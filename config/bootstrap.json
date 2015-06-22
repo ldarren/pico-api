@@ -1,0 +1,18 @@
+{
+    "app":{
+        "name": "Sample App",
+        "env": "dev",
+        "apis": [
+            "app/bootstrap"
+        ]
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[],
+            "port":4888
+        }
+    }
+}
