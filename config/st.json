@@ -1,0 +1,17 @@
+{
+    "app":{
+        "name": "Sample App",
+        "env": "st",
+        "actions": [
+            "app/bootstrap"
+        ]
+    },
+    "deps":[
+        "dev.json"
+    ],
+    "mods":{
+        "webServer":{
+            "port":4000
+        }
+    }
+}
