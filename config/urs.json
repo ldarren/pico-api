@@ -1,0 +1,21 @@
+{
+    "app":{
+        "name": "Yours Radio Station",
+        "env": "dev",
+        "ajax":null,
+        "paths":{
+            "*":"http://localhost/",
+            "api": "http://localhost/api",
+            "model": "http://localhost/model"
+        }
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[],
+            "port":4888
+        }
+    }
+}

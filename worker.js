@@ -1,19 +1,17 @@
 var
 pico= require('pico-common'),
+mods= require('./lib/mods'),
 utils= require('./lib/utils')
 
-    pico.start({
-        name:'worker',
-        production:false,
-        ajax:utils.ajax,
-        paths:{
-            '*':'http://localhost/'
-        }
-    },function(){
+mods.load(__dirname, './config/urs.json', function(err, context, config){
+    if (err) return console.error(err)
+
+    config.ajax=utils.ajax
+
+    pico.start(config,function(){
         var hello=require('hello')
-console.log('loading...')
         me.slot('load', function(){
-            console.log('loaded')
             hello.said()
         })
     })
+})
