@@ -3,7 +3,7 @@ args= require('./lib/args'),
 mods= require('./lib/mods'),
 defaults= {
     worker: ['./worker.js', 'worker script path'],
-    config: ['./config.json', 'app config file path'],
+    config: ['./config/config.json', 'app config file path'],
     help: [false, 'show this help'],
     h: [false, 'show this help']
 },

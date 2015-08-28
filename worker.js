@@ -8,10 +8,10 @@ mods.load(__dirname, './config/urs.json', function(err, context, config){
 
     config.ajax=utils.ajax
 
-    pico.start(config,function(){
+    pico.run(config,function(){
         var hello=require('hello')
-        me.slot('load', function(){
+        this.load=function(){
             hello.said()
-        })
+        }
     })
 })
