@@ -1,10 +1,6 @@
 {
     "app":{
-        "name": "Sample App",
-        "env": "st",
-        "actions": [
-            "app/bootstrap"
-        ]
+        "env": "st"
     },
     "deps":[
         "dev.json"

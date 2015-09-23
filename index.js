@@ -2,14 +2,14 @@ var
 args= require('./lib/args'),
 mods= require('./lib/mods'),
 defaults= {
-    worker: ['./worker.js', 'worker script path'],
-    config: ['./config/config.json', 'app config file path'],
+    config: ['./config/config.json', 'app config path'],
     help: [false, 'show this help'],
-    h: [false, 'show this help']
+    c: '@config',
+    h: '@help'
 },
 options = args.parse(defaults)
 
-if (!options || options.help || options.h){
+if (!options || options.help){
     args.usage(defaults)
     process.exit(0)
 }

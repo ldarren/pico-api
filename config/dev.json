@@ -1,9 +1,9 @@
 {
     "app":{
-        "name": "Sample App",
+        "name": "ubli",
         "env": "dev",
         "actions": [
-            "app/bootstrap"
+            "apps/ubli"
         ]
     },
     "mods":{
