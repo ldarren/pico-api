@@ -2,9 +2,9 @@ var
 args= require('./lib/args'),
 mods= require('./lib/mods'),
 defaults= {
-    config: ['./config/config.json', 'app config path'],
-    help: [false, 'show this help'],
+    config: ['./config/pro.json', 'app config path'],
     c: '@config',
+    help: [false, 'show this help'],
     h: '@help'
 },
 options = args.parse(defaults)

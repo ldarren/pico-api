@@ -4,9 +4,9 @@ bootstrap=function(session, order, next){
 },
 all = {
     setup: function(context, next){
-        var web = context.webServer
+        var sigslot = context.sigslot
 
-        web.route('bootstrap/load', [bootstrap])
+        sigslot.slot('bootstrap/load', [bootstrap])
         next()
     }
 }

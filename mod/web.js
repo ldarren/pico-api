@@ -5,11 +5,7 @@ var
 http= require('http'),
 https= require('https'),
 path= require('path'),
-Plant= require('../lib/Plant'),
-web= {
-    plant: null,
-    route: function(api, funcs){ this.plant.route(api, funcs) }
-},
+sigslot,
 request= function(req, res){
     var now = Date.now()
     res.writeHead(200, HEADERS)
@@ -43,8 +39,10 @@ module.exports= {
         pfxPath= libConfig.pfxPath,
         server
 
+        sigslot= appConfig.sigslot
+
         if (pfxPath){
-            pfxPath= path.isAbsolute(pfxPath) ? pfxPath : appConfig.path+path.sep+pfxPath
+            pfxPath= path.isAbsolute(pfxPath) ? pfxPath : path.resolve(appConfig.path, pfxPath)
             server= https.createServer({pfx:fs.readFileSync(pfxPath)}, request)
         }else{
             server= http.createServer(request)
@@ -53,8 +51,7 @@ module.exports= {
         server.listen(libConfig.port, function(){
             if (libConfig.allowOrigin) HEADERS['Access-Control-Allow-Origin']= libConfig.allowOrigin
 
-            web.plant= new Plant
-            next(null, web)
+            next()
         })
     }
 }

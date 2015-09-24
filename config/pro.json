@@ -1,0 +1,13 @@
+{
+    "app":{
+        "env": "pro"
+    },
+    "deps":[
+        "dev.json"
+    ],
+    "mods":{
+        "webServer":{
+            "port":4000
+        }
+    }
+}
