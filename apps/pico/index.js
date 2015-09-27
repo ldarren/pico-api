@@ -1,12 +1,16 @@
 var
 sep = function(session, order, next){console.log('###'); return next()},
-bootstrap=function(session, order, next){
+addApp=function(session, order, next){
+    console.log(JSON.stringify(order))
+    next()
 },
 all = {
     setup: function(context, next){
-        var sigslot = context.sigslot
+        var
+        sigslot=context.sigslot,
+        web=context.webServer
 
-        sigslot.slot('bootstrap/load', [bootstrap])
+        sigslot.slot('pico/add/app', [web.parse, addApp])
         next()
     }
 }
