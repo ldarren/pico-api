@@ -2,7 +2,7 @@ var
 args= require('./lib/args'),
 mods= require('./lib/mods'),
 defaults= {
-    config: ['./config/pro.json', 'app config path'],
+    config: ['./config/pico.pro.json', 'app config path'],
     c: '@config',
     help: [false, 'show this help'],
     h: '@help'

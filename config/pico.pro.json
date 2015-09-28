@@ -1,9 +1,9 @@
 {
     "app":{
-        "env": "st"
+        "env": "pro"
     },
     "deps":[
-        "dev.json"
+        "pico.dev.json"
     ],
     "mods":{
         "webServer":{

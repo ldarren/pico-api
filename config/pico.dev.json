@@ -1,0 +1,22 @@
+{
+    "app":{
+        "name": "pico",
+        "env": "dev",
+        "actions": [
+            "apps/pico"
+        ]
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[],
+            "port":4888
+        },
+        "appMgr":{
+            "mod":"appMgr",
+            "path":"config/profile"
+        }
+    }
+}

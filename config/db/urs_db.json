@@ -1,0 +1,31 @@
+{
+    "databases":{
+        "hms_plus":{
+            "encoding":"utf8",
+            "lc_collate":"zh_CN.UTF-8",
+            "lc_ctype":"zh_CN.UTF-8",
+            "template":"template0"
+        }
+    },
+    "hms_plus":{
+        "users":{
+            "hms_uid":"VARCHAR(64) NOT NULL",
+            "domain":"INT NOT NULL",
+            "token":"VARCHAR(32)",
+            "key":"VARCHAR(10)",
+            "MAP":["platform","pushToken","favUsers","favGroups","favDepartments"],
+            "UNIQUE":[["hms_uid", "domain"]],
+            "INDEX":[["token"],["seen_at"]]
+        },
+        "organizations":{
+            "MAP":["name","admin","url","domain","displayName","clientVersion","appVersion"],
+            "REF":[["users"]]
+        },
+        "quests":{
+            "type":"INT NOT NULL",
+            "MAP":['name','member','organization','crrId','detail','parent','broadcastId'],
+            "LIST":['chatMsg','recipients'],
+            "REF":[["users"],["LIST","users"]]
+        }
+    }
+}

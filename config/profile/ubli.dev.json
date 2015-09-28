@@ -1,9 +1,9 @@
 {
     "app":{
-        "name": "pico",
+        "name": "ubli",
         "env": "dev",
         "actions": [
-            "apps/pico"
+            "apps/ubli"
         ]
     },
     "mods":{
@@ -12,7 +12,7 @@
             "allowOrigin":"*",
             "delimiter":["&"],
             "uploadWL":[],
-            "port":4888
+            "port":"/tmp/ubli.sock"
         }
     }
 }

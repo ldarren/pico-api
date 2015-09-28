@@ -4,30 +4,11 @@ var
 http= require('http'),
 https= require('https'),
 path= require('path'),
+args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 picoObj=require('pico').export('pico/obj'),
 sigslot,
-reply=function(err, evt, order){
-    var
-    res=evt.res
-
-    if(err){
-        console.error(err)
-        return res.end()
-    }
-    res.end('ok')
-},
-/*
-        getChannelId(order.shift(), url.parse(req.url, true).pathname, function(err, channelId, channelPass){
-            req = undefined
-            createSession(res, channelId, startTime, function(err, session){
-                if (channelId) {
-                    res[PICO_CHANNEL_ID] = session[SESSION_CHANNEL_ID] = channelId
-                    res.write(channelId+' '+channelPass)
-                }
-                res.write(delimiter)//to simplified protocol, always present a delimiter even no channel
-*/
 web={
     parse:function(session,order,next){
         var
@@ -47,6 +28,16 @@ web={
         }
     }
 },
+reply=function(err, evt, order){
+    var
+    res=evt.res
+
+    if(err){
+        console.error(err)
+        return res.end()
+    }
+    res.end('ok')
+},
 request= function(req, res){
     res.writeHead(200, HEADERS)
     switch(req.method){
@@ -60,8 +51,19 @@ request= function(req, res){
 module.exports= {
     create: function(appConfig, libConfig, next){
         var
-        pfxPath= libConfig.pfxPath,
+        config={
+            pfxPath:null,
+            port:'80',
+            allowOrigin:'localhost',
+            delimiter:JSON.stringify(['^']),
+            secretKey:null,
+            cullAge:0,
+            uploadWL:[]
+        },
+        pfxPath= config.pfxPath,
         server
+
+        picoObj.extend(config,libConfig)
 
         sigslot= appConfig.sigslot
 
@@ -72,8 +74,19 @@ module.exports= {
             server= http.createServer(request)
         }
 
-        server.listen(libConfig.port, function(){
-            if (libConfig.allowOrigin) HEADERS['Access-Control-Allow-Origin']= libConfig.allowOrigin
+        server.listen(config.port, function(){
+            if (config.allowOrigin) HEADERS['Access-Control-Allow-Origin']= config.allowOrigin
+
+            var
+            secretKey = config.secretKey || null,
+            cullAge = config.cullAge,
+            delimiter = config.delimiter ? JSON.stringify(config.delimiter) : '',
+            uploadWL = config.uploadWL || []
+
+            multipart.setup(uploadWL)
+            bodyparser.setup(cullAge, secretKey, delimiter)
+
+            args.print('Web Options',config)
 
             next(null, web)
         })
