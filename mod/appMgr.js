@@ -1,5 +1,6 @@
 var
 cluster=require('cluster'),
+http=require('http'),
 fs=require('fs'),
 path=require('path'),
 picoObj=require('pico').export('pico/obj'),
@@ -7,7 +8,22 @@ args=require('../lib/args'),
 loader=function(){
 },
 appMgr={
-    load:loader
+    load:loader,
+    redirect:function(session, order, next){
+        var
+        req=session.req,
+        res=session.res
+
+        req.pipe(http.request({
+            socketPath:'/tmp'+req.url+'.sock',
+            method:req.method,
+            path:req.url,
+            headers:req.headers
+        }, function(cres){
+            res.writeHeader(cres.statusCode, cres.headers)
+            cres.pipe(res)
+        }))
+    }
 }
 
 module.exports= {
@@ -17,21 +33,22 @@ module.exports= {
         var
         config={
             path:'config/profile'
-        }
+        },
+        appPath= appConfig.path,
+        ext='.'+appConfig.env+'.json',
+        fn
 
         picoObj.extend(config,libConfig)
 
         args.print('AppMgr Options',config)
 
-        var
-        ext='.'+appConfig.env+'.json',
-        fn
-        fs.readdir(path.resolve(appConfig.path, config.path),function(err, fnames){
+        fs.readdir(path.resolve(appPath, config.path),function(err, fnames){
             if (err) return next(err)
             for(var i=0,fname; fname=fnames[i]; i++){
                 fn=path.basename(fname,ext)
                 if (-1!==fn.indexOf('.')) continue
-                console.log('load %s',fname)
+                cluster.setupMaster({exec:path.resolve(appPath,'lib/app.js'), args:['-c',path.resolve(appPath,config.path,fname)]})
+                cluster.fork()
             }
             next(null, appMgr)
         })

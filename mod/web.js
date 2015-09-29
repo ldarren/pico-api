@@ -3,6 +3,7 @@ const HEADERS= { 'Content-Type': 'application/octet-stream' }
 var
 http= require('http'),
 https= require('https'),
+fs= require('fs'),
 path= require('path'),
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
@@ -28,6 +29,10 @@ web={
         }
     }
 },
+resetPort=function(port, cb){
+    if ('string' === typeof port) return fs.unlink(port, cb)
+    cb()
+},
 reply=function(err, evt, order){
     var
     res=evt.res
@@ -45,7 +50,7 @@ request= function(req, res){
     case 'GET': return res.end(''+Date.now())
     default: return res.end()
     }
-    sigslot.signal(req.url.substr(1),{req:req,res:res},reply)
+    sigslot.signal(req.url,{req:req,res:res},reply)
 }
 
 module.exports= {
@@ -60,11 +65,13 @@ module.exports= {
             cullAge:0,
             uploadWL:[]
         },
-        pfxPath= config.pfxPath,
-        server
+        pfxPath, server
 
         picoObj.extend(config,libConfig)
 
+        args.print('Web Options',config)
+
+        pfxPath= config.pfxPath
         sigslot= appConfig.sigslot
 
         if (pfxPath){
@@ -74,21 +81,16 @@ module.exports= {
             server= http.createServer(request)
         }
 
-        server.listen(config.port, function(){
-            if (config.allowOrigin) HEADERS['Access-Control-Allow-Origin']= config.allowOrigin
+        //TODO: security check b4 unlink
+        resetPort(config.port, function(){
+            server.listen(config.port, function(){
+                if (config.allowOrigin) HEADERS['Access-Control-Allow-Origin']= config.allowOrigin
 
-            var
-            secretKey = config.secretKey || null,
-            cullAge = config.cullAge,
-            delimiter = config.delimiter ? JSON.stringify(config.delimiter) : '',
-            uploadWL = config.uploadWL || []
+                multipart.setup(config.uploadWL)
+                bodyparser.setup(config.cullAge, config.secretKey, config.delimiter)
 
-            multipart.setup(uploadWL)
-            bodyparser.setup(cullAge, secretKey, delimiter)
-
-            args.print('Web Options',config)
-
-            next(null, web)
+                next(null, web)
+            })
         })
     }
 }

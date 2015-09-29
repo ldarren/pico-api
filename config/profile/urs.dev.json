@@ -1,10 +1,7 @@
 {
     "app":{
-        "name": "ubli",
-        "env": "dev",
-        "actions": [
-            "apps/ubli"
-        ]
+        "name": "urs",
+        "env": "dev"
     },
     "mods":{
         "webServer":{
@@ -12,7 +9,7 @@
             "allowOrigin":"*",
             "delimiter":["&"],
             "uploadWL":[],
-            "port":"/tmp/ubli.sock"
+            "port":"/tmp/urs.sock"
         }
     }
 }

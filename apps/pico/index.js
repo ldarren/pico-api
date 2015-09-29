@@ -8,9 +8,11 @@ all = {
     setup: function(context, next){
         var
         sigslot=context.sigslot,
-        web=context.webServer
+        web=context.webServer,
+        appMgr=context.appMgr
 
         sigslot.slot('pico/add/app', [web.parse, addApp])
+        sigslot.slot('/urs', [appMgr.redirect])
         next()
     }
 }
