@@ -1,12 +1,12 @@
 {
     "app":{
         "name": "Yours Radio Station",
+        "ajax": null,
         "env": "dev",
-        "ajax":null,
         "paths":{
-            "*":"http://localhost/",
-            "api": "http://localhost/api",
-            "model": "http://localhost/model"
+            "*":"http://localhost/urs/",
+            "api": "http://localhost/urs/api/",
+            "model": "http://localhost/urs/model/"
         }
     },
     "mods":{
@@ -15,7 +15,7 @@
             "allowOrigin":"*",
             "delimiter":["&"],
             "uploadWL":[],
-            "port":4888
+            "port":"/tmp/urs.sock"
         }
     }
 }

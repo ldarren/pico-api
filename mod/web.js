@@ -27,21 +27,22 @@ web={
                 order=picoObj.extend(order, query)
             })
         }
+    },
+    error:function(evt, order){
+        var res=evt.res
+
+        console.error(err)
+        res.end('ko')
+    },
+    render:function(evt, order, next){
+        var res=evt.res
+
+        res.end('ok')
     }
 },
 resetPort=function(port, cb){
     if ('string' === typeof port) return fs.unlink(port, cb)
     cb()
-},
-reply=function(err, evt, order){
-    var
-    res=evt.res
-
-    if(err){
-        console.error(err)
-        return res.end()
-    }
-    res.end('ok')
 },
 request= function(req, res){
     res.writeHead(200, HEADERS)
@@ -50,7 +51,7 @@ request= function(req, res){
     case 'GET': return res.end(''+Date.now())
     default: return res.end()
     }
-    sigslot.signal(req.url,{req:req,res:res},reply)
+    sigslot.signal(req.url,{req:req,res:res})
 }
 
 module.exports= {

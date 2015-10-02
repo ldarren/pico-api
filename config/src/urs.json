@@ -1,0 +1,50 @@
+{
+    "app":{
+        "name": "Yours Radio Station",
+        "ajax":null,
+        "paths":{
+            "*":"http://localhost/urs/",
+            "api": "http://localhost/urs/api/",
+            "model": "http://localhost/urs/model/"
+        }
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[]
+        },
+        "mainDb":{
+            "mod":"mysql",
+            "instance":"small",
+            "character":"utf8_general_ci",
+            "collate":"utf8_bin"
+        }
+    },
+    "db":{
+        "mainDB":{
+            "users":{
+                "un":["VARCHAR(16)"],
+                "pwd":["INT"],
+                "type":["VARCHAR(16)"],
+                "session":["VARCHAR(16)"],
+                "token":["VARCHAR(16)"],
+                "platform":["VARCHAR(16)"],
+                "locks":["list"],
+                "UNIQUE":[["hms_uid", "domain"]],
+                "INDEX":[["token"],["seen_at"]]
+            },
+            "domains":{
+                "REF":[["users"]]
+            },
+            "locks":{
+                "type":"INT NOT NULL",
+                "LIST":['chatMsg','recipients'],
+                "REF":[["users"],["LIST","users"]]
+            },
+            "logs":{
+            }
+        }
+    }
+}

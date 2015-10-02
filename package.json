@@ -1,0 +1,28 @@
+{
+  "name": "picos",
+  "version": "0.0.1",
+  "description": "pico operating system",
+  "main": "index.js",
+  "dependencies": {
+    "pico": "^0.3.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ldarren/pico-api.git"
+  },
+  "keywords": [
+    "pico",
+    "web",
+    "server"
+  ],
+  "author": "Darren Liew",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ldarren/pico-api/issues"
+  },
+  "homepage": "https://github.com/ldarren/pico-api#readme"
+}
