@@ -32,7 +32,7 @@ module.exports= {
 
         var
         config={
-            path:'config/profile'
+            path:'config/build'
         },
         appPath= appConfig.path,
         ext='.'+appConfig.env+'.json',

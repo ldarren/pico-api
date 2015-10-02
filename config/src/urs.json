@@ -3,9 +3,9 @@
         "name": "Yours Radio Station",
         "ajax":null,
         "paths":{
-            "*":"http://localhost/urs/",
-            "api": "http://localhost/urs/api/",
-            "model": "http://localhost/urs/model/"
+            "*":"http://localhost/urs/node/",
+            "api": "http://localhost/urs/node/api/",
+            "model": "http://localhost/urs/node/model/"
         }
     },
     "mods":{

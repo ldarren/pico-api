@@ -16,7 +16,7 @@
         },
         "appMgr":{
             "mod":"appMgr",
-            "path":"config/profile"
+            "path":"config/build"
         }
     }
 }
