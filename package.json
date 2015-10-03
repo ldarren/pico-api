@@ -4,7 +4,10 @@
   "description": "pico operating system",
   "main": "index.js",
   "dependencies": {
-    "pico": "^0.3.7"
+    "pico": "^0.3.7",
+    "mysql": "^2.9.0",
+    "redis": "^2.1.0",
+    "hiredis": "^0.4.1"
   },
   "devDependencies": {},
   "scripts": {
