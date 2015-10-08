@@ -48,10 +48,10 @@ CREATE TABLE IF NOT EXISTS `userMapInt`(
     UNIQUE KEY (`userId`, `k`)
 );
 
-CREATE TABLE `userLock`(
+CREATE TABLE `userRef1`(
     `id` SERIAL PRIMARY KEY,
     `userId` BIGINT UNSIGNED NOT NULL,
-    `lockId` BIGINT UNSIGNED NOT NULL,
+    `ref1Id` BIGINT UNSIGNED NOT NULL,
     `k` INT NOT NULL,
     `v` TEXT NOT NULL,
     `status` TINYINT UNSIGNED DEFAULT 1,
@@ -60,7 +60,7 @@ CREATE TABLE `userLock`(
     `createdBy` BIGINT UNSIGNED NOT NULL,
     `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     KEY (`userId`,`k`,`updatedAt`),
-    UNIQUE KEY (`lockId`,`userId`,`k`)
+    UNIQUE KEY (`ref1Id`,`userId`,`k`)
 );
 
 CREATE TABLE IF NOT EXISTS `domain`(
@@ -86,10 +86,10 @@ CREATE TABLE IF NOT EXISTS `domainMap`(
     UNIQUE KEY (`domainId`, `k`)
 );
 
-CREATE TABLE `domainUser`(
+CREATE TABLE `domainRef1`(
     `id` SERIAL PRIMARY KEY,
     `domainId` BIGINT UNSIGNED NOT NULL,
-    `userId` BIGINT UNSIGNED NOT NULL,
+    `ref1Id` BIGINT UNSIGNED NOT NULL,
     `k` INT NOT NULL,
     `v` TEXT NOT NULL,
     `status` TINYINT UNSIGNED DEFAULT 1,
@@ -98,7 +98,7 @@ CREATE TABLE `domainUser`(
     `createdBy` BIGINT UNSIGNED NOT NULL,
     `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     KEY (`domainId`,`k`,`updatedAt`),
-    UNIQUE KEY (`userId`,`domainId`,`k`)
+    UNIQUE KEY (`ref1Id`,`domainId`,`k`)
 );
 
 CREATE TABLE IF NOT EXISTS `lock`(

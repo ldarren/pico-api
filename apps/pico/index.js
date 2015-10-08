@@ -11,9 +11,11 @@ all = {
         web=context.webServer,
         appMgr=context.appMgr
 
-        sigslot.slot('pico/add/app', [web.parse, addApp, web.render])
         sigslot.slot('err/*', [web.error])
-        sigslot.slot('/urs', [appMgr.redirect])
+        sigslot.slot('/pdl', [appMgr.redirect])
+        sigslot.slot('/pico', [web.parse])
+
+        sigslot.slot('pico/add/app', [addApp, web.render])
         next()
     }
 }

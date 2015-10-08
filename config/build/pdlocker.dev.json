@@ -1,6 +1,6 @@
 {
     "app":{
-        "name": "Yours Radio Station",
+        "name": "Personal Delivery Locker",
         "ajax": null,
         "env": "dev",
         "paths":{
@@ -15,7 +15,7 @@
             "allowOrigin":"*",
             "delimiter":["&"],
             "uploadWL":[],
-            "port":"/tmp/pdlocker.sock"
+            "port":"/tmp/pdl.sock"
         },
         "mainDB":{
             "mod":"mysql",
