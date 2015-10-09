@@ -16,23 +16,23 @@ makeConn = function(client){
     conn.connect(function(err){
         if (err) {
             setImmediate(function(){ makeConn(client) })
-            return console.error('mysql conn[',JSON.stringify(config),'] error[',err,']')
+            return console.error('mysql conn[%s] error[%s]',JSON.stringify(config),err)
         }
-        console.log('mysql conn['+config.host+':'+config.port+'.'+config.database+'] connected')
+        console.log('mysql conn[%s:%d.%s] connected',config.host,config.port,config.database)
         //conn.query('SET NAMES utf8');
     })
-    client.conn = conn
+    return client.conn = conn
 },
-createClient = function(config){
-    var client = {
-        config: config,
-        conn: null,
-        query: function(){
-            this.conn.query.apply(this.conn, arguments)
-        }
+Client=function(config, conn){
+    this.config=config
+    this.conn=conn
+    makeConn(this)
+}
+
+Client.prototype={
+    query: function(){
+        this.conn.query.apply(this.conn, arguments)
     }
-    makeConn(client)
-    return client
 }
 
 module.exports={
@@ -45,10 +45,8 @@ module.exports={
             database:'null'
         }
 
-        picoObj.extend(config,libConfig)
+        args.print('MySQL Options',picoObj.extend(config,libConfig))
 
-        args.print('MySQL Options',config)
-
-        return next(null, createClient(config))
+        return next(null, new Client(config))
     }
 }

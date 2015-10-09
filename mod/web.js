@@ -8,6 +8,8 @@ path= require('path'),
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
+Session= require('../lib/Session'),
+Task= require('../lib/Task'),
 picoObj=require('pico').export('pico/obj'),
 sigslot,
 dummyCB=function(){},
@@ -18,39 +20,43 @@ web={
         now=Date.now()
 
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
-            bodyparser.parse(req, function(err, query){
+            bodyparser.parse(req, function(err, queries){
                 if (err) return next(err)
-                for(var i=1,q; q=query[i]; i++){
-                    sigslot.signal(q.api, picoObj.extend(q.data,session))
+                for(var i=1,q; q=queries[i]; i++){
+                    sigslot.signal(q.api, new Session(q.data,0,req,session.res,q))
                 }
                 next()
             })
         }else{
-            multipart.parse(req, function(err, order){
-                if (err || !order.api) return next(err || 'empty multipart api')
-                sigslot.signal(order.api, picoObj.extend(order.data,session))
+            multipart.parse(req, function(err, query){
+                if (err || !query.api) return next(err || 'empty multipart api')
+                sigslot.signal(query.api, new Session(query.data,0,req,session.res,query))
                 next()
             })
         }
     },
-    error:function(evt, order, next){
-        console.error(order)
+    error:function(session, err, next){
+        console.error(err)
 
-        var res=evt.res
+        var res=session.res
 
         res.writeHead(400, HEADERS)
-        res.end(JSON.stringify(order))
+        res.write(bodyparser.error(session.query,err))
+        res.end(bodyparser.sep)
         next()
     },
-    render:function(evt, order, next){
-        var res=evt.res
+    render:function(session, order, next){
+        var
+        res=session.res,
+        jobs=session.jobs
 
         res.writeHead(200, HEADERS)
-        res.end(JSON.stringify(order))
+        order.commit(session.jobs,function(err,product){
+            res.write(bodyparser.render(session.query,product))
+        })
+        res.end(bodyparser.sep)
         next()
     }
-},
-triggerQuery=function(){
 },
 resetPort=function(port, cb){
     if ('string' === typeof port) return fs.unlink(port, cb)
@@ -63,7 +69,7 @@ console.log(req.url,req.method)
     case 'GET': return web.render({req:req,res:res},Date.now(),dummyCB)
     default: return res.end()
     }
-    sigslot.signal(req.url,{req:req,res:res})
+    sigslot.signal(req.url, new Session(null,0,req,res))
 }
 
 module.exports= {
@@ -80,9 +86,7 @@ module.exports= {
         },
         pfxPath, server
 
-        picoObj.extend(config,libConfig)
-
-        args.print('Web Options',config)
+        args.print('Web Options',picoObj.extend(config,libConfig))
 
         pfxPath= config.pfxPath
         sigslot= appConfig.sigslot

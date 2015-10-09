@@ -2,11 +2,7 @@
 var
 redis = require('redis'),
 picoObj= require('pico').export('pico/obj'),
-args= require('../lib/args'),
-onMessage = function(channel, msg){
-    switch(msg){
-    }
-}
+args= require('../lib/args')
 
 module.exports={
     create:function(appConfig, libConfig, next){
@@ -18,9 +14,7 @@ module.exports={
             options:null,
         }
 
-        picoObj.extend(config,libConfig)
-
-        args.print('Redis Options',config)
+        args.print('Redis Options',picoObj.extend(config,libConfig))
 
         var client = redis.createClient(config.port, config.host, config.options)
         if (config.password) client.auth(config.password)
@@ -38,9 +32,6 @@ module.exports={
         })
         client.on('connect', function(){
             console.log('redis conn[%s:%d.%d] connected',config.host,config.port,config.database)
-            if (config.sub){
-                client.subscribe(config.sub, onMessage)
-            }
         })
         return next(null, client)
     }

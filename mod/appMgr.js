@@ -38,9 +38,7 @@ module.exports= {
         ext='.'+appConfig.env+'.json',
         fn
 
-        picoObj.extend(config,libConfig)
-
-        args.print('AppMgr Options',config)
+        args.print('AppMgr Options',picoObj.extend(config,libConfig))
 
         fs.readdir(path.resolve(appPath, config.path),function(err, fnames){
             if (err) return next(err)
