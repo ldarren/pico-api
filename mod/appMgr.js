@@ -9,7 +9,7 @@ loader=function(){
 },
 appMgr={
     load:loader,
-    redirect:function(session, order, next){
+    redirect:function(session, models, next){
         var
         req=session.req,
         res=session.res

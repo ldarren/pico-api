@@ -5,32 +5,30 @@ http= require('http'),
 https= require('https'),
 fs= require('fs'),
 path= require('path'),
+url= require('url'),
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
-Task= require('../lib/Task'),
 picoObj=require('pico').export('pico/obj'),
 sigslot,
 dummyCB=function(){},
 web={
-    parse:function(session,order,next){
-        var
-        req=session.req,
-        now=Date.now()
+    parse:function(session,models,next){
+        var req=session.req
 
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, function(err, queries){
                 if (err) return next(err)
                 for(var i=1,q; q=queries[i]; i++){
-                    sigslot.signal(q.api, new Session(q.data,0,req,session.res,q))
+                    sigslot.signal(q.api, new Session(Session.TYPE.WEB,q.data,session.time,req,session.res,q))
                 }
                 next()
             })
         }else{
             multipart.parse(req, function(err, query){
                 if (err || !query.api) return next(err || 'empty multipart api')
-                sigslot.signal(query.api, new Session(query.data,0,req,session.res,query))
+                sigslot.signal(query.api, new Session(Session.TYPE.WEB,query.data,session.time,req,session.res,query))
                 next()
             })
         }
@@ -45,14 +43,18 @@ web={
         res.end(bodyparser.sep)
         next()
     },
-    render:function(session, order, next){
+    render:function(session, models, next){
         var
         res=session.res,
         jobs=session.jobs
 
         res.writeHead(200, HEADERS)
-        order.commit(session.jobs,function(err,product){
-            res.write(bodyparser.render(session.query,product))
+console.log('render',models)
+        models.commit(session.jobs,function(err,product){
+console.log('render product',product)
+            var q=session.query
+            if (q) res.write(bodyparser.render(session.query,product))
+            else res.write(JSON.stringify(product))
         })
         res.end(bodyparser.sep)
         next()
@@ -64,12 +66,8 @@ resetPort=function(port, cb){
 },
 request= function(req, res){
 console.log(req.url,req.method)
-    switch(req.method){
-    case 'POST': break
-    case 'GET': return web.render({req:req,res:res},Date.now(),dummyCB)
-    default: return res.end()
-    }
-    sigslot.signal(req.url, new Session(null,0,req,res))
+    var o=url.parse(req.url,true)
+    sigslot.signal(o.pathname, new Session(Session.TYPE.WEB, o.query,Date.now(),req,res))
 }
 
 module.exports= {
