@@ -15,12 +15,13 @@ sigslot,
 dummyCB=function(){},
 web={
     parse:function(session,models,next){
+console.log('parse',1)
         var req=session.req
 
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, function(err, queries){
                 if (err) return next(err)
-                for(var i=1,q; q=queries[i]; i++){
+                for(var i=0,q; q=queries[i]; i++){
                     sigslot.signal(q.api, new Session(Session.TYPE.WEB,q.data,session.time,req,session.res,q))
                 }
                 next()
@@ -44,20 +45,20 @@ web={
         next()
     },
     render:function(session, models, next){
-        var
-        res=session.res,
-        jobs=session.jobs
+console.log('render',1)
+        var res=session.res
 
         res.writeHead(200, HEADERS)
-console.log('render',models)
-        models.commit(session.jobs,function(err,product){
-console.log('render product',product)
+        models.commit(session.getJobs(),function(err){
+            if (err) session.error(err)
             var q=session.query
-            if (q) res.write(bodyparser.render(session.query,product))
-            else res.write(JSON.stringify(product))
+            if (q){
+                res.end(bodyparser.render(q, session.getOutput()))
+            }else{
+                res.end(JSON.stringify(session.getOutput()))
+            }
+            next()
         })
-        res.end(bodyparser.sep)
-        next()
     }
 },
 resetPort=function(port, cb){
@@ -68,6 +69,7 @@ request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
     sigslot.signal(o.pathname, new Session(Session.TYPE.WEB, o.query,Date.now(),req,res))
+console.log('request end')
 }
 
 module.exports= {

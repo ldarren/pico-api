@@ -3,11 +3,8 @@ sep = function(session, models, next){console.log('###'); return next()},
 route=function(session, models, next){
     switch(session.req.method){
     case 'POST': return next()
-    case 'GET':
-        var time=models.get('time')
-        time.now=session.time
-        var err=session.addJob(models, [session.job('time','now')])
-    default: return next(err, 'END')
+    case 'GET': session.setOutput(session.time)
+    default: return next(null, 'END')
     }
 },
 addApp=function(session, models, next){

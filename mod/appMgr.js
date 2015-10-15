@@ -15,7 +15,7 @@ appMgr={
         res=session.res
 
         req.pipe(http.request({
-            socketPath:'/tmp'+req.url+'.sock',
+            socketPath:'/tmp'+this.api+'.sock',
             method:req.method,
             path:req.url,
             headers:req.headers
