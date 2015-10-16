@@ -15,7 +15,6 @@ sigslot,
 dummyCB=function(){},
 web={
     parse:function(session,models,next){
-console.log('parse',1)
         var req=session.req
 
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
@@ -35,17 +34,13 @@ console.log('parse',1)
         }
     },
     error:function(session, err, next){
-        console.error(err)
-
         var res=session.res
-
-        res.writeHead(400, HEADERS)
-        res.write(bodyparser.error(session.query,err))
-        res.end(bodyparser.sep)
+        if (!Array.isArray(err)) err=[500,err]
+        res.writeHead(err[0], HEADERS)
+        res.end(bodyparser.error(session.query,err[1]))
         next()
     },
     render:function(session, models, next){
-console.log('render',1)
         var res=session.res
 
         res.writeHead(200, HEADERS)
@@ -69,7 +64,6 @@ request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
     sigslot.signal(o.pathname, new Session(Session.TYPE.WEB, o.query,Date.now(),req,res))
-console.log('request end')
 }
 
 module.exports= {
