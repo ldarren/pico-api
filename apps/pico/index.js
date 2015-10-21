@@ -21,6 +21,7 @@ all = {
         sigslot.slot('ERR/*', [web.error])
         sigslot.slot('END', [web.render])
         sigslot.slot('/pdl', [appMgr.redirect])
+        sigslot.slot('/pdl/*', [appMgr.redirect])
         sigslot.slot('/pico', [route,web.parse])
 
         sigslot.slot('pico/add/app', [addApp, web.render])

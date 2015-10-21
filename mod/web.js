@@ -33,6 +33,22 @@ web={
             })
         }
     },
+    sse:function(session, err, next){
+        var
+        req=session.req,
+        res=session.res
+
+        req.socket.setKeepAlive(true)  
+        req.socket.setTimeout(0)
+
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+        res.setHeader('Content-Type', 'text/event-stream')
+        res.setHeader('Cache-Control', 'no-cache')
+        res.setHeader('Connection', 'keep-alive')
+        res.writeHead(200, HEADERS)
+
+        next()
+    },
     error:function(session, err, next){
         var res=session.res
         if (!Array.isArray(err)) err=[500,err]
@@ -60,9 +76,13 @@ resetPort=function(port, cb){
     if ('string' === typeof port) return fs.unlink(port, cb)
     cb()
 },
+disconnect= function(){
+    sigslot.signal('web.dc', new Session(Session.TYPE.WEB, null,Date.now(),null,this))
+},
 request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
+    res.on('close',disconnect)
     sigslot.signal(o.pathname, new Session(Session.TYPE.WEB, o.query,Date.now(),req,res))
 }
 
