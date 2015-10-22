@@ -33,7 +33,7 @@ web={
             })
         }
     },
-    sse:function(session, err, next){
+    SSEStart:function(session, models, next){
         var
         req=session.req,
         res=session.res
@@ -46,7 +46,14 @@ web={
         res.setHeader('Cache-Control', 'no-cache')
         res.setHeader('Connection', 'keep-alive')
         res.writeHead(200, HEADERS)
-
+console.log('start SSE')
+        next()
+    },
+    SSEStop:function(session, err, next){
+        var res=session.res
+       // res.writeHead(500, err)
+console.log('stop SSE')
+        res.end()
         next()
     },
     error:function(session, err, next){
@@ -93,7 +100,7 @@ module.exports= {
             pfxPath:null,
             port:'80',
             allowOrigin:'localhost',
-            delimiter:JSON.stringify(['&']),
+            delimiter:['&'],
             secretKey:null,
             cullAge:0,
             uploadWL:[]
@@ -101,7 +108,6 @@ module.exports= {
         pfxPath, server
 
         args.print('Web Options',picoObj.extend(config,libConfig))
-
         pfxPath= config.pfxPath
         sigslot= appConfig.sigslot
 

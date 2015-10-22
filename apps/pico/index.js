@@ -4,12 +4,11 @@ route=function(session, models, next){
     switch(session.req.method){
     case 'POST': return next()
     case 'GET': session.setOutput(session.time)
-    default: return next(null, 'END')
+    default: return next(null, this.sigslot.abort())
     }
 },
-addApp=function(session, models, next){
-    console.log(JSON.stringify(models))
-    next()
+help=function(session, models, next){
+    next(`api ${this.api} is not supported yet`)
 },
 all = {
     setup: function(context, next){
@@ -18,13 +17,13 @@ all = {
         web=context.webServer,
         appMgr=context.appMgr
 
-        sigslot.slot('ERR/*', [web.error])
-        sigslot.slot('END', [web.render])
+        sigslot.slot('', [help])
+        sigslot.slot('ERR/', [web.error])
+        sigslot.slot('END/', [web.render])
         sigslot.slot('/pdl', [appMgr.redirect])
-        sigslot.slot('/pdl/*', [appMgr.redirect])
         sigslot.slot('/pico', [route,web.parse])
 
-        sigslot.slot('pico/add/app', [addApp, web.render])
+        sigslot.slot('pico/add/app', [help])
         next()
     }
 }

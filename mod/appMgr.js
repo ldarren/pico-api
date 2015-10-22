@@ -12,10 +12,11 @@ appMgr={
     redirect:function(session, models, next){
         var
         req=session.req,
-        res=session.res
+        res=session.res,
+        arr=this.api.split('/')
 
         req.pipe(http.request({
-            socketPath:'/tmp'+this.api+'.sock',
+            socketPath:'/tmp/'+arr[1]+'.sock',
             method:req.method,
             path:req.url,
             headers:req.headers
