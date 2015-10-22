@@ -41,13 +41,19 @@ web={
         req.socket.setKeepAlive(true)  
         req.socket.setTimeout(0)
 
+        res.setHeader('Access-Control-Allow-Origin', HEADERS['Access-Control-Allow-Origin'])
         res.setHeader('Access-Control-Allow-Credentials', 'true')
         res.setHeader('Content-Type', 'text/event-stream')
         res.setHeader('Cache-Control', 'no-cache')
         res.setHeader('Connection', 'keep-alive')
-        res.writeHead(200, HEADERS)
+        res.writeHead(200)
 console.log('start SSE')
         next()
+    },
+    SSE:function(res, msg, evt, retry){
+        res.write("retry: "+(retry||1000)+"\n");
+        if (evt) res.write("event: "+evt+"\n");
+        res.write("data: " + msg + "\n\n");
     },
     SSEStop:function(session, err, next){
         var res=session.res
