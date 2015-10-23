@@ -23,6 +23,7 @@ appMgr={
         }, function(cres){
             res.writeHeader(cres.statusCode, cres.headers)
             cres.pipe(res)
+            res.on('close', function(){cres.close()})
         }))
     }
 }

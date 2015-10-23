@@ -38,6 +38,8 @@ web={
         req=session.req,
         res=session.res
 
+        res.on('close',disconnect)
+
         req.socket.setKeepAlive(true)  
         req.socket.setTimeout(0)
 
@@ -95,7 +97,6 @@ disconnect= function(){
 request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
-    res.on('close',disconnect)
     sigslot.signal(o.pathname, new Session(Session.TYPE.WEB, o.query,Date.now(),req,res))
 }
 

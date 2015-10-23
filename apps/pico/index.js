@@ -8,7 +8,7 @@ route=function(session, models, next){
     }
 },
 help=function(session, models, next){
-    next(`api ${this.api} is not supported yet`)
+    next(`api ${this.api} is not supported by pico yet`)
 },
 all = {
     setup: function(context, next){
@@ -18,8 +18,8 @@ all = {
         appMgr=context.appMgr
 
         sigslot.slot('', [help])
-        sigslot.slot('ERR/', [web.error])
-        sigslot.slot('END/', [web.render])
+        sigslot.slot('ERR', [web.error])
+        sigslot.slot('END', [web.render])
         sigslot.slot('/pdl', [appMgr.redirect])
         sigslot.slot('/pico', [route,web.parse])
 
