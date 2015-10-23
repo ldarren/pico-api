@@ -38,7 +38,7 @@ web={
         req=session.req,
         res=session.res
 
-        res.on('close',disconnect)
+        res.addListener('close',disconnect)
 
         req.socket.setKeepAlive(true)  
         req.socket.setTimeout(0)
@@ -49,7 +49,6 @@ web={
         res.setHeader('Cache-Control', 'no-cache')
         res.setHeader('Connection', 'keep-alive')
         res.writeHead(200)
-console.log('start SSE')
         next()
     },
     SSE:function(res, msg, evt, retry){
@@ -58,10 +57,7 @@ console.log('start SSE')
         res.write("data: " + msg + "\n\n");
     },
     SSEStop:function(session, err, next){
-        var res=session.res
-       // res.writeHead(500, err)
-console.log('stop SSE')
-        res.end()
+        session.res.end()
         next()
     },
     error:function(session, err, next){
