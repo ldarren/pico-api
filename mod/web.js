@@ -9,26 +9,24 @@ url= require('url'),
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
-Session= require('../lib/Session'),
+Models= require('../lib/Models'),
 picoObj=require('pico').export('pico/obj'),
 sigslot,
 dummyCB=function(){},
 web={
-    parse:function(session,models,next){
-        var req=session.req
-
+    parse:function(req,res,next){
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, function(err, queries){
                 if (err) return next(err)
                 for(var i=0,q; q=queries[i]; i++){
-                    sigslot.signal(q.api, new Session(Session.TYPE.WEB,q.data,session.time,req,session.res,q))
+                    sigslot.signal(q.api, Models.TYPE.WEB,q.data,req,res,q)
                 }
                 next()
             })
         }else{
             multipart.parse(req, function(err, query){
                 if (err || !query.api) return next(err || 'empty multipart api')
-                sigslot.signal(query.api, new Session(Session.TYPE.WEB,query.data,session.time,req,session.res,query))
+                sigslot.signal(query.api, Models.TYPE.WEB,query.data,req,res,query)
                 next()
             })
         }
@@ -60,24 +58,20 @@ web={
         session.res.end()
         next()
     },
-    error:function(session, err, next){
-        var res=session.res
+    error:function(query, res, err, next){
         if (!Array.isArray(err)) err=[500,err]
         res.writeHead(err[0], HEADERS)
-        res.end(bodyparser.error(session.query,err[1]))
+        res.end(bodyparser.error(query,err[1]))
         next()
     },
-    render:function(session, models, next){
-        var res=session.res
-
+    render:function(query, res, next){
         res.writeHead(200, HEADERS)
-        models.commit(session.getJobs(),function(err){
-            if (err) session.error(err)
-            var q=session.query
-            if (q){
-                res.end(bodyparser.render(q, session.getOutput()))
+        this.commit(function(err){
+            if (err) this.error(err)
+            if (query){
+                res.end(bodyparser.render(query, this.getOutput()))
             }else{
-                res.end(JSON.stringify(session.getOutput()))
+                res.end(JSON.stringify(this.getOutput()))
             }
             next()
         })

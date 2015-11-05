@@ -9,11 +9,8 @@ loader=function(){
 },
 appMgr={
     load:loader,
-    redirect:function(session, models, next){
-        var
-        req=session.req,
-        res=session.res,
-        arr=this.api.split('/')
+    redirect:function(req, res, next){
+        var arr=this.api.split('/')
 
         req.pipe(http.request({
             socketPath:'/tmp/'+arr[1]+'.sock',
