@@ -1,4 +1,7 @@
 module.exports={
+    setup: function(context, cb){
+        cb()
+    },
     sep:function(next){console.log('###'); return next()},
     route:function(req, evt, next){
         switch(req.method){

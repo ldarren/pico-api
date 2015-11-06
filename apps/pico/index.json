@@ -1,7 +1,6 @@
 {
     "deps":{
         "util":"./util",
-        "sigslot":["context","sigslot"],
         "web":["context","webServer"],
         "appMgr":["context","appMgr"]
     },
