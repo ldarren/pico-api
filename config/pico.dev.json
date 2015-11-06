@@ -3,7 +3,7 @@
         "name": "pico",
         "env": "dev",
         "actions": [
-            "apps/pico"
+            "apps/pico/index.json"
         ]
     },
     "mods":{

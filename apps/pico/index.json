@@ -1,0 +1,29 @@
+{
+    "deps":{
+        "util":"./util",
+        "sigslot":["context","sigslot"],
+        "web":["context","webServer"],
+        "appMgr":["context","appMgr"]
+    },
+    "routes":{
+        "": [
+            ["util","help"]
+        ],
+        "ERR":[
+            ["web","error","query","res","err"]
+        ],
+        "END":[
+            ["web","render","query","res"]
+        ],
+        "/pdl":[
+            ["appMgr","redirect","req","res"]
+        ],
+        "/pico":[
+            ["util","route","req","evt"],
+            ["web","parse","req","res","evt"]
+        ],
+        "pico/add/app":[
+            ["util","help"]
+        ]
+    }
+}
