@@ -82,12 +82,12 @@ resetPort=function(port, cb){
     cb()
 },
 disconnect= function(){
-    sigslot.signal('web.dc', new Session(Session.TYPE.WEB, null,Date.now(),null,this))
+    sigslot.signal('web.dc', Models.TYPE.WEB, null,null,this)
 },
 request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, new Session(Session.TYPE.WEB, o.query,Date.now(),req,res))
+    sigslot.signal(o.pathname, Models.TYPE.WEB, o.query,req,res)
 }
 
 module.exports= {
