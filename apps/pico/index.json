@@ -18,8 +18,8 @@
             ["appMgr","redirect","req","res"]
         ],
         "/pico":[
-            ["util","route","req","evt"],
-            ["web","parse","req","res","evt"]
+            ["util","route","req"],
+            ["web","parse","req","res"]
         ],
         "pico/add/app":[
             ["util","help"]

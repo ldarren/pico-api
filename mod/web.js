@@ -9,7 +9,7 @@ url= require('url'),
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
-Models= require('../lib/Models'),
+SessionMgr= require('../lib/SessionMgr'),
 picoObj=require('pico').export('pico/obj'),
 sigslot,
 dummyCB=function(){},
@@ -19,14 +19,14 @@ web={
             bodyparser.parse(req, function(err, queries){
                 if (err) return next(err)
                 for(var i=0,q; q=queries[i]; i++){
-                    sigslot.signal(q.api, Models.TYPE.WEB,q.data,req,res,q)
+                    sigslot.signal(q.api, SessionMgr.TYPE.WEB,q.data,req,res,q)
                 }
                 next()
             })
         }else{
             multipart.parse(req, function(err, query){
                 if (err || !query.api) return next(err || 'empty multipart api')
-                sigslot.signal(query.api, Models.TYPE.WEB,query.data,req,res,query)
+                sigslot.signal(query.api, SessionMgr.TYPE.WEB,query.data,req,res,query)
                 next()
             })
         }
@@ -66,12 +66,13 @@ web={
     },
     render:function(query, res, next){
         res.writeHead(200, HEADERS)
+        var self=this
         this.commit(function(err){
-            if (err) this.error(err)
-            if (query){
-                res.end(bodyparser.render(query, this.getOutput()))
+            if (err) self.error(err)
+            if (query.api){
+                res.end(bodyparser.render(query, self.getOutput()))
             }else{
-                res.end(JSON.stringify(this.getOutput()))
+                res.end(JSON.stringify(self.getOutput()))
             }
             next()
         })
@@ -82,12 +83,12 @@ resetPort=function(port, cb){
     cb()
 },
 disconnect= function(){
-    sigslot.signal('web.dc', Models.TYPE.WEB, null,null,this)
+    sigslot.signal('web.dc', SessionMgr.TYPE.WEB, null,null,this)
 },
 request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, Models.TYPE.WEB, o.query,req,res)
+    sigslot.signal(o.pathname, SessionMgr.TYPE.WEB, o.query,req,res)
 }
 
 module.exports= {
