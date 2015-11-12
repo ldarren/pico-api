@@ -1,7 +1,6 @@
 //TODO: use pool or clusterPool to prevent connection error?
 var
 mysql = require('mysql'),
-picoObj= require('pico').export('pico/obj'),
 args= require('../lib/args'),
 makeConn = function(client){
     var
@@ -45,7 +44,7 @@ module.exports={
             database:'null'
         }
 
-        args.print('MySQL Options',picoObj.extend(config,libConfig))
+        args.print('MySQL Options',Object.assign(config,libConfig))
 
         return next(null, new Client(config))
     }

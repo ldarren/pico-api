@@ -1,7 +1,6 @@
 // TODO: must contained pubsub communication channel, reuse pipeline feature?
 var
 redis = require('redis'),
-picoObj= require('pico').export('pico/obj'),
 args= require('../lib/args')
 
 module.exports={
@@ -14,7 +13,7 @@ module.exports={
             options:null,
         }
 
-        args.print('Redis Options',picoObj.extend(config,libConfig))
+        args.print('Redis Options',Object.assign(config,libConfig))
 
         var client = redis.createClient(config.port, config.host, config.options)
         if (config.password) client.auth(config.password)

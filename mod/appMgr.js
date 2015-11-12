@@ -3,7 +3,6 @@ cluster=require('cluster'),
 http=require('http'),
 fs=require('fs'),
 path=require('path'),
-picoObj=require('pico').export('pico/obj'),
 args=require('../lib/args'),
 loader=function(){
 },
@@ -39,7 +38,7 @@ module.exports= {
         ext='.'+appConfig.env+'.json',
         fn
 
-        args.print('AppMgr Options',picoObj.extend(config,libConfig))
+        args.print('AppMgr Options',Object.assign(config,libConfig))
 
         fs.readdir(path.resolve(appPath, config.path),function(err, fnames){
             if (err) return next(err)

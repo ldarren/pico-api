@@ -9,8 +9,7 @@ url= require('url'),
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
-SessionMgr= require('../lib/SessionMgr'),
-picoObj=require('pico').export('pico/obj'),
+Session= require('../lib/Session'),
 sigslot,
 dummyCB=function(){},
 web={
@@ -19,14 +18,14 @@ web={
             bodyparser.parse(req, function(err, queries){
                 if (err) return next(err)
                 for(var i=0,q; q=queries[i]; i++){
-                    sigslot.signal(q.api, SessionMgr.TYPE.WEB,q.data,req,res,q)
+                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q)
                 }
                 next()
             })
         }else{
             multipart.parse(req, function(err, query){
                 if (err || !query.api) return next(err || 'empty multipart api')
-                sigslot.signal(query.api, SessionMgr.TYPE.WEB,query.data,req,res,query)
+                sigslot.signal(query.api, Session.TYPE.WEB,query.data,req,res,query)
                 next()
             })
         }
@@ -78,12 +77,12 @@ resetPort=function(port, cb){
     cb()
 },
 disconnect= function(){
-    sigslot.signal('web.dc', SessionMgr.TYPE.WEB, null,null,this)
+    sigslot.signal('web.dc', Session.TYPE.WEB, null,null,this)
 },
 request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, SessionMgr.TYPE.WEB, o.query,req,res)
+    sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,req,res)
 }
 
 module.exports= {
@@ -100,7 +99,7 @@ module.exports= {
         },
         pfxPath, server
 
-        args.print('Web Options',picoObj.extend(config,libConfig))
+        args.print('Web Options',Object.assign(config,libConfig))
         pfxPath= config.pfxPath
         sigslot= appConfig.sigslot
 
