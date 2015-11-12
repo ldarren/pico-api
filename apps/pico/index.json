@@ -9,7 +9,7 @@
             ["util","help"]
         ],
         "ERR":[
-            ["web","error","query","res","err"]
+            ["web","error","query","res","error"]
         ],
         "END":[
             ["web","render","query","res"]

@@ -31,11 +31,7 @@ web={
             })
         }
     },
-    SSEStart:function(session, models, next){
-        var
-        req=session.req,
-        res=session.res
-
+    SSEStart:function(req, res, next){
         res.addListener('close',disconnect)
 
         req.socket.setKeepAlive(true)  
@@ -54,8 +50,8 @@ web={
         if (evt) res.write("event: "+evt+"\n");
         res.write("data: " + msg + "\n\n");
     },
-    SSEStop:function(session, err, next){
-        session.res.end()
+    SSEStop:function(res, next){
+        res.end()
         next()
     },
     error:function(query, res, err, next){
@@ -66,13 +62,12 @@ web={
     },
     render:function(query, res, next){
         res.writeHead(200, HEADERS)
-        var self=this
-        this.commit(function(err){
-            if (err) self.error(err)
+        this.commit((err)=>{
+            if (err) this.error(err)
             if (query.api){
-                res.end(bodyparser.render(query, self.getOutput()))
+                res.end(bodyparser.render(query, this.getOutput()))
             }else{
-                res.end(JSON.stringify(self.getOutput()))
+                res.end(JSON.stringify(this.getOutput()))
             }
             next()
         })

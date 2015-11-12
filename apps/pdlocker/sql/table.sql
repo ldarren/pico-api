@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS `user`(
     `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY (`un`),
     KEY (`sess`),
-    KEY (`updatedAt`)
+    KEY (`updatedAt`),
+    KEY (`createdBy`)
 );
 
 CREATE TABLE IF NOT EXISTS `userMap`(
@@ -71,7 +72,9 @@ CREATE TABLE IF NOT EXISTS `domain`(
     `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `createdBy` BIGINT UNSIGNED NOT NULL,
     `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY (`name`)
+    UNIQUE KEY (`name`),
+    KEY (`updatedAt`),
+    KEY (`createdBy`)
 );
 
 CREATE TABLE IF NOT EXISTS `domainMap`(
@@ -107,7 +110,9 @@ CREATE TABLE IF NOT EXISTS `lock`(
     `updatedBy` BIGINT UNSIGNED,
     `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `createdBy` BIGINT UNSIGNED NOT NULL,
-    `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY (`updatedAt`),
+    KEY (`createdBy`)
 );
 
 CREATE TABLE IF NOT EXISTS `lockMapInt`(
