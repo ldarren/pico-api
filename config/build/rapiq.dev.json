@@ -1,0 +1,20 @@
+{
+    "app":{
+        "name": "Rapiq",
+        "ajax": null,
+        "env": "dev",
+        "paths":{
+            "*":"http://localhost/rapiq/node/",
+            "api": "http://localhost/rapiq/node/api/"
+        }
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[],
+            "port":"/tmp/rapiq.sock"
+        }
+    }
+}

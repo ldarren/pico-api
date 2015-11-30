@@ -1,11 +1,11 @@
 {
     "app":{
-        "name": "Yours Radio Station",
+        "name": "Personal Delivery Locker",
         "ajax":null,
         "paths":{
-            "*":"http://localhost/urs/node/",
-            "api": "http://localhost/urs/node/api/",
-            "model": "http://localhost/urs/node/model/"
+            "*":"http://localhost/pdlocker/node/",
+            "api": "http://localhost/pdlocker/node/api/",
+            "sql": "http://localhost/pdlocker/node/model/sql/"
         }
     },
     "mods":{
@@ -20,9 +20,13 @@
             "instance":"small",
             "character":"utf8_general_ci",
             "collate":"utf8_bin"
+        },
+        "mainCache":{
+            "mod":"redis",
+            "instance":"small"
         }
     },
-    "db":{
+    "mysql":{
         "mainDB":{
             "users":{
                 "un":["VARCHAR(16)"],

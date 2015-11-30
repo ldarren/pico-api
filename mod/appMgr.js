@@ -1,3 +1,6 @@
+// TODO
+// 1) app health check
+// 2) simple load balancing if more than one instance running
 var
 cluster=require('cluster'),
 http=require('http'),
