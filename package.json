@@ -1,13 +1,15 @@
 {
   "name": "picos",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "pico operating system",
   "main": "index.js",
   "dependencies": {
-    "pico": "^0.3.7",
+    "bleno": "^0.3.3",
+    "hiredis": "^0.4.1",
     "mysql": "^2.9.0",
-    "redis": "^2.1.0",
-    "hiredis": "^0.4.1"
+    "noble": "^1.2.1",
+    "pico": "^0.3.7",
+    "redis": "^2.4.2"
   },
   "devDependencies": {},
   "scripts": {

@@ -117,8 +117,8 @@ module.exports= {
         bodyparser.setup(config.cullAge, config.secretKey, 'string'===typeof sep?sep:JSON.stringify(sep))
 
         //TODO: security check b4 unlink
-        resetPort(config.port, function(){
-            server.listen(config.port, function(){
+        resetPort(config.port, ()=>{
+            server.listen(config.port, ()=>{
                 next(null, web)
             })
         })
