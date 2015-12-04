@@ -50,7 +50,7 @@ start=function(name, spec, cb){
 
     device.services=services
 
-    bleno.startAdvertising(name, services, error=>{
+    bleno.startAdvertising(name, services, (err)=>{
         cb(err, ble)
     })
 },
@@ -92,9 +92,20 @@ ble={
     updateRSSI:function(cb){
         bleno.updateRSSI(cb)
     },
-    error:function(data, offset, self, callback){
+    error:function(err, character, cb, next){
+        switch(err[0]){
+        case 400: cb(character.RESULT_ATTR_NOT_LONG); break // attempt to write data with offset, but expected data is small
+        case 404: cb(character.RESULT_INVALID_OFFSET); break // read data with offset bigger than data size
+        case 415: cb(character.RESULT_INVALID_ATTRIBUTE_LENGTH); break // write data size not right
+        default: cb(character.RESULT_UNLIKELY_ERROR); break
+        }
+        next()
     },
-    render:function(data, offset, self, callback){
+    render:function(buffer, offset, character, cb, next){
+        if (offset) buffer=buffer.slice(offset)
+        if (cb) cb(character.RESULT_SUCCESS, buffer) // for write request, buffer will be ignore
+        if (character.updateValueCB) character.updateValueCB(buffer)
+        next()
     }
 }
 
@@ -113,7 +124,7 @@ Characteristic.prototype={
     onSubscribe:function(maxValueSize, updateValueCB){
         console.log(this.name+'/subscribe: ' + maxValueSize)
         bleno.Characteristic.prototype.onSubscribe.call(this, maxValueSize, updateValueCB)
-        sigslot.signal(this.name+'/subscribe', Session.TYPE.BLE, null, 0, this, updateValueCB)
+        sigslot.signal(this.name+'/subscribe', Session.TYPE.BLE, null, 0, this)
     },
     // notify/indicate unsubscribe handler, function() { ...}
     onUnsubscribe:function(){
