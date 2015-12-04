@@ -11,11 +11,11 @@ bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
 sigslot,
-dummyCB=function(){},
+dummyCB=()=>{},
 web={
     parse:function(req,res,next){
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
-            bodyparser.parse(req, function(err, queries){
+            bodyparser.parse(req, (err, queries)=>{
                 if (err) return next(err)
                 for(var i=0,q; q=queries[i]; i++){
                     sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q)
@@ -23,7 +23,7 @@ web={
                 next()
             })
         }else{
-            multipart.parse(req, function(err, query){
+            multipart.parse(req, (err, query)=>{
                 if (err || !query.api) return next(err || 'empty multipart api')
                 sigslot.signal(query.api, Session.TYPE.WEB,query.data,req,res,query)
                 next()
