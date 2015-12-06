@@ -1,3 +1,8 @@
+//
+// handle (ble serial for arduino?) is not supported.
+// descriptor read and write is not supported, as cordova-ble-central is not supported it yet,
+// Read and write descriptors for a particular characteristic. One of the most common descriptors used is the Client Characteristic Configuration Descriptor. This allows the client to set the notifications to indicate or notify for a particular characteristic.
+//
 const
 ERR_INVALID='invalid ble action',
 ERR_OFF='ble power not on',
