@@ -59,6 +59,26 @@ start=function(name, spec, cb){
         cb(err, ble)
     })
 },
+error=function(err, character, cb, next){
+    switch(err[0]){
+    case 400: cb(character.RESULT_ATTR_NOT_LONG); break // attempt to write data with offset, but expected data is small
+    case 404: cb(character.RESULT_INVALID_OFFSET); break // read data with offset bigger than data size
+    case 415: cb(character.RESULT_INVALID_ATTRIBUTE_LENGTH); break // write data size not right
+    default: cb(character.RESULT_UNLIKELY_ERROR); break
+    }
+    next()
+},
+render=function(cb, charcter, offset, input, next){
+    if (this.has('error')) return error(this.get('error'), character, cb, next)
+    this.commit((err)=>{
+        if (err) return error(err, character, cb, next)
+        var buffer=this.getOutput()
+        if (offset) buffer=buffer.slice(offset)
+        if (cb) cb(character.RESULT_SUCCESS, buffer) // for write request, buffer will be ignore
+        if (character.updateValueCB) character.updateValueCB(buffer)
+        next()
+    })
+},
 ble={
     // standard: name, services, cb
     // ibeacon: uuid, major, minor, rssi, cb
@@ -96,21 +116,6 @@ ble={
     },
     updateRSSI:function(cb){
         bleno.updateRSSI(cb)
-    },
-    error:function(err, character, cb, next){
-        switch(err[0]){
-        case 400: cb(character.RESULT_ATTR_NOT_LONG); break // attempt to write data with offset, but expected data is small
-        case 404: cb(character.RESULT_INVALID_OFFSET); break // read data with offset bigger than data size
-        case 415: cb(character.RESULT_INVALID_ATTRIBUTE_LENGTH); break // write data size not right
-        default: cb(character.RESULT_UNLIKELY_ERROR); break
-        }
-        next()
-    },
-    render:function(buffer, offset, character, cb, next){
-        if (offset) buffer=buffer.slice(offset)
-        if (cb) cb(character.RESULT_SUCCESS, buffer) // for write request, buffer will be ignore
-        if (character.updateValueCB) character.updateValueCB(buffer)
-        next()
     }
 }
 
@@ -118,34 +123,34 @@ Characteristic.prototype={
     // read request handler, function(offset, callback) { ... }
     onReadRequest:function(offset, cb){
         console.log(this.name+'/read: ' + offset)
-        sigslot.signal(this.name+'/read', Session.TYPE.BLE, null, offset, this, cb)
+        sigslot.signal(this.name+'/read', Session.TYPE.BLE, null, offset, this, cb, render)
     },
     // write request handler, function(data, offset, withoutResponse, callback) { ...}
     onWriteRequest:function(data, offset, withoutResponse, cb){
         console.log(this.name+'/write: ' + data.toString('hex') + ' ' + offset + ' ' + withoutResponse)
-        sigslot.signal(this.name+'/write', Session.TYPE.BLE, data, offset, this, cb)
+        sigslot.signal(this.name+'/write', Session.TYPE.BLE, data, offset, this, cb, render)
     },
     // notify/indicate subscribe handler, function(maxValueSize, updateValueCallback) { ...}
     onSubscribe:function(maxValueSize, updateValueCB){
         console.log(this.name+'/subscribe: ' + maxValueSize)
         bleno.Characteristic.prototype.onSubscribe.call(this, maxValueSize, updateValueCB)
-        sigslot.signal(this.name+'/subscribe', Session.TYPE.BLE, null, 0, this)
+        sigslot.signal(this.name+'/subscribe', Session.TYPE.BLE, null, 0, this, null, render)
     },
     // notify/indicate unsubscribe handler, function() { ...}
     onUnsubscribe:function(){
         console.log(this.name+'/unsubscribe: ' + arguments)
         bleno.Characteristic.prototype.onUnsubscribe.call(this)
-        sigslot.signal(this.name+'/unsubscribe', Session.TYPE.BLE, null, 0, this)
+        sigslot.signal(this.name+'/unsubscribe', Session.TYPE.BLE, null, 0, this, null, render)
     },
     // notify sent handler, function() { ...}
     onNotify:function(){
         console.log(this.name+'/notify: ' + arguments)
-        sigslot.signal(this.name+'/notify', Session.TYPE.BLE, null, 0, this)
+        sigslot.signal(this.name+'/notify', Session.TYPE.BLE, null, 0, this, null, render)
     },
     // indicate confirmation received handler, function() { ...}
     onIndicate:function(){
         console.log(this.name+'/indicate: ' + arguments)
-        sigslot.signal(this.name+'/indicate', Session.TYPE.BLE, null, 0, this)
+        sigslot.signal(this.name+'/indicate', Session.TYPE.BLE, null, 0, this, null, render)
     }
 }
 
@@ -183,29 +188,29 @@ module.exports= {
             }
         })
         bleno.on('advertisingStart', (err)=>{
-            if (!err) sigslot.signal('ble/start', Session.TYPE.BLE)
+            if (!err) sigslot.signal('ble/start', Session.TYPE.BLE, null, null, null, render)
         })
         bleno.on('advertisingStartError', (err)=>{
-            sigslot.signal('ERR/ble/start', Session.TYPE.BLE, err)
+            sigslot.signal('ERR/ble/start', Session.TYPE.BLE, err, null, null, null, render)
         })
         bleno.on('advertisingStop', ()=>{
-            sigslot.signal('ble/stop', Session.TYPE.BLE)
+            sigslot.signal('ble/stop', Session.TYPE.BLE, null, null, null, null, render)
         })
         bleno.on('servicesSet', (err)=>{
-            if (!err) sigslot.signal('ble/service/set', Session.TYPE.BLE)
+            if (!err) sigslot.signal('ble/service/set', Session.TYPE.BLE, null, null, null, null, render)
         })
         bleno.on('servicesSetError', (err)=>{
-            sigslot.signal('ERR/ble/service/set', Session.TYPE.BLE, err)
+            sigslot.signal('ERR/ble/service/set', Session.TYPE.BLE, err, null, null, null, render)
         })
         // following are linux only
         bleno.on('accept', (address)=>{
-            sigslot.signal('ble/connect', Session.TYPE.BLE, address)
+            sigslot.signal('ble/connect', Session.TYPE.BLE, address, null, null, null, render)
         })
         bleno.on('disconnect', (address)=>{
-            sigslot.signal('ble/disconnect', Session.TYPE.BLE, address)
+            sigslot.signal('ble/disconnect', Session.TYPE.BLE, address, null, null, null, render)
         })
         bleno.on('rssiUpdate', (rssi)=>{
-            sigslot.signal('ble/rssi/update', Session.TYPE.BLE, rssi)
+            sigslot.signal('ble/rssi/update', Session.TYPE.BLE, rssi, null, null, null, render)
         })
     }
 }

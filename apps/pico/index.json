@@ -9,10 +9,10 @@
             ["util","help"]
         ],
         "ERR":[
-            ["web","error","query","res","error"]
+            [0]
         ],
         "END":[
-            ["web","render","query","res"]
+            [0]
         ],
         "/pdl":[
             ["appMgr","redirect","req","res"]

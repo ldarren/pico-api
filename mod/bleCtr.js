@@ -1,12 +1,11 @@
+// ideal case, this module should be use as data source just like mysql and redis
 const
 ERR_INVALID='invalid ble action'
 
 var
 noble=require('noble'),
 args= require('../lib/args'),
-Session= require('../lib/Session'),
 poweredOn=false,
-sigslot,
 serviceMap={},
 characteristicMap={},
 characteristicList=[],
@@ -93,8 +92,6 @@ module.exports= {
 
         args.print('BLE_CTR Options',Object.assign(config,libConfig))
 
-        sigslot= appConfig.sigslot
-
         noble.on('stateChange',(state)=>{
             console.log(`BLE_CTR state ${state} at ${Date.now()}`)
             switch(state){
@@ -115,18 +112,7 @@ module.exports= {
         noble.on('discover', (peripheral)=>{
             peripheral.discoverAllServicesAndCharacteristics((err, services, characteristics)=>{
                 characteristicList.push(...characteristics)
-                sigslot.signal('bleCtr/discover', Session.TYPE.BLE_CTR)
             })
         })
-        noble.on('scanStart', ()=>{
-            sigslot.signal('bleCtr/start', Session.TYPE.BLE_CTR)
-        })
-        noble.on('scanStop', ()=>{
-            sigslot.signal('bleCtr/stop', Session.TYPE.BLE_CTR)
-        })
-        noble.on('warning', (msg)=>{
-            sigslot.signal('ERR/bleCtr', Session.TYPE.BLE_CTR, msg)
-        })
-
     }
 }

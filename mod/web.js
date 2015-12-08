@@ -12,20 +12,39 @@ multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
 sigslot,
 dummyCB=()=>{},
+error=function(err, res, query, next){
+    if (!Array.isArray(err)) err=[500,err]
+    res.writeHead(err[0], HEADERS)
+    res.end(bodyparser.error(query,err[1]))
+    next()
+},
+render=function(ack, query, res, req, input, next){
+    if (this.has('error')) return error(this.get('error'), res, query, next)
+    res.writeHead(200, HEADERS)
+    this.commit((err)=>{
+        if (err) return error(err, res, query, next)
+        if (query.api){
+            res.end(bodyparser.render(query, this.getOutput()))
+        }else{
+            res.end(JSON.stringify(this.getOutput()))
+        }
+        next()
+    })
+},
 web={
     parse:function(req,res,next){
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{
                 if (err) return next(err)
                 for(var i=0,q; q=queries[i]; i++){
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q)
+                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q,null,render)
                 }
                 next()
             })
         }else{
             multipart.parse(req, (err, query)=>{
                 if (err || !query.api) return next(err || 'empty multipart api')
-                sigslot.signal(query.api, Session.TYPE.WEB,query.data,req,res,query)
+                sigslot.signal(query.api, Session.TYPE.WEB,query.data,req,res,query,null,render)
                 next()
             })
         }
@@ -52,24 +71,6 @@ web={
     SSEStop:function(res, next){
         res.end()
         next()
-    },
-    error:function(query, res, err, next){
-        if (!Array.isArray(err)) err=[500,err]
-        res.writeHead(err[0], HEADERS)
-        res.end(bodyparser.error(query,err[1]))
-        next()
-    },
-    render:function(query, res, next){
-        res.writeHead(200, HEADERS)
-        this.commit((err)=>{
-            if (err) this.error(err)
-            if (query.api){
-                res.end(bodyparser.render(query, this.getOutput()))
-            }else{
-                res.end(JSON.stringify(this.getOutput()))
-            }
-            next()
-        })
     }
 },
 resetPort=function(port, cb){
@@ -77,12 +78,12 @@ resetPort=function(port, cb){
     cb()
 },
 disconnect= function(){
-    sigslot.signal('web.dc', Session.TYPE.WEB, null,null,this)
+    sigslot.signal('web.dc', Session.TYPE.WEB, null,null,this,null,null,render)
 },
 request= function(req, res){
 console.log(req.url,req.method)
     var o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,req,res)
+    sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,req,res,null,null,render)
 }
 
 module.exports= {
