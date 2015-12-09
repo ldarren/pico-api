@@ -17,6 +17,9 @@
         "appMgr":{
             "mod":"appMgr",
             "path":"config/build"
+        },
+        "cmd":{
+            "mod":"cmd"
         }
     }
 }
