@@ -194,6 +194,38 @@ FileDB.prototype = {
         cb=cb||dummyCB
         rmrf([url],this.root, cb)
     },
+    rename:function(from,to,cb){
+        cb=cb||dummyCB
+        var
+        fromP=normalize(this.root, from),
+        toP=normalize(this.root, to)
+
+        if (!fromP || !toP) return cb(`invalid fromURL:${from} or toURL:${to}`)
+
+        fs.rename(fromP,toP,cb)
+    },
+    chmod:function(url,mod,cb){
+        cb=cb||dummyCB
+
+        var p=normalize(this.root, url)
+        if (!p) return cb(`invalid url: ${url}`)
+
+        fs.stat(p,(err,stat)=>{
+            if (err) return cb(err)
+            fs.cdmod(p,mod,cb)
+        })
+    },
+    mode:function(url,cb){
+        if (!cb) return
+
+        var p=normalize(this.root, url)
+        if (!p) return cb(`invalid url: ${url}`)
+
+        fs.stat(p,(err,stat)=>{
+            if (err) return cb(err)
+            cb(null, parseInt(stat.mode.toString(8), 10))
+        })
+    },
     read:function(url,cb){
         if (!cb) return
 
