@@ -1,9 +1,18 @@
 const
 META='.meta',
 ENC='utf8',
+EMPTY='',
+MODE=0o700,
+META_OPT={encoding:ENC,mode:MODE},
 TYPE_FILE=1,
 TYPE_DIR=2,
-TYPE_LINK=3
+TYPE_LINK=3,
+G_R_OK=0o040,
+G_W_OK=0o020,
+G_X_OK=0o010,
+A_R_OK=0o004,
+A_W_OK=0o002,
+A_X_OK=0o001
 
 var
 fs = require('fs'),
@@ -15,18 +24,19 @@ normalize=function(root, url){
     if (!p.startsWith(root)) return null
     return p
 },
-mkdirp=function(arr, i, cb){
+mkdirp=function(arr, i, mode, cb){
+console.log(mode)
     if (arr.length <= i) return cb()
     var url=path.resolve(...(arr.slice(0,++i)))
-    fs.mkdir(url, (err)=>{
+    fs.mkdir(url, mode, (err)=>{
         if (err){
             // ignore EEXIST
-            if (err.errno === -17) return mkdirp(arr, i, cb)
+            if (err.errno === -17) return mkdirp(arr, i, mode, cb)
             return cb(err)
         }
-        fs.writeFile(path.resolve(url, META), '', ENC, (err)=>{
+        fs.writeFile(path.resolve(url, META), EMPTY, META_OPT, (err)=>{
             if (err) return cb(err)
-            mkdirp(arr, i, cb)
+            mkdirp(arr, i, mode, cb)
         })
     })
 },
@@ -66,7 +76,7 @@ copyr=function(list, root, dest, cb){
     fs.lstat(src, (err, stat)=>{
         if (err) return cb(err)
         if (stat.isFile()){
-            fs.stat(dest, (err, stat)=>{
+            fs.stat(dest, (err)=>{
                 if (err) fs.createReadStream(src).pipe(fs.createWriteStream(dest))
                 else fs.createReadStream(src).pipe(fs.createWriteStream(path.resolve(dest, fname)))
                 return copyr(list, root, dest, cb)
@@ -81,12 +91,12 @@ copyr=function(list, root, dest, cb){
         })
         if (stat.isDirectory()) return fs.readdir(src,(err,files)=>{
             if (err) return cb(err)
-            fs.stat(dest, (err, stat)=>{
+            fs.stat(dest, (err)=>{
                 var d=dest
                 if (!err){
                     d=path.resolve(dest, fname)
                 }
-                fs.mkdir(d, (err)=>{
+                fs.mkdir(d, stat.mode, (err)=>{
                     if (err) return cb(err)
                     copyr(files, src, d, (err)=>{
                         if (err) return cb(err)
@@ -155,13 +165,35 @@ FileDB.prototype = {
         DIR:TYPE_DIR,
         LINK:TYPE_LINK
     },
+    MODE:{
+        G_R:G_R_OK,
+        G_W:G_W_OK,
+        G_X:G_X_OK,
+        A_R:A_R_OK,
+        A_W:A_W_OK,
+        A_X:A_X_OK
+    },
     domain:function(name){
         var arr= name.match(this.domainRule)
         if (!arr) return arr
         return path.resolve(this.root,...arr)
     },
-    create:function(url,type,data,cb){
+    // node bug? a+w is never allow
+    create:function(url,data,type,mode,cb){
+        switch(arguments.length){
+        case 5: break
+        case 4:
+            if ('function' === typeof mode){
+                cb=mode
+                mode=MODE
+            }
+            break
+        case 3: mode=MODE; break
+        default: return console.error('not enough params')
+        }
+        mode=mode|MODE
         cb=cb||dummyCB
+
         var dst=normalize(this.root, url)
         if (!dst) return cb(`invalid dst ${url}`)
 
@@ -169,16 +201,16 @@ FileDB.prototype = {
         case TYPE_FILE:
             var arr=path.dirname(dst.substr(this.root.length+1)).split('/')
             arr.unshift(this.root)
-            mkdirp(arr, 1, (err)=>{
-                fs.writeFile(dst,data,ENC,cb)
+            mkdirp(arr, 1, mode, (err)=>{
+                fs.writeFile(dst,data,{encoding:ENC,mode:mode},cb)
             })
             break
         case TYPE_DIR:
             var arr=dst.substr(this.root.length+1).split('/')
             arr.unshift(this.root)
-            mkdirp(arr, 1, (err)=>{
+            mkdirp(arr, 1, mode, (err)=>{
                 if (err) cb(err)
-                fs.writeFile(path.resolve(dst,META),data,ENC,cb)
+                fs.writeFile(path.resolve(dst,META),data,META_OPT,cb)
             })
             break
         case TYPE_LINK:
@@ -212,7 +244,7 @@ FileDB.prototype = {
 
         fs.stat(p,(err,stat)=>{
             if (err) return cb(err)
-            fs.cdmod(p,mod,cb)
+            fs.chmod(p,MODE|mod,cb)
         })
     },
     mode:function(url,cb){
@@ -223,7 +255,7 @@ FileDB.prototype = {
 
         fs.stat(p,(err,stat)=>{
             if (err) return cb(err)
-            cb(null, parseInt(stat.mode.toString(8), 10))
+            cb(null, stat.mode)//parseInt(stat.mode.toString(8), 10))
         })
     },
     read:function(url,cb){
