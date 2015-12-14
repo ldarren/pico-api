@@ -5,6 +5,7 @@ var
 net = require('net'),
 repl = require('repl'),
 util = require('util'),
+pico= require('pico'),
 args= require('../lib/args'),
 Session= require('../lib/Session'),
 inspectOpts={showHidden:false, depth:4, colors:true, customInspect:false},
@@ -56,6 +57,7 @@ Cmd=function(config, input, output){
         replMode:repl.REPL_MODE_STRICT
     })
 
+    ctx['pico']=pico
     ctx['sigslot']=sigslot
     ctx['Session']=Session
     extendCtx(svr.context, ctx)
