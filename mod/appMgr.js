@@ -13,6 +13,7 @@ appMgr={
     load:loader,
     redirect:function(req, res, next){
         var arr=this.api.split('/')
+        if (2 > arr.length || !arr[1]) return next('invalid path for appMgr')
 
         req.pipe(http.request({
             socketPath:'/tmp/'+arr[1]+'.sock',
