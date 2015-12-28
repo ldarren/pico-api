@@ -1,0 +1,33 @@
+{
+    "app":{
+        "name": "Apis",
+        "ajax":null,
+        "paths":{
+            "*":"http://localhost/apis/node/",
+            "api": "http://localhost/apis/node/api/"
+            "sql": "http://localhost/apis/node/model/sql/",
+            "fsdb": "http://localhost/apis/node/model/fsdb/"
+        }
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[]
+        },
+        "mainDB":{
+            "mod":"mysql",
+            "database":"apis"
+        },
+        "mainCache":{
+            "mod":"redis",
+            "database":"apis",
+            "options":{}
+        },
+        "mainFS":{
+            "mod":"fsdb",
+            "domainDiv":2
+        }
+    }
+}
