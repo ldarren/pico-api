@@ -26,6 +26,9 @@
         ],
         "pico/add/app":[
             ["util","help"]
+        ],
+        "sayHello":[
+            ["util","sayHello"]
         ]
     }
 }
