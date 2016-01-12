@@ -1,4 +1,4 @@
-USE `apis`;
+USE `ceilia`;
 INSERT INTO `hash` (`k`) VALUES
 ('name'),
 ('pwd'),

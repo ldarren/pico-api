@@ -1,11 +1,11 @@
 {
     "app":{
-        "name": "Personal Delivery Locker",
+        "name": "Lead",
         "ajax":null,
         "paths":{
-            "*":"http://localhost/pdlocker/node/",
-            "api": "http://localhost/pdlocker/node/api/",
-            "sql": "http://localhost/pdlocker/node/model/sql/"
+            "*":"http://localhost/lead/node/",
+            "api": "http://localhost/lead/node/api/",
+            "sql": "http://localhost/lead/node/model/sql/"
         }
     },
     "mods":{
@@ -17,6 +17,7 @@
         },
         "mainDb":{
             "mod":"mysql",
+            "database":"lead",
             "instance":"small",
             "character":"utf8_general_ci",
             "collate":"utf8_bin"

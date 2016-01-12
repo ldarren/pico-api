@@ -1,4 +1,4 @@
-USE `pdlocker`;
+USE `lead`;
 INSERT INTO `hash` (`k`) VALUES
 ('name'),
 ('pwd'),

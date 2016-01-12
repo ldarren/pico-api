@@ -1,13 +1,13 @@
 {
     "app":{
-        "name": "Apis",
+        "name": "Ceilia",
         "ajax": null,
         "env": "dev",
         "paths":{
-            "*":"http://localhost/apis/node/",
-            "api": "http://localhost/apis/node/api/",
-            "sql": "http://localhost/apis/node/model/sql/",
-            "fsdb": "http://localhost/apis/node/model/fsdb/"
+            "*":"http://localhost/ceilia/node/",
+            "api": "http://localhost/ceilia/node/api/",
+            "sql": "http://localhost/ceilia/node/model/sql/",
+            "fsdb": "http://localhost/ceilia/node/model/fsdb/"
         }
     },
     "mods":{
@@ -16,7 +16,7 @@
             "allowOrigin":"*",
             "delimiter":["&"],
             "uploadWL":[],
-            "port":"/tmp/apis.sock"
+            "port":"/tmp/ceilia.sock"
         },
         "mainDB":{
             "mod":"mysql",
@@ -24,7 +24,7 @@
             "port":3306,
             "user":"root",
             "password":"root",
-            "database":"apis"
+            "database":"ceilia"
         },
         "mainCache":{
             "mod":"redis",

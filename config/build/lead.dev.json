@@ -1,12 +1,12 @@
 {
     "app":{
-        "name": "Personal Delivery Locker",
+        "name": "Lead",
         "ajax": null,
         "env": "dev",
         "paths":{
-            "*":"http://localhost/pdlocker/node/",
-            "api": "http://localhost/pdlocker/node/api/",
-            "sql": "http://localhost/pdlocker/node/model/sql/"
+            "*":"http://localhost/lead/node/",
+            "api": "http://localhost/lead/node/api/",
+            "sql": "http://localhost/lead/node/model/sql/"
         }
     },
     "mods":{
@@ -15,7 +15,7 @@
             "allowOrigin":"*",
             "delimiter":["&"],
             "uploadWL":[],
-            "port":"/tmp/pdl.sock"
+            "port":"/tmp/lead.sock"
         },
         "mainDB":{
             "mod":"mysql",
@@ -23,7 +23,7 @@
             "port":3306,
             "user":"root",
             "password":"root",
-            "database":"pdlocker"
+            "database":"lead"
         },
         "mainCache":{
             "mod":"redis",
