@@ -7,10 +7,40 @@ http=require('http'),
 fs=require('fs'),
 path=require('path'),
 args=require('../lib/args'),
-loader=function(){
+workers={},
+ext,appjs,watchPath,sigslot,
+install=function(fname){
+    console.log('installing',fname)
+    if (!fname) return false
+    uninstall(fname)
+    var base=path.basename(fname,ext)
+    if (-1!==base.indexOf('.')) return true
+    cluster.setupMaster({exec:appjs, args:['-c',path.resolve(watchPath,fname)]})
+    workers[base]=cluster.fork()
+    sigslot.slot('/'+base, [[appMgr.redirect, 'req', 'res']])
+    console.log('installed',fname)
+    return true
+},
+uninstall=function(fname){
+    console.log('uninstalling',fname)
+    if (!fname) return false
+    var base=path.basename(fname,ext)
+    if (-1!==base.indexOf('.')) return true
+    var worker=workers[base]
+    if (!worker) return true
+    worker.kill()
+    delete workers[base]
+    sigslot.unslot('/'+base)
+    console.log('uninstalled',fname)
+    return true
+},
+watch=function(evt, fname){
+    switch(evt){
+    case 'rename': uninstall(fname); break
+    case 'change': install(fname); break
+    }
 },
 appMgr={
-    load:loader,
     redirect:function(req, res, next){
         var arr=this.api.split('/')
         if (2 > arr.length || !arr[1]) return next('invalid path for appMgr')
@@ -36,22 +66,22 @@ module.exports= {
 
         var
         config={
-            path:'config/build'
+            path:'config/build',
+            persistent:false
         },
-        appPath= appConfig.path,
-        ext='.'+appConfig.env+'.json',
-        fn
+        appPath= appConfig.path
 
         args.print('AppMgr Options',Object.assign(config,libConfig))
 
-        fs.readdir(path.resolve(appPath, config.path),function(err, fnames){
+        ext='.'+appConfig.env+'.json'
+        appjs=path.resolve(appPath,'lib/app.js')
+        watchPath=path.resolve(appPath,config.path)
+        sigslot=appConfig.sigslot
+
+        fs.readdir(watchPath,function(err, fnames){
             if (err) return next(err)
-            for(var i=0,fname; fname=fnames[i]; i++){
-                fn=path.basename(fname,ext)
-                if (-1!==fn.indexOf('.')) continue
-                cluster.setupMaster({exec:path.resolve(appPath,'lib/app.js'), args:['-c',path.resolve(appPath,config.path,fname)]})
-                cluster.fork()
-            }
+            for(var i=0; install(fnames[i]); i++);
+            fs.watch(watchPath, {persistent:config.persistent}, watch)
             next(null, appMgr)
         })
     }

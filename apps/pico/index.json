@@ -14,12 +14,6 @@
         "END":[
             [0]
         ],
-        "/pdl":[
-            ["appMgr","redirect","req","res"]
-        ],
-        "/apis":[
-            ["appMgr","redirect","req","res"]
-        ],
         "/pico":[
             ["util","route","req"],
             ["web","parse","req","res"]
