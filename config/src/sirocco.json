@@ -1,0 +1,24 @@
+{
+    "app":{
+        "name": "Sirocco",
+        "ajax":null,
+        "paths":{
+            "*":"http://localhost/sirocco/node/",
+            "api": "http://localhost/sirocco/node/api/",
+            "redis": "http://localhost/sirocco/node/model/redis/",
+            "tpl": "http://localhost/sirocco/node/tpl/"
+        }
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[]
+        },
+        "mainCache":{
+            "mod":"redis",
+            "options":{}
+        }
+    }
+}

@@ -1,4 +1,13 @@
-const HEADERS= { 'Content-Type': 'application/octet-stream' }
+const
+CORS='Access-Control-Allow-Origin',
+HEAD_JSON= { 'Content-Type': 'application/octet-stream' },
+HEAD_HTML= { 'Content-Type': 'text/html' }
+HEAD_SSE= {
+    'Content-Type': 'text/event-stream',
+    'Access-Control-Allow-Credentials': 'true',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+}
 
 var
 http= require('http'),
@@ -14,19 +23,26 @@ sigslot,
 dummyCB=()=>{},
 error=function(err, res, query, next){
     if (!Array.isArray(err)) err=[500,err]
-    res.writeHead(err[0], HEADERS)
+    res.writeHead(err[0], HEAD_JSON)
     res.end(bodyparser.error(query,err[1]))
     next()
 },
 render=function(ack, query, res, req, input, next){
     if (this.has('error')) return error(this.get('error'), res, query, next)
-    res.writeHead(200, HEADERS)
     this.commit((err)=>{
         if (err) return error(err, res, query, next)
         if (query.api){
+            res.writeHead(200, HEAD_JSON)
             res.end(bodyparser.render(query, this.getOutput()))
         }else{
-            res.end(JSON.stringify(this.getOutput()))
+            var output=this.getOutput()
+            if ('string'===typeof output){
+                res.writeHead(200, HEAD_HTML)
+                res.end(output)
+            } else {
+                res.writeHead(200, HEAD_JSON)
+                res.end(JSON.stringify(this.getOutput()))
+            }
         }
         next()
     })
@@ -55,12 +71,7 @@ web={
         req.socket.setKeepAlive(true)  
         req.socket.setTimeout(0)
 
-        res.setHeader('Access-Control-Allow-Origin', HEADERS['Access-Control-Allow-Origin'])
-        res.setHeader('Access-Control-Allow-Credentials', 'true')
-        res.setHeader('Content-Type', 'text/event-stream')
-        res.setHeader('Cache-Control', 'no-cache')
-        res.setHeader('Connection', 'keep-alive')
-        res.writeHead(200)
+        res.writeHead(200, HEAD_SSE)
         next()
     },
     SSE:function(res, msg, evt, retry){
@@ -111,7 +122,7 @@ module.exports= {
             server= http.createServer(request)
         }
 
-        if (config.allowOrigin) HEADERS['Access-Control-Allow-Origin']= config.allowOrigin
+        if (config.allowOrigin) HEAD_HTML[CORS]=HEAD_JSON[CORS]=HEAD_SSE[CORS]=config.allowOrigin
 
         multipart.setup(config.uploadWL)
         var sep=config.delimiter
