@@ -10,11 +10,10 @@ args=require('../lib/args'),
 workers={},
 ext,appjs,watchPath,sigslot,
 install=function(fname){
-    console.log('installing',fname)
     if (!fname) return false
-    uninstall(fname)
     var base=path.basename(fname,ext)
     if (-1!==base.indexOf('.')) return true
+    uninstall(fname)
     cluster.setupMaster({exec:appjs, args:['-c',path.resolve(watchPath,fname)]})
     workers[base]=cluster.fork()
     sigslot.slot('/'+base, [[appMgr.redirect, 'req', 'res']])
