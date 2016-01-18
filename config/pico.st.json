@@ -1,13 +1,22 @@
 {
     "app":{
-        "env": "st"
+        "name": "pico",
+        "env": "dev",
+        "actions": [
+            "apps/pico/index.json"
+        ]
     },
-    "deps":[
-        "pico.dev.json"
-    ],
     "mods":{
         "webServer":{
-            "port":4000
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[],
+            "port":4888
+        },
+        "appMgr":{
+            "mod":"appMgr",
+            "path":"config/build"
         }
     }
 }
