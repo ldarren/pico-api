@@ -1,7 +1,7 @@
 const
 CORS='Access-Control-Allow-Origin',
 HEAD_JSON= { 'Content-Type': 'application/octet-stream' },
-HEAD_HTML= { 'Content-Type': 'text/html' }
+HEAD_HTML= { 'Content-Type': 'text/html; charset=utf-8' }
 HEAD_SSE= {
     'Content-Type': 'text/event-stream',
     'Access-Control-Allow-Credentials': 'true',
