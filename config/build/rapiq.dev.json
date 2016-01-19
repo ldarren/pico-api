@@ -4,8 +4,8 @@
         "ajax": null,
         "env": "dev",
         "paths":{
-            "*":"http://localhost/rapiq/node/",
-            "api": "http://localhost/rapiq/node/api/"
+            "*":"http://107.20.154.29/rapiq/node/",
+            "api": "http://107.20.154.29/rapiq/node/api/"
         }
     },
     "mods":{

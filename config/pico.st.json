@@ -6,17 +6,6 @@
         "pico.dev.json"
     ],
     "mods":{
-        "webServer":{
-            "mod":"web",
-            "allowOrigin":"*",
-            "delimiter":["&"],
-            "uploadWL":[],
-            "port":4888
-        },
-        "appMgr":{
-            "mod":"appMgr",
-            "path":"config/build"
-        },
         "cmd":{
             "mod":0
         }

@@ -3,11 +3,11 @@
         "env": "pro"
     },
     "deps":[
-        "pico.dev.json"
+        "ceilia.dev.json"
     ],
     "mods":{
-        "cmd":{
-            "mod":0
+        "mainDB":{
+            "password":"HULU^8park"
         }
     }
 }
