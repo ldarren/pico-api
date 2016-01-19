@@ -1,7 +1,7 @@
 module.exports={
     setup: function(context, cb){
         var sigslot=context.sigslot
-        sigslot.signalAt('* * * * * *', 'sayHello')
+        //sigslot.signalAt('* * * * * *', 'sayHello')
         cb()
     },
     sep:function(next){console.log('###'); return next()},
@@ -16,7 +16,7 @@ module.exports={
         next(`api ${this.api} is not supported by pico yet`)
     },
     sayHello:function(next){
-        console.log('1 min')
+        console.log(Date.now())
         next()
     }
 }

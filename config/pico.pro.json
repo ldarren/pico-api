@@ -6,6 +6,9 @@
         "pico.dev.json"
     ],
     "mods":{
+        "webServer":{
+            "port":2016
+        },
         "cmd":{
             "mod":0
         }
