@@ -28,6 +28,7 @@
         }
     },
     "mysql":{
+        "remarks":"use json schema validator, https://github.com/epoberezkin/ajv",
         "mainDB":{
             "users":{
                 "un":["VARCHAR(16)"],
