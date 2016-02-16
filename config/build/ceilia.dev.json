@@ -4,10 +4,10 @@
         "ajax": null,
         "env": "dev",
         "paths":{
-            "*":"http://107.20.154.29/ceilia/node/",
-            "api": "http://107.20.154.29/ceilia/node/api/",
-            "sql": "http://107.20.154.29/ceilia/node/model/sql/",
-            "fsdb": "http://107.20.154.29/ceilia/node/model/fsdb/"
+            "*":"http://52.73.58.222/ceilia/node/",
+            "api": "http://52.73.58.222/ceilia/node/api/",
+            "sql": "http://52.73.58.222/ceilia/node/model/sql/",
+            "fsdb": "http://52.73.58.222/ceilia/node/model/fsdb/"
         }
     },
     "mods":{

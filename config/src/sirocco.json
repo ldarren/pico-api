@@ -3,10 +3,10 @@
         "name": "Sirocco",
         "ajax":null,
         "paths":{
-            "*":"http://107.20.154.29/sirocco/node/",
-            "api": "http://107.20.154.29/sirocco/node/api/",
-            "redis": "http://107.20.154.29/sirocco/node/model/redis/",
-            "tpl": "http://107.20.154.29/sirocco/node/tpl/"
+            "*":"http://52.73.58.222/sirocco/node/",
+            "api": "http://52.73.58.222/sirocco/node/api/",
+            "redis": "http://52.73.58.222/sirocco/node/model/redis/",
+            "tpl": "http://52.73.58.222/sirocco/node/tpl/"
         }
     },
     "mods":{
