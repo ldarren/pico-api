@@ -22,8 +22,8 @@
             "mod":"mysql",
             "host":"localhost",
             "port":3306,
-            "user":"root",
-            "password":"root",
+            "user":"cilia_user",
+            "password":"7\"kfhqVk",
             "database":"ceilia"
         },
         "mainCache":{
