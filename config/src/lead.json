@@ -3,9 +3,9 @@
         "name": "Lead",
         "ajax":null,
         "paths":{
-            "*":"http://54.83.28.108/lead/node/",
-            "api": "http://54.83.28.108/lead/node/api/",
-            "sql": "http://54.83.28.108/lead/node/model/sql/"
+            "*":"http://localhost/lead/node/",
+            "api": "http://localhost/lead/node/api/",
+            "sql": "http://localhost/lead/node/model/sql/"
         }
     },
     "mods":{

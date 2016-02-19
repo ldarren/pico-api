@@ -4,10 +4,10 @@
         "ajax": null,
         "env": "dev",
         "paths":{
-            "*":"http://54.83.28.108/ceilia/node/",
-            "api": "http://54.83.28.108/ceilia/node/api/",
-            "sql": "http://54.83.28.108/ceilia/node/model/sql/",
-            "fsdb": "http://54.83.28.108/ceilia/node/model/fsdb/"
+            "*":"http://localhost/ceilia/node/",
+            "api": "http://localhost/ceilia/node/api/",
+            "sql": "http://localhost/ceilia/node/model/sql/",
+            "fsdb": "http://localhost/ceilia/node/model/fsdb/"
         }
     },
     "mods":{
