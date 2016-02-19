@@ -3,8 +3,8 @@
         "name": "Rapiq",
         "ajax":null,
         "paths":{
-            "*":"http://52.73.58.222/rapiq/node/",
-            "api": "http://52.73.58.222/rapiq/node/api/"
+            "*":"http://54.83.28.108/rapiq/node/",
+            "api": "http://54.83.28.108/rapiq/node/api/"
         }
     },
     "mods":{

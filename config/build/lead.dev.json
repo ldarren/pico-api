@@ -4,9 +4,9 @@
         "ajax": null,
         "env": "dev",
         "paths":{
-            "*":"http://52.73.58.222/lead/node/",
-            "api": "http://52.73.58.222/lead/node/api/",
-            "sql": "http://52.73.58.222/lead/node/model/sql/"
+            "*":"http://54.83.28.108/lead/node/",
+            "api": "http://54.83.28.108/lead/node/api/",
+            "sql": "http://54.83.28.108/lead/node/model/sql/"
         }
     },
     "mods":{

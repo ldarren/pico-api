@@ -4,10 +4,10 @@
         "ajax": null,
         "env": "dev",
         "paths":{
-            "*":"http://52.73.58.222/sirocco/node/",
-            "api": "http://52.73.58.222/sirocco/node/api/",
-            "redis": "http://52.73.58.222/sirocco/node/model/redis/",
-            "tpl": "http://52.73.58.222/sirocco/node/tpl/"
+            "*":"http://54.83.28.108/sirocco/node/",
+            "api": "http://54.83.28.108/sirocco/node/api/",
+            "redis": "http://54.83.28.108/sirocco/node/model/redis/",
+            "tpl": "http://54.83.28.108/sirocco/node/tpl/"
         }
     },
     "mods":{
