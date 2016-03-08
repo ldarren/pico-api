@@ -15,6 +15,7 @@ https= require('https'),
 fs= require('fs'),
 path= require('path'),
 url= require('url'),
+WebSocketServer= require('ws').Server,
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
@@ -121,6 +122,15 @@ module.exports= {
         }else{
             server= http.createServer(request)
         }
+
+		var wss=new WebSocketServer({server:server})
+		wss.on('connection', (ws)=>{
+			ws.on('message', (message)=>{
+				console.log('received: %s', message)
+			})
+
+			ws.send('something')
+		})
 
         if (config.allowOrigin) HEAD_HTML[CORS]=HEAD_JSON[CORS]=HEAD_SSE[CORS]=config.allowOrigin
 
