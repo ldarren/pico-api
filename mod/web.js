@@ -15,7 +15,6 @@ https= require('https'),
 fs= require('fs'),
 path= require('path'),
 url= require('url'),
-WebSocketServer= require('ws').Server,
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
@@ -123,15 +122,6 @@ module.exports= {
             server= http.createServer(request)
         }
 
-		var wss=new WebSocketServer({server:server})
-		wss.on('connection', (ws)=>{
-			ws.on('message', (message)=>{
-				console.log('received: %s', message)
-			})
-
-			ws.send('something')
-		})
-
         if (config.allowOrigin) HEAD_HTML[CORS]=HEAD_JSON[CORS]=HEAD_SSE[CORS]=config.allowOrigin
 
         multipart.setup(config.uploadWL)
@@ -141,6 +131,20 @@ module.exports= {
         //TODO: security check b4 unlink
         resetPort(config.port, ()=>{
             server.listen(config.port, ()=>{
+
+				// WS TEST START
+				// BUG: ws.send not working and unable forward ws connection to workers
+				var
+				WebSocketServer= require('ws').Server,
+				wss=new WebSocketServer({server:server})
+				wss.on('connection', (ws)=>{
+					ws.on('message', (message)=>{
+						console.log('ws received: %s %d', message, require('cluster').isWorker)
+						ws.send(`${message} too!`, (err)=>{if (err) return console.error(err)})
+					})
+				})
+				// WS TEST END
+
                 next(null, web)
             })
         })
