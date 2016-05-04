@@ -54,8 +54,8 @@
                 "name":["VARCHAR(32)"],
                 "pwd":["INT"],
                 "role":["ENUM","consumer","agent","admin"],
-                "_place":["LIST","TEXT"],
-                "_case":["LIST","TEXT"],
+                "$place":["LIST","TEXT"],
+                "$case":["LIST","TEXT"],
 				"UNIQUE":["un"],
 				"INDEX":["sess"]
             },

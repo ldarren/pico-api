@@ -7,14 +7,13 @@ INSERT INTO `hash` (`id`,`k`) VALUES
 (4,'consumer'),
 (5,'agent'),
 (6,'admin'),
-(7,'_place'),
-(8,'_case'),
+(7,'$place'),
+(8,'$case'),
 (9,'os'),
 (10,'token'),
 (11,'android'),
 (12,'ios'),
-(13,'json'),
-(14,'passcode');
+(13,'passcode');
 /*
 INSERT INTO `lock` (`passcode`,`createdBy`) VALUES
 (64415253, 0);
