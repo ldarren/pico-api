@@ -134,7 +134,7 @@ module.exports= {
 
 				// WS TEST START
 				// BUG: ws.send not working and unable forward ws connection to workers
-				var
+				/*var
 				WebSocketServer= require('ws').Server,
 				wss=new WebSocketServer({server:server})
 				wss.on('connection', (ws)=>{
@@ -142,7 +142,7 @@ module.exports= {
 						console.log('ws received: %s %d', message, require('cluster').isWorker)
 						ws.send(`${message} too!`, (err)=>{if (err) return console.error(err)})
 					})
-				})
+				})*/
 				// WS TEST END
 
                 next(null, web)

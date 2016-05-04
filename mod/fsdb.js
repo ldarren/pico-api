@@ -156,7 +156,7 @@ getFile=function(src, root, cb){
 
 function FileDB(config){
     this.root = config.root
-    this.domainRule = new RegExp(`[\\s\\S]{1,${config.domainDiv}}`,'g')
+    this.domainRule = new RegExp(`[\\s\\S]{1,${config.nameLength}}`,'g')
 }
 
 FileDB.prototype = {
@@ -302,7 +302,7 @@ FileDB.prototype = {
 
 module.exports={
     create: function(appConfig, libConfig, next){
-        var config={ root:__dirname, domainDiv:2 }
+        var config={ root:__dirname, nameLength:2 }
 
         args.print('FileDB Options',Object.assign(config,libConfig))
 
