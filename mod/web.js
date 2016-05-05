@@ -21,16 +21,16 @@ multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
 sigslot,
 dummyCB=()=>{},
-error=function(err, res, query, next){
-    if (!Array.isArray(err)) err=[500,err]
+error=function(err, sess, res, query, next){
+    if (!Array.isArray(err)) err=sess.error(404,err)
     res.writeHead(err[0], HEAD_JSON)
     res.end(bodyparser.error(query,err[1]))
     next()
 },
 render=function(ack, query, res, req, input, next){
-    if (this.has('error')) return error(this.get('error'), res, query, next)
+    if (this.has('error')) return error(this.get('error'), this, res, query, next)
     this.commit((err)=>{
-        if (err) return error(err, res, query, next)
+        if (err) return error(err, this, res, query, next)
         if (query.api){
             res.writeHead(200, HEAD_JSON)
             res.end(bodyparser.render(query, this.getOutput()))
