@@ -31,6 +31,16 @@
             "port":6379,
             "database":10,
             "options":{}
+        },
+        "pubsub":{
+            "mod":"redis",
+            "host":"localhost",
+            "port":6379,
+            "database":10,
+            "options":{},
+			"psubscribe":[
+				"broadcast"
+			]
         }
     }
 }
