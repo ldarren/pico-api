@@ -67,6 +67,7 @@ web={
     },
     SSEStart:function(req, res, next){
         res.addListener('close',disconnect)
+        res.addListener('error',disconnect)
 
         req.socket.setKeepAlive(true)  
         req.socket.setTimeout(0)
@@ -128,7 +129,6 @@ module.exports= {
         var sep=config.delimiter
         bodyparser.setup(config.cullAge, config.secretKey, 'string'===typeof sep?sep:JSON.stringify(sep))
 
-        //TODO: security check b4 unlink
         resetPort(config.port, ()=>{
             server.listen(config.port, ()=>{
 

@@ -5,7 +5,8 @@
         "paths":{
             "*":"http://localhost/lead/node/",
             "api": "http://localhost/lead/node/api/",
-            "sql": "http://localhost/lead/node/model/sql/"
+            "sql": "http://localhost/lead/node/model/sql/",
+            "redis": "http://localhost/lead/node/model/redis/"
         }
     },
     "mods":{
@@ -30,7 +31,18 @@
 		},
         "mainCache":{
             "mod":"redis",
-            "instance":"small"
+            "instance":"small",
+			"database":0,
+            "options":{}
+        },
+        "pubsub":{
+            "mod":"redis",
+            "instance":"small",
+			"database":0,
+			"subscribe":[
+				"lead/broadcast"
+			],
+            "options":{}
         }
     },
     "mysql":{
@@ -57,7 +69,7 @@
                 "$place":["LIST","TEXT"],
                 "$case":["LIST","TEXT"],
 				"UNIQUE":["un"],
-				"INDEX":["sess"]
+				"INDEX":["sess","role"]
             },
 			"device":{
                 "userId":["FOREIGN","user"],

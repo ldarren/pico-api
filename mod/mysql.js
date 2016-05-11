@@ -31,7 +31,90 @@ Client=function(config, conn){
 Client.prototype={
     query: function(){
         this.conn.query.apply(this.conn, arguments)
-    }
+    },
+	decode:function(obj,hash,ENUM){
+		var keys=Object.keys(obj)
+		for(var i=0,k; k=keys[i]; i++) {
+			if (-1===ENUM.indexOf(k)) continue
+			obj[k]=hash.key(obj[k])
+		}
+		return obj 
+	},
+	decodes:function(rows,hash,ENUM){
+		for(var i=0,r;r=rows[i];i++){ 
+			this.decode(r,hash,ENUM) 
+		}
+		return rows
+	},
+	encode:function(obj,by,hash,INDEX,ENUM){
+		var arr=[]
+        for(var i=0,k; k=INDEX[i]; i++){ 
+			if (-1===ENUM.indexOf(k)) arr.push(obj[k])
+			else arr.push(hash.val(obj[k]))
+		}
+        arr.push(by)
+		return arr
+	},
+	mapDecode:function(rows=[], output={}, hash, ENUM){
+		for(var i=0,r,k; r=rows[i]; i++) {
+			k=hash.key(r.k)
+			if (-1===ENUM.indexOf(k)) output[k]=r.v1 || r.v2
+			else output[k]=hash.key(r.v2)
+			r.v1=r.v2=undefined
+		}
+		return output
+	},
+	mapEncode:function(obj, hash, INDEX, ENUM){
+		var
+		id=obj.id,
+		by=obj.cby||id,
+		arr=[]
+
+		for(var i=0,keys=Object.keys(obj),key,k,v; key=keys[i]; i++){
+			if(INDEX.indexOf(key)>-1)continue
+			k=hash.val(key)
+			v=obj[key]
+			if (!k || undefined===v) continue
+			if (-1===ENUM.indexOf(key)){
+				if(v.charAt) arr.push([id,k,v,null,by])
+				else arr.push([id,k,null,v,by])
+			}else{
+				arr.push([id,k,null,hash.val(v),by])
+			}
+		}
+		return arr
+	},
+	listDecode:function(rows,key,hash,ENUM){
+		var
+		k=hash.val(key),
+		notEnum=(-1===ENUM.indexOf(key))
+
+		for(var i=0,r; r=rows[i]; i++) {
+			if (r.k!==k)continue
+			if (notEnum) r[key]=(r.v1 || r.v2)
+			else r[key]=hash.key(r.v2)
+			r.v1=r.v2=undefined
+		}
+		return rows
+	},
+	listEncode:function(id, key, list, by, hash, INDEX, ENUM){
+		if (!key || !list || !list.length) return cb()
+		var
+		arr=[],
+		k=hash.val(key),
+		notEnum=(-1===ENUM.indexOf(key))
+
+		if(!k || INDEX.indexOf(key)>-1) return arr
+		for(var i=0,v; v=list[i]; i++){
+			if (notEnum){
+				if(v.charAt) arr.push([id,k,v,null,by])
+				else arr.push([id,k,null,v,by])
+			}else{
+				arr.push([id,k,null,hash.val(v),by])
+			}
+		}
+		return arr
+	}
 }
 
 module.exports={

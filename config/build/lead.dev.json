@@ -6,7 +6,8 @@
         "paths":{
             "*":"http://localhost/lead/node/",
             "api": "http://localhost/lead/node/api/",
-            "sql": "http://localhost/lead/node/model/sql/"
+            "sql": "http://localhost/lead/node/model/sql/",
+            "redis": "http://localhost/lead/node/model/redis/"
         }
     },
     "mods":{
@@ -37,10 +38,10 @@
             "host":"localhost",
             "port":6379,
             "database":10,
-            "options":{},
-			"psubscribe":[
-				"broadcast"
-			]
+			"subscribe":[
+				"lead/broadcast"
+			],
+            "options":{}
         }
     }
 }
