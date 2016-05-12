@@ -44,18 +44,26 @@ appMgr={
         var arr=this.api.split('/')
         if (2 > arr.length || !arr[1]) return next('invalid path for appMgr')
 
-        req.pipe(http.request({
+		var proxy=http.request({
             socketPath:'/tmp/'+arr[1]+'.sock',
             method:req.method,
             path:req.url,
             headers:req.headers
-        }, function(cres){
+        }, (cres)=>{
             res.writeHeader(cres.statusCode, cres.headers)
             cres.pipe(res)
-            res.addListener('close', function(){
+            res.addListener('close', ()=>{
                 cres.destroy()
             })
-        }))
+        })
+
+		proxy.addListener('error', (err)=>{
+			this.error(404,err)
+		})
+
+        req.pipe(proxy)
+
+		next()
     }
 }
 
@@ -77,7 +85,7 @@ module.exports= {
         watchPath=path.resolve(appPath,config.path)
         sigslot=appConfig.sigslot
 
-        fs.readdir(watchPath,function(err, fnames){
+        fs.readdir(watchPath,(err, fnames)=>{
             if (err) return next(err)
             for(var i=0; install(fnames[i]); i++);
             fs.watch(watchPath, {persistent:config.persistent}, watch)

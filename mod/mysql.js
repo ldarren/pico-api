@@ -30,7 +30,11 @@ Client=function(config, conn){
 
 Client.prototype={
     query: function(){
-        this.conn.query.apply(this.conn, arguments)
+        return this.conn.query(...arguments)
+    },
+    format: function(){
+		console.log('%%%',arguments)
+        return mysql.format(...arguments)
     },
 	decode:function(obj,hash,ENUM){
 		var keys=Object.keys(obj)
@@ -128,7 +132,6 @@ module.exports={
         }
 
         args.print('MySQL Options',Object.assign(config,libConfig))
-
         return next(null, new Client(config))
     }
 }

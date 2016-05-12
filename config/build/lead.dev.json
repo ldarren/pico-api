@@ -11,13 +11,6 @@
         }
     },
     "mods":{
-        "webServer":{
-            "mod":"web",
-            "allowOrigin":"*",
-            "delimiter":["&"],
-            "uploadWL":[],
-            "port":"/tmp/lead.sock"
-        },
         "mainDB":{
             "mod":"mysql",
             "host":"localhost",
@@ -42,6 +35,13 @@
 				"lead/broadcast"
 			],
             "options":{}
+        },
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[],
+            "port":"/tmp/lead.sock"
         }
     }
 }

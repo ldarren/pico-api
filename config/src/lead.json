@@ -10,12 +10,6 @@
         }
     },
     "mods":{
-        "webServer":{
-            "mod":"web",
-            "allowOrigin":"*",
-            "delimiter":["&"],
-            "uploadWL":[]
-        },
         "mainDb":{
             "mod":"mysql",
             "database":"lead",
@@ -43,6 +37,12 @@
 				"lead/broadcast"
 			],
             "options":{}
+        },
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "delimiter":["&"],
+            "uploadWL":[]
         }
     },
     "mysql":{
