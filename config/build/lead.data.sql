@@ -7,7 +7,7 @@ INSERT INTO `hash` (`id`,`k`) VALUES
 (4,'applicant'),
 (5,'agent'),
 (6,'admin'),
-(7,'$place'),
+(7,'$addr'),
 (8,'$case'),
 (9,'os'),
 (10,'token'),
