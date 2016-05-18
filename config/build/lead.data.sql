@@ -8,13 +8,12 @@ INSERT INTO `hash` (`id`,`k`) VALUES
 (5,'agent'),
 (6,'admin'),
 (7,'$addr'),
-(8,'$case'),
+(8,'$detail'),
 (9,'os'),
 (10,'token'),
 (11,'android'),
 (12,'ios'),
-(13,'passcode');
-/*
-INSERT INTO `lock` (`passcode`,`createdBy`) VALUES
-(64415253, 0);
-*/
+(13,'passcode'),
+(14,'$profile'),
+(15,'salt'),
+(16,'lockId');

@@ -33,7 +33,6 @@ Client.prototype={
         return this.conn.query(...arguments)
     },
     format: function(){
-		console.log('%%%',arguments)
         return mysql.format(...arguments)
     },
 	decode:function(obj,hash,ENUM){
@@ -68,10 +67,9 @@ Client.prototype={
 		}
 		return output
 	},
-	mapEncode:function(obj, hash, INDEX, ENUM){
+	mapEncode:function(obj, by, hash, INDEX, ENUM){
 		var
 		id=obj.id,
-		by=obj.cby||id,
 		arr=[]
 
 		for(var i=0,keys=Object.keys(obj),key,k,v; key=keys[i]; i++){
