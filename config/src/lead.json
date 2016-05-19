@@ -66,7 +66,7 @@
                 "name":["VARCHAR(32)"],
                 "pwd":["INT"],
                 "role":["ENUM","consumer","agent","admin"],
-                "$profile":["TEXT"],
+                "$detail":["TEXT"],
 				"UNIQUE":["un"],
 				"INDEX":["sess","role"]
             },
@@ -76,16 +76,16 @@
 				"token":["VARCHAR(4096)"],
 				"INDEX":["userId"]
 			},
-            "case":{
+            "request":{
 				"userId":["FOREIGN","user"],
 				"$detail":["TEXT"],
-                "lockId":["INT"],
+                "lockerId":["INT"],
 				"INDEX":["userId"]
             },
-            "lock":{
+            "locker":{
 				"userId":["FOREIGN","user"],
 				"name":["VARCHAR(32)"],
-				"$addr":["TEXT"],
+				"$detail":["TEXT"],
                 "passcode":["INT"],
                 "salt":["INT"],
 				"INDEX":["userId","name"]
