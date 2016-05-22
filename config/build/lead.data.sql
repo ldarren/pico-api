@@ -14,4 +14,4 @@ INSERT INTO `hash` (`id`,`k`) VALUES
 (12,'ios'),
 (13,'passcode'),
 (15,'salt'),
-(16,'lockId');
+(16,'lockerId');
