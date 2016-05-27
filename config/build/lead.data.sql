@@ -1,6 +1,6 @@
 USE `lead`;
 
-INSERT INTO `hash` (`id`,`k`) VALUES
+INSERT INTO `hash` (`v`,`k`) VALUES
 (1,'name'),
 (2,'pwd'),
 (3,'consumer'),
@@ -15,4 +15,4 @@ INSERT INTO `hash` (`id`,`k`) VALUES
 (13,'passcode'),
 (15,'salt'),
 (16,'lockerId'),
-(17,'agentId');
+(17,'requestId');

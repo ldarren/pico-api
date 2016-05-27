@@ -67,6 +67,7 @@
                 "pwd":["INT"],
                 "role":["ENUM","consumer","agent","admin"],
                 "$detail":["TEXT"],
+				"requestId":["LIST","INT"],
 				"UNIQUE":["un"],
 				"INDEX":["sess","role"]
             },
@@ -80,8 +81,7 @@
 				"userId":["FOREIGN","user"],
 				"$detail":["TEXT"],
                 "lockerId":["INT"],
-				"INDEX":["userId"],
-				"agentId":["LIST","INT"]
+				"INDEX":["userId"]
             },
             "locker":{
 				"userId":["FOREIGN","user"],

@@ -67,6 +67,12 @@ Client.prototype={
 		}
 		return output
 	},
+    mapDecodes:function(rows=[], outputs=[], hash, ENUM){
+        for(var i=0,o,r; o=outputs[i]; i++){
+            r=rows[o.id]
+            this.mapDecode(r, o, hash, ENUM)
+        }
+    },
 	mapEncode:function(obj, by, hash, INDEX, ENUM){
 		var
 		id=obj.id,
