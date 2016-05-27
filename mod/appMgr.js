@@ -12,7 +12,7 @@ ext,appjs,watchPath,sigslot,
 install=function(fname){
     if (!fname) return false
     var base=path.basename(fname,ext)
-    if (-1!==base.indexOf('.')) return true
+    if (base===fname || -1!==base.indexOf('.')) return true
     uninstall(fname)
     cluster.setupMaster({exec:appjs, args:['-c',path.resolve(watchPath,fname)]})
     workers[base]=cluster.fork()
@@ -24,7 +24,7 @@ uninstall=function(fname){
     console.log('uninstalling',fname)
     if (!fname) return false
     var base=path.basename(fname,ext)
-    if (-1!==base.indexOf('.')) return true
+    if (base===fname || -1!==base.indexOf('.')) return true
     var worker=workers[base]
     if (!worker) return true
     worker.kill()

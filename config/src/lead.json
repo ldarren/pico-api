@@ -80,7 +80,8 @@
 				"userId":["FOREIGN","user"],
 				"$detail":["TEXT"],
                 "lockerId":["INT"],
-				"INDEX":["userId"]
+				"INDEX":["userId"],
+				"agentId":["LIST","INT"]
             },
             "locker":{
 				"userId":["FOREIGN","user"],
