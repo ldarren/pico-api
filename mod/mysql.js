@@ -72,6 +72,7 @@ Client.prototype={
             r=rows[o.id]
             this.mapDecode(r, o, hash, ENUM)
         }
+        return outputs
     },
 	mapEncode:function(obj, by, hash, INDEX, ENUM){
 		var
