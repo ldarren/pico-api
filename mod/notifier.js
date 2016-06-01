@@ -3,6 +3,7 @@ apn=require('apn'),
 gcm=require('node-gcm'),
 args= require('../lib/args'),
 Session= require('../lib/Session'),
+picoObj=require('pico').export('pico/str'),
 apnConnected = function(){ console.log('apn connected') },
 apnDisconnected = function(){ console.log('apn dc') },
 apnTimeout = function(){ console.log('apn timeout') },
@@ -123,7 +124,7 @@ module.exports= {
             }
         }
 
-        args.print('Notifier Options',Object.assign(config,libConfig))
+        args.print('Notifier Options',picoObj.extend(config,libConfig))
         return next(null, new Notifier(config,appConfig.sigslot))
     }
 }
