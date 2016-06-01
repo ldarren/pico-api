@@ -1,4 +1,5 @@
 // ideal case, this module should be use as data source just like mysql and redis
+// TODO: subscribe to a characteristic
 const
 ERR_INVALID='invalid ble action'
 

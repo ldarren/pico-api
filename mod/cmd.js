@@ -66,10 +66,10 @@ Cmd=function(config, input, output){
     this.context=ctx
     svr.on('reset', (context)=>{
         extendCtx(context, ctx)
-        sigslot.signal('cmd/reset', Session.TYPE.CMD, context, render)
+        sigslot.signal('cmd.reset', Session.TYPE.CMD, context, render)
     })
     svr.on('exit', ()=>{
-        sigslot.signal('cmd/exit', Session.TYPE.CMD, 'sample data', render)
+        sigslot.signal('cmd.exit', Session.TYPE.CMD, 'sample data', render)
     })
 }
 
