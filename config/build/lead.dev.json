@@ -36,6 +36,28 @@
 			],
             "options":{}
         },
+        "pdl_agent_notifier":{
+            "mod":"notifier",
+            "apn":{
+                "key":"config/apn/pdl_agent_key",
+                "cert":"config/apn/pdl_agent_cert"
+            },
+            "gcm":{
+                "key":"xxxxxxxxxxx"
+            },
+            "options":{}
+        },
+        "pdl_consumer_notifier":{
+            "mod":"notifier",
+            "apn":{
+                "key":"config/apn/pdl_consumer_key",
+                "cert":"config/apn/pdl_consumer_cert"
+            },
+            "gcm":{
+                "key":"yyyyyyyyyyyyy"
+            },
+            "options":{}
+        },
         "webServer":{
             "mod":"web",
             "allowOrigin":"*",

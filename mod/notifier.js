@@ -1,9 +1,10 @@
 var
+path=require('path'),
 apn=require('apn'),
 gcm=require('node-gcm'),
 args= require('../lib/args'),
 Session= require('../lib/Session'),
-picoObj=require('pico').export('pico/str'),
+picoObj=require('pico').export('pico/obj'),
 apnConnected = function(){ console.log('apn connected') },
 apnDisconnected = function(){ console.log('apn dc') },
 apnTimeout = function(){ console.log('apn timeout') },
@@ -18,6 +19,9 @@ apnFeedback=function(feedback,sigslot){
 gcmCB=function(err, result){
     if (err) console.error('gcm send ko',err)
     else console.log('gcm send ok',result)
+},
+resolvePath=function(home, apnPath, pro){
+    return (path.isAbsolute(apnPath) ? apnPath : path.resolve(home, apnPath)) + (pro?'.pro':'.dev')
 },
 Notifier=function(config,sigslot){
     this.options=config.options
@@ -71,7 +75,7 @@ Notifier.prototype={
                     sound:options.sound
                 },
                 // bug with cordova-plugin-push, title and message should not here
-                data:payload|{},
+                data:payload||{},
                 collapseKey: title || content,
                 timeToLive: options.ttl,
                 delayWhileIdle: options.priority>5?0:1,
@@ -101,9 +105,9 @@ module.exports= {
             // https://github.com/argon/node-apn/blob/master/doc/connection.markdown
             // https://github.com/argon/node-apn/blob/master/doc/feedback.markdown
             apn:{
-                key:'cfg/apn_key.pem',
-                cert:'cfg/apn_cert.pem',
-                production:false,
+                key:'apn_key.pem',
+                cert:'apn_cert.pem',
+                production:'pro'===appConfig.env?true:false,
                 interval:3600
             },
             // https://github.com/ToothlessGear/node-gcm/blob/master/README.md
@@ -125,6 +129,14 @@ module.exports= {
         }
 
         args.print('Notifier Options',picoObj.extend(config,libConfig))
+
+        var
+        apn=config.apn,
+        pro=config.apn.production
+
+        apn.key=resolvePath(appConfig.path,apn.key,pro)
+        apn.cert=resolvePath(appConfig.path,apn.cert,pro)
+
         return next(null, new Notifier(config,appConfig.sigslot))
     }
 }

@@ -1,3 +1,5 @@
+config/apn
+
 # Logs
 logs
 *.log
