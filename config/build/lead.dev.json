@@ -43,7 +43,7 @@
                 "cert":"config/apn/pdl_agent_cert"
             },
             "gcm":{
-                "key":"xxxxxxxxxxx"
+                "key":"AIzaSyBwfvIeyFcxmAijdgQ-3BmGG_MfzVxukRs"
             },
             "options":{}
         },
@@ -54,7 +54,7 @@
                 "cert":"config/apn/pdl_consumer_cert"
             },
             "gcm":{
-                "key":"yyyyyyyyyyyyy"
+                "key":"AIzaSyAUaB5yybMaulrRRhIM-Fwutcr2hvNRS5s"
             },
             "options":{}
         },
