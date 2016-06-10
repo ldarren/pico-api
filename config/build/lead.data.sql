@@ -15,4 +15,5 @@ INSERT INTO `hash` (`v`,`k`) VALUES
 (13,'passcode'),
 (15,'salt'),
 (16,'lockerId'),
-(17,'requestId');
+(17,'requestId'),
+(18,'model');

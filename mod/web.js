@@ -19,24 +19,24 @@ args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
+errorDelay=0,
 sigslot,
-dummyCB=()=>{},
-error=function(err, sess, res, query, next){
+error=function(err, sess, res, query, cb){
     var err=err||sess.get('error')
     if (!Array.isArray(err)) err=sess.error(404,err)
     if (!res.headersSent) res.writeHead(err[0], HEAD_JSON)
     res.write(bodyparser.error(query,err[1]))
     sess.set('error',undefined)
-    next()
+    cb()
 },
 render=function(sess, ack, query, res, req, input, cb){
     sess.commit((err)=>{
-        if (err) return cb(err)
+        if (err) return error(err, sess, res, query, cb)
         if (query.api){
             res.write(bodyparser.render(query, sess.getOutput()))
         }else{
             var output=sess.getOutput()
-            if ('string'===typeof output){
+            if (output.charAt){
                 res.write(output)
             } else {
                 res.write(JSON.stringify(output))
@@ -48,35 +48,23 @@ render=function(sess, ack, query, res, req, input, cb){
 renderStart=function(ack, query, res, req, input, next){
     if (this.has('error')) return error(null, this, res, query, next)
     res.writeHead(200, HEAD_JSON)
-    render(this, ack, query, res, req, input, (err)=>{
-        if (err) return error(err, this, res, query, next)
-        next()
-    })
+    render(this, ack, query, res, req, input, next)
 },
 renderStream=function(ack, query, res, req, input, next){
     if (this.has('error')) return error(null, this, res, query, next)
-    render(this, ack, query, res, req, input, (err)=>{
-        if (err) return error(err, this, res, query, next)
-        next()
-    })
+    render(this, ack, query, res, req, input, next)
 },
 renderStop=function(ack, query, res, req, input, next){
-    if (this.has('error')) return error(null, this, res, query, ()=>{ res.end() })
-    render(this, ack, query, res, req, input, (err)=>{
-        if (err) return error(err, this, res, query, next)
-        res.end()
-        next()
-    })
+    var cb=()=>{res.end(); next()}
+    if (this.has('error')) return error(null, this, res, query, cb)
+    render(this, ack, query, res, req, input, cb)
 },
 // TODO: better way to delay error message
 renderAll=function(ack, query, res, req, input, next){
-    if (this.has('error')) return setTimeout(error, 3000, null, this, res, query, next)
+    var cb=()=>{res.end(); next()}
+    if (this.has('error')) return setTimeout(error, errorDelay, null, this, res, query, cb) // only protocol error need delay
     res.writeHead(200, HEAD_JSON)
-    render(this, ack, query, res, req, input, (err)=>{
-        if (err) return setTimeout(error, 3000, err, this, res, query, next)
-        res.end()
-        next()
-    })
+    render(this, ack, query, res, req, input, cb)
 },
 web={
     parse:function(req,res,next){
@@ -155,13 +143,15 @@ module.exports= {
             delimiter:['&'],
             secretKey:null,
             cullAge:0,
-            uploadWL:[]
+            uploadWL:[],
+            errorDelay:1000
         },
         pfxPath, server
 
         args.print('Web Options',Object.assign(config,libConfig))
         pfxPath= config.pfxPath
         sigslot= appConfig.sigslot
+        errorDelay=config.errorDelay
 
         if (pfxPath){
             pfxPath= path.isAbsolute(pfxPath) ? pfxPath : path.resolve(appConfig.path, pfxPath)
