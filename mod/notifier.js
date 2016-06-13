@@ -47,7 +47,6 @@ Notifier=function(config,sigslot){
 
 Notifier.prototype={
     broadcast: function(tokens, ids, title, content, options={}, payload){
-console.log('broadcast 1',arguments)
         Object.assign(options,this.options)
         var type=getType(tokens)
         if (type){
