@@ -23,6 +23,12 @@ gcmCB=function(err, result){
 resolvePath=function(home, apnPath, pro){
     return (path.isAbsolute(apnPath) ? apnPath : path.resolve(home, apnPath)) + (pro?'.pro':'.dev')
 },
+getType=function(cont){
+    if (!cont) return 0
+    else if ((Array.isArray(cont) && cont.length) || cont.charAt) return 1
+    else if (Object.keys(cont).length) return 2
+    return 0
+},
 Notifier=function(config,sigslot){
     this.options=config.options
     this.gcmCli= new gcm.Sender(config.gcm.key)
@@ -41,9 +47,11 @@ Notifier=function(config,sigslot){
 
 Notifier.prototype={
     broadcast: function(tokens, ids, title, content, options={}, payload){
+console.log('broadcast 1',arguments)
         Object.assign(options,this.options)
-        if (tokens){
-            var msg = new this.apnCli.Notification(payload)
+        var type=getType(tokens)
+        if (type){
+            var msg = new apn.Notification(payload)
 
             msg.setAlertTitle(title)
             msg.setAlertText(content)
@@ -56,18 +64,19 @@ Notifier.prototype={
             msg.contentAvailable = options.contentAvailable
             msg.trim()
 
-            if (Array.isArray(tokens) || tokens.charAt){
-                this.apnCli.pushNotification(msg, tokens)
+            var cli=this.apnCli
+            if (1===type){
+                cli.pushNotification(msg, tokens)
             }else{
-                var cli=this.apnCli
                 for(var t in tokens){
                     msg.badge=tokens[t]
                     cli.pushNotification(msg, t)
                 }
             }
         }
-        if (ids){
-            var msg = new this.gcmCli.Message({
+        type=getType(ids)
+        if (type){
+            var msg = new gcm.Message({
                 notification:{
                     title: title,
                     message: content,
@@ -83,13 +92,13 @@ Notifier.prototype={
                 contentAvailable: options.contentAvailable,
                 restrictedPackageName:options.packageName
             })
-            broadcastGCM(Object.keys(ids), ids, msg, options.retry || 3)
 
-            var retry=-1===options.retryLimit ? 5 : options.retryLimit
-            if (Array.isArray(ids) || ids.charAt){
-                this.gcmCli.send(msg, ids, retry, gcmCB)
+            var
+            cli=this.gcmCli,
+            retry=-1===options.retryLimit ? 5 : options.retryLimit
+            if (1===type){
+                cli.send(msg, ids, retry, gcmCB)
             }else{
-                var cli=this.gcmCli
                 for(var t in ids){
                     msg.addData('msgcnt',ids[t])
                     cli.send(msg, t, retry, gcmCB)

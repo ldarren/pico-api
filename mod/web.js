@@ -144,7 +144,7 @@ module.exports= {
             secretKey:null,
             cullAge:0,
             uploadWL:[],
-            errorDelay:1000
+            errorDelay:3000
         },
         pfxPath, server
 
