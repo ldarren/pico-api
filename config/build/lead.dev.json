@@ -61,7 +61,7 @@
         "webServer":{
             "mod":"web",
             "allowOrigin":"*",
-            "delimiter":["&"],
+            "sep":["&"],
             "uploadWL":[],
             "port":"/tmp/lead.sock"
         }

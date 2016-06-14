@@ -15,11 +15,12 @@ https= require('https'),
 fs= require('fs'),
 path= require('path'),
 url= require('url'),
+PJSON= require('pico').export('pico/json'),
 args= require('../lib/args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
-errorDelay=0,
+config,
 sigslot,
 error=function(err, sess, res, query, cb){
     var err=err||sess.get('error')
@@ -62,7 +63,7 @@ renderStop=function(ack, query, res, req, input, next){
 // TODO: better way to delay error message
 renderAll=function(ack, query, res, req, input, next){
     var cb=()=>{res.end(); next()}
-    if (this.has('error')) return setTimeout(error, errorDelay, null, this, res, query, cb) // only protocol error need delay
+    if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
     res.writeHead(200, HEAD_JSON)
     render(this, ack, query, res, req, input, cb)
 },
@@ -113,11 +114,17 @@ web={
     SSE:function(res, msg, evt, retry){
         res.write("retry: "+(retry||1000)+"\n");
         if (evt) res.write("event: "+evt+"\n");
-        res.write("data: " + msg + "\n\n");
+        res.write("data: " + PJSON.stringify(msg).join(config.sep) + "\n\n");
     },
     SSEStop:function(res, next){
         res.end()
         next()
+    },
+    SSEAbort:function(err, res, next){
+        setTimeout(error, config.errorDelay, err, this, res, null, ()=>{
+            res.end()
+            next()
+        })
     }
 },
 resetPort=function(port, cb){
@@ -135,23 +142,22 @@ console.log(req.url,req.method)
 
 module.exports= {
     create: function(appConfig, libConfig, next){
-        var
         config={
             pfxPath:null,
             port:'80',
             allowOrigin:'localhost',
-            delimiter:['&'],
+            sep:['&'],
             secretKey:null,
             cullAge:0,
             uploadWL:[],
             errorDelay:3000
-        },
-        pfxPath, server
+        }
+        var pfxPath, server
 
         args.print('Web Options',Object.assign(config,libConfig))
+        config.sep=config.sep.charAt?config.sep:JSON.stringify(config.sep)
         pfxPath= config.pfxPath
         sigslot= appConfig.sigslot
-        errorDelay=config.errorDelay
 
         if (pfxPath){
             pfxPath= path.isAbsolute(pfxPath) ? pfxPath : path.resolve(appConfig.path, pfxPath)
@@ -163,8 +169,7 @@ module.exports= {
         if (config.allowOrigin) HEAD_HTML[CORS]=HEAD_JSON[CORS]=HEAD_SSE[CORS]=config.allowOrigin
 
         multipart.setup(config.uploadWL)
-        var sep=config.delimiter
-        bodyparser.setup(config.cullAge, config.secretKey, 'string'===typeof sep?sep:JSON.stringify(sep))
+        bodyparser.setup(config.cullAge, config.secretKey, config.sep)
 
         resetPort(config.port, ()=>{
             server.listen(config.port, ()=>{

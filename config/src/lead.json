@@ -63,7 +63,7 @@
         "webServer":{
             "mod":"web",
             "allowOrigin":"*",
-            "delimiter":["&"],
+            "sep":["&"],
             "uploadWL":[]
         }
     },
@@ -95,9 +95,11 @@
             },
 			"device":{
                 "userId":["FOREIGN","user"],
+                "uuid":["VARCHAR(36)"],
 				"os":["ENUM","android","ios"],
 				"token":["VARCHAR(4096)"],
-				"INDEX":["userId"]
+                "$detail":["TEXT"],
+				"UNIQUE":["userId","uuid"]
 			},
             "request":{
 				"userId":["FOREIGN","user"],
