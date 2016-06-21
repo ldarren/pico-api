@@ -42,7 +42,7 @@ watch=function(evt, fname){
 appMgr={
     redirect:function(req, res, next){
         var arr=this.api.split('/')
-        if (2 > arr.length || !arr[1]) return next('invalid path for appMgr')
+        if (2 > arr.length || !arr[1]) return next('appMgr, invalid path:'+this.api)
 
 		var proxy=http.request({
             socketPath:'/tmp/'+arr[1]+'.sock',
@@ -50,16 +50,12 @@ appMgr={
             path:req.url,
             headers:req.headers
         }, (cres)=>{
+            res.addListener('close', ()=>{ cres.destroy() })
             res.writeHeader(cres.statusCode, cres.headers)
             cres.pipe(res)
-            res.addListener('close', ()=>{
-                cres.destroy()
-            })
         })
 
-		proxy.addListener('error', (err)=>{
-			this.error(404,err)
-		})
+		proxy.addListener('error', (err)=>{ this.error(404,err) })
 
         req.pipe(proxy)
 
@@ -80,7 +76,7 @@ module.exports= {
 
         args.print('AppMgr Options',Object.assign(config,libConfig))
 
-        ext='.'+appConfig.env+'.json'
+        ext=`.${appConfig.env}.json`
         appjs=path.resolve(appPath,'lib/app.js')
         watchPath=path.resolve(appPath,config.path)
         sigslot=appConfig.sigslot

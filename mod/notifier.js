@@ -31,6 +31,7 @@ getType=function(cont){
 },
 Notifier=function(config,sigslot){
     this.options=config.options
+    this.gcmKey=config.gcm.key
     this.gcmCli= new gcm.Sender(config.gcm.key)
 
     var apnCli=this.apnCli = new apn.Connection(config.apn)
@@ -86,9 +87,9 @@ Notifier.prototype={
                 data:payload||{},
                 collapseKey: title || content,
                 timeToLive: options.ttl,
-                delayWhileIdle: options.priority>5?0:1,
+                delayWhileIdle: options.priority>5?false:true,
                 priority: options.priority>5?'high':'normal',
-                contentAvailable: options.contentAvailable,
+                contentAvailable: options.contentAvailable?true:false,
                 restrictedPackageName:options.packageName
             })
 
@@ -100,6 +101,7 @@ Notifier.prototype={
             }else{
                 for(var t in ids){
                     msg.addData('msgcnt',ids[t])
+console.log(this.gcmKey,t)
                     cli.send(msg, t, retry, gcmCB)
                 }
             }
@@ -109,7 +111,7 @@ Notifier.prototype={
 
 module.exports= {
     create: function(appConfig, libConfig, next){
-        config={
+        var config={
             // https://github.com/argon/node-apn/blob/master/doc/connection.markdown
             // https://github.com/argon/node-apn/blob/master/doc/feedback.markdown
             apn:{

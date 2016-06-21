@@ -45,7 +45,9 @@
             "gcm":{
                 "key":"AIzaSyBwfvIeyFcxmAijdgQ-3BmGG_MfzVxukRs"
             },
-            "options":{}
+            "options":{
+                "packageName":"com.jasaws.pdl.agent"
+            }
         },
         "pdl_consumer_notifier":{
             "mod":"notifier",
@@ -56,7 +58,9 @@
             "gcm":{
                 "key":"AIzaSyAUaB5yybMaulrRRhIM-Fwutcr2hvNRS5s"
             },
-            "options":{}
+            "options":{
+                "packageName":"com.jasaws.pdl.consumer"
+            }
         },
         "webServer":{
             "mod":"web",

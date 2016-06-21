@@ -14,6 +14,6 @@ if (!options || options.help){
     process.exit(0)
 }
 
-mods.load(__dirname, options.config, function(err, context){
+mods.load(__dirname, options.config, (err, context)=>{
     if (err) return console.error(err)
 })
