@@ -31,26 +31,32 @@ getType=function(cont){
 },
 Notifier=function(config,sigslot){
     this.options=config.options
-    this.gcmKey=config.gcm.key
-    this.gcmCli= new gcm.Sender(config.gcm.key)
 
-    var apnCli=this.apnCli = new apn.Connection(config.apn)
-    apnCli.on('connected', apnConnected)
-    apnCli.on('disconnected', apnDisconnected)
-    apnCli.on('timeout', apnTimeout)
-    apnCli.on('transmitted', apnTransmitted)
-    apnCli.on('transmissionError', apnTransmissionError)
-    apnCli.on('socketError', console.error)
+    if (config.gcm){
+        this.gcmCli= new gcm.Sender(config.gcm.key)
+    }
 
-    // Setup a connection to the feedback service using a custom interval (10 seconds)
-    apnFeedback(new apn.feedback(config.apn), sigslot)
+    if (config.apn){
+        var apnCli=this.apnCli = new apn.Connection(config.apn)
+        apnCli.on('connected', apnConnected)
+        apnCli.on('disconnected', apnDisconnected)
+        apnCli.on('timeout', apnTimeout)
+        apnCli.on('transmitted', apnTransmitted)
+        apnCli.on('transmissionError', apnTransmissionError)
+        apnCli.on('socketError', console.error)
+
+        // Setup a connection to the feedback service using a custom interval (10 seconds)
+        apnFeedback(new apn.feedback(config.apn), sigslot)
+    }
 }
 
 Notifier.prototype={
     broadcast: function(tokens, ids, title, content, options={}, payload){
         Object.assign(options,this.options)
-        var type=getType(tokens)
-        if (type){
+        var
+        type=getType(tokens),
+        cli=this.apnCli
+        if (type && cli){
             var msg = new apn.Notification(payload)
 
             msg.setAlertTitle(title)
@@ -64,7 +70,6 @@ Notifier.prototype={
             msg.contentAvailable = options.contentAvailable
             msg.trim()
 
-            var cli=this.apnCli
             if (1===type){
                 cli.pushNotification(msg, tokens)
             }else{
@@ -75,7 +80,8 @@ Notifier.prototype={
             }
         }
         type=getType(ids)
-        if (type){
+        cli=this.gcmCli
+        if (type && cli){
             var msg = new gcm.Message({
                 notification:{
                     title: title,
@@ -93,15 +99,12 @@ Notifier.prototype={
                 restrictedPackageName:options.packageName
             })
 
-            var
-            cli=this.gcmCli,
-            retry=-1===options.retryLimit ? 5 : options.retryLimit
+            var retry=-1===options.retryLimit ? 5 : options.retryLimit
             if (1===type){
                 cli.send(msg, ids, retry, gcmCB)
             }else{
                 for(var t in ids){
                     msg.addData('msgcnt',ids[t])
-console.log(this.gcmKey,t)
                     cli.send(msg, t, retry, gcmCB)
                 }
             }

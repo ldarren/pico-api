@@ -8,16 +8,6 @@
     "mods":{
         "mainDB":{
             "password":"9N^_^tJHR7#K]HY`"
-        },
-        "pdl_agent_notifier":{
-            "apn":{
-                "production":false
-            }
-        },
-        "pdl_consumer_notifier":{
-            "apn":{
-                "production":false
-            }
         }
     }
 }
