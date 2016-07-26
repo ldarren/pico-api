@@ -1,5 +1,5 @@
 var
-args= require('./lib/args'),
+args= require('pico-args'),
 mods= require('./lib/mods'),
 defaults= {
     config: ['./config/pico.pro.json', 'app config path'],

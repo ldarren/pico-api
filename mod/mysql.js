@@ -1,7 +1,7 @@
 //TODO: use pool or clusterPool to prevent connection error?
 var
 mysql = require('mysql'),
-args= require('../lib/args'),
+args= require('pico-args'),
 makeConn = function(client){
     var
     config = client.config,

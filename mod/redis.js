@@ -1,7 +1,7 @@
 // TODO: must contained pubsub communication channel, reuse pipeline feature?
 var
 redis = require('redis'),
-args= require('../lib/args'),
+args= require('pico-args'),
 Session= require('../lib/Session'),
 send=(sigslot,pattern,channel,msg)=>{
 	var input

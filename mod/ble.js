@@ -11,7 +11,7 @@ ERR_NO_SERVICE='no ble service'
 var
 util=require('util'),
 bleno=require('bleno'),
-args= require('../lib/args'),
+args= require('pico-args'),
 Session= require('../lib/Session'),
 poweredOn=false,
 sigslot,

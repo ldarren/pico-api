@@ -17,7 +17,7 @@ A_X_OK=0o001
 var
 fs = require('fs'),
 path = require('path'),
-args= require('../lib/args'),
+args= require('pico-args'),
 dummyCB=()=>{},
 normalize=function(root, url){
     var p=path.resolve(root,url)

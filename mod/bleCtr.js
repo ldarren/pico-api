@@ -5,7 +5,7 @@ ERR_INVALID='invalid ble action'
 
 var
 noble=require('noble'),
-args= require('../lib/args'),
+args= require('pico-args'),
 poweredOn=false,
 serviceMap={},
 characteristicMap={},

@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "pico operating system",
   "main": "index.js",
   "dependencies": {
@@ -11,7 +11,8 @@
     "noble": "^1.3.0",
     "node-gcm": "^0.14.3",
     "redis": "^2.4.2",
-    "ws": "^1.0.1"
+    "ws": "^1.0.1",
+    "pico-args": "^1.0.0"
   },
   "devDependencies": {},
   "scripts": {

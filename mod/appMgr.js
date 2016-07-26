@@ -6,7 +6,7 @@ cluster=require('cluster'),
 http=require('http'),
 fs=require('fs'),
 path=require('path'),
-args=require('../lib/args'),
+args=require('pico-args'),
 workers={},
 ext,appjs,watchPath,sigslot,
 install=function(fname){

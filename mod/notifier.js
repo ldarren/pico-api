@@ -2,7 +2,7 @@ var
 path=require('path'),
 apn=require('apn'),
 gcm=require('node-gcm'),
-args= require('../lib/args'),
+args= require('pico-args'),
 Session= require('../lib/Session'),
 picoObj=require('pico').export('pico/obj'),
 apnConnected = function(){ console.log('apn connected') },
