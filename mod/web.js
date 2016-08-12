@@ -68,6 +68,12 @@ renderAll=function(ack, query, res, req, input, next){
     render(this, ack, query, res, req, input, cb)
 },
 web={
+	parsePOST:function(req,res,next){
+		bodyparser.parsePOST(req, (err, queries)=>{
+			if (err) return next(err)
+            sigslot.signal(this.api, Session.TYPE.WEB,queries,req,res,null,null,renderAll)
+		})
+	},
     parse:function(req,res,next){
         if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{

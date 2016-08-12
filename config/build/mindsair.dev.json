@@ -1,0 +1,22 @@
+{
+    "app":{
+        "name": "Mindsair",
+        "ajax": null,
+        "env": "dev",
+        "paths":{
+            "*":"http://localhost/mindsair/node/",
+            "api": "http://localhost/mindsair/node/api/",
+            "sql": "http://localhost/mindsair/node/model/sql/",
+            "redis": "http://localhost/mindsair/node/model/redis/"
+        }
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "allowOrigin":"*",
+            "sep":["&"],
+            "uploadWL":[],
+            "port":"/tmp/mindsair.sock"
+        }
+    }
+}
