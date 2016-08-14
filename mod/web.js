@@ -68,7 +68,18 @@ renderAll=function(ack, query, res, req, input, next){
     render(this, ack, query, res, req, input, cb)
 },
 web={
-	parsePOST:function(req,res,next){
+	getBody:function(req,body,next){
+		function cb(err, query){
+			if (err) return next(err)
+			Object.assign(body,query)
+			next()
+		}
+		switch(req.headers['content-type']){
+		default: return bodyparser.parseBody(req, cb)
+		case 'multipart/form-data': return multipart.parse(req, cb)
+		}
+	},
+	getMultipart:function(req,body,next){
 		bodyparser.parsePOST(req, (err, queries)=>{
 			if (err) return next(err)
             sigslot.signal(this.api, Session.TYPE.WEB,queries,req,res,null,null,renderAll)
