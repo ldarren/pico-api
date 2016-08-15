@@ -16,7 +16,7 @@ install=function(fname){
     uninstall(fname)
     cluster.setupMaster({exec:appjs, args:['-c',path.resolve(watchPath,fname)]})
     workers[base]=cluster.fork()
-    sigslot.slot('/'+base, [[appMgr.redirect, 'req', 'res']])
+    sigslot.slot('/'+base+'/*opt', [[appMgr.redirect, 'req', 'res']])
     console.log('installed',fname)
     return true
 },
@@ -29,7 +29,7 @@ uninstall=function(fname){
     if (!worker) return true
     worker.kill()
     delete workers[base]
-    sigslot.unslot('/'+base)
+    sigslot.unslot('/'+base+'/*opt')
     console.log('uninstalled',fname)
     return true
 },

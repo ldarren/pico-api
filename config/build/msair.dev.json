@@ -16,7 +16,7 @@
             "allowOrigin":"*",
             "sep":["&"],
             "uploadWL":[],
-            "port":"/tmp/mindsair.sock"
+            "port":"/tmp/msair.sock"
         }
     }
 }
