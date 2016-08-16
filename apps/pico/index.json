@@ -5,13 +5,10 @@
         "appMgr":["context","appMgr"]
     },
     "routes":{
-        "": [
-            ["util","help"]
-        ],
-        "ERR":[
+        "ERR|#msg":[
             [0]
         ],
-        "END":[
+        "END|#msg":[
             [0]
         ],
         "/pico":[
@@ -23,6 +20,12 @@
         ],
         "sayHello":[
             ["util","sayHello"]
-        ]
+        ],
+		"/:appName|#appPath":[
+			["appMgr","redirect","req","res"]
+        ],
+        "#help": [
+            ["util","help"]
+		]
     }
 }

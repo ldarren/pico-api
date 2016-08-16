@@ -8,7 +8,7 @@ fs=require('fs'),
 path=require('path'),
 args=require('pico-args'),
 workers={},
-ext,appjs,watchPath,sigslot,
+ext,appjs,watchPath,
 install=function(fname){
     if (!fname) return false
     var base=path.basename(fname,ext)
@@ -16,7 +16,6 @@ install=function(fname){
     uninstall(fname)
     cluster.setupMaster({exec:appjs, args:['-c',path.resolve(watchPath,fname)]})
     workers[base]=cluster.fork()
-    sigslot.slot('/'+base+'/*opt', [[appMgr.redirect, 'req', 'res']])
     console.log('installed',fname)
     return true
 },
@@ -29,7 +28,6 @@ uninstall=function(fname){
     if (!worker) return true
     worker.kill()
     delete workers[base]
-    sigslot.unslot('/'+base+'/*opt')
     console.log('uninstalled',fname)
     return true
 },
@@ -41,11 +39,12 @@ watch=function(evt, fname){
 },
 appMgr={
     redirect:function(req, res, next){
-        var arr=this.api.split('/')
-        if (2 > arr.length || !arr[1]) return next('appMgr, invalid path:'+this.api)
+        var appName=this.params.appName
+console.log('redirecting',appName)
+        if (!appName) return next(`appMgr, invalid path:${this.api}`)
 
 		var proxy=http.request({
-            socketPath:'/tmp/'+arr[1]+'.sock',
+            socketPath:`/tmp/${appName}.sock`,
             method:req.method,
             path:req.url,
             headers:req.headers
@@ -79,7 +78,6 @@ module.exports= {
         ext=`.${appConfig.env}.json`
         appjs=path.resolve(appPath,'lib/app.js')
         watchPath=path.resolve(appPath,config.path)
-        sigslot=appConfig.sigslot
 
         fs.readdir(watchPath,(err, fnames)=>{
             if (err) return next(err)

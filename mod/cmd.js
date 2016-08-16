@@ -5,7 +5,7 @@ var
 net = require('net'),
 repl = require('repl'),
 util = require('util'),
-pico= require('pico'),
+pico= require('pico-common'),
 args= require('pico-agrs'),
 Session= require('../lib/Session'),
 inspectOpts={showHidden:false, depth:4, colors:true, customInspect:false},

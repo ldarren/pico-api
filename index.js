@@ -13,7 +13,7 @@ if (!options || options.help){
     args.usage(defaults)
     process.exit(0)
 }
-
+console.log(options.config)
 mods.load(__dirname, options.config, (err, context)=>{
     if (err) return console.error(err)
 })
