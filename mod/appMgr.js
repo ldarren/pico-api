@@ -40,8 +40,8 @@ watch=function(evt, fname){
 appMgr={
     redirect:function(req, res, next){
         var appName=this.params.appName
-console.log('redirecting',appName)
         if (!appName) return next(`appMgr, invalid path:${this.api}`)
+		console.info('redirecting to',appName)
 
 		var proxy=http.request({
             socketPath:`/tmp/${appName}.sock`,

@@ -145,7 +145,7 @@ module.exports= {
 
         var
         apn=config.apn,
-        pro=config.apn.production
+        pro=apn.production
 
         apn.key=resolvePath(appConfig.path,apn.key,pro)
         apn.cert=resolvePath(appConfig.path,apn.cert,pro)

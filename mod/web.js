@@ -33,15 +33,13 @@ error=function(err, sess, res, query, cb){
 render=function(sess, ack, query, res, req, input, cb){
     sess.commit((err)=>{
         if (err) return error(err, sess, res, query, cb)
+        var output=sess.getOutput()
+		if (!output) return cb()
         if (query.api){
-            res.write(bodyparser.render(query, sess.getOutput()))
+            res.write(bodyparser.render(query, output))
         }else{
-            var output=sess.getOutput()
-            if (output.charAt){
-                res.write(output)
-            } else {
-                res.write(JSON.stringify(output))
-            }
+			if (output.charAt) res.write(output)
+			else res.write(JSON.stringify(output))
         }
         cb()
     })
@@ -86,7 +84,9 @@ web={
 		})
 	},
     parse:function(req,res,next){
-        if (-1 === req.headers['content-type'].toLowerCase().indexOf('multipart/form-data')){
+		var ct=req.headers['content-type']
+		if (!ct) return next()
+        if (-1 === ct.toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{
                 if (err) return next(err)
                 var q
@@ -152,7 +152,7 @@ disconnect= function(){
     sigslot.signal('web.dc', Session.TYPE.WEB, null,null,this,null,null,renderAll)
 },
 request= function(req, res){
-console.log(req.url,req.method)
+	console.log(req.method,req.url)
     var o=url.parse(req.url,true)
     sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,req,res,null,null,renderAll)
 }
