@@ -67,7 +67,7 @@ mozSend=function(url,header,keys,i,res,cb){
 WebPush.prototype={
 	broadcast: function(tokens, ids, keys, title, content, urlargs, cb){
         var
-		opt=this.options,
+		options=this.options,
 		cli=this.apnCli
 
         if (cli && tokens){
