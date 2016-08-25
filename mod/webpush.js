@@ -1,4 +1,5 @@
 var
+path=require('path'),
 apn=require('apn'),
 args= require('pico-args'),
 picoObj=require('pico-common').export('pico/obj'),
@@ -15,12 +16,15 @@ apnFeedback=function(feedback,sigslot){
     })
     feedback.on('feedbackError', console.error)
 },
-resolvePath=function(home, apnPath, pro){
-    return (path.isAbsolute(apnPath) ? apnPath : path.resolve(home, apnPath)) + (pro?'.pro':'.dev')
+webpushCB=function(err, code, data){
+	if (err) return console.error(err)
+	console.log(data)
+},
+resolvePath=function(home, apnPath){
+    return (path.isAbsolute(apnPath) ? apnPath : path.resolve(home, apnPath))
 },
 WebPush=function(config,sigslot){
-    this.options=config.options
-
+	this.options=config.options
     if (config.apn){
         var apnCli=this.apnCli = new apn.Connection(config.apn)
         apnCli.on('connected', apnConnected)
@@ -33,32 +37,61 @@ WebPush=function(config,sigslot){
         // Setup a connection to the feedback service using a custom interval (10 seconds)
         apnFeedback(new apn.feedback(config.apn), sigslot)
     }
+	if (config.gcm){
+		this.gcm={
+			url:config.gcm.endpoint,
+			header:{
+				"Authorization": `key=${config.gcm.key}`,
+				"Content-Type": "application/json"
+			}
+		}
+	}
+	if (config.moz){
+		this.moz={
+			url:config.moz.endpoint,
+			header:{
+				"TTL": `${config.options.ttl}`,
+			}
+		}
+	}
+},
+mozSend=function(url,header,keys,i,res,cb){
+	if (keys.length >=i) return cb()
+	utils.ajax('post',url+keys[i],null,header,(err,code,data)=>{
+		if (err) return cb(err)
+		res.push(data)
+		mozSend(url,header,keys,++i,res,cb)
+	})
 }
 
 WebPush.prototype={
-	broadcast: function(tokens, ids, keys, title, content, urlargs){
-        Object.assign(options,this.options)
-        var cli=this.apnCli
+	broadcast: function(tokens, ids, keys, title, content, urlargs, cb){
+        var
+		opt=this.options,
+		cli=this.apnCli
+
         if (cli && tokens){
             var msg = new apn.Notification()
 
             msg.setAlertTitle(title)
             msg.setAlertText(content)
             msg.setAlertAction('view')
-            msg.truncateAtWordEnd=options.truncateAtWordEnd
-            msg.expiry = options.ttl ? (Date.now()/1000) + options.ttl : 0,
+			msg.urlArgs=urlargs
+            msg.truncateAtWordEnd=true
+            msg.expiry = options.ttl ? (Date.now()/1000) + options.ttl : 0
             msg.trim()
 
 			cli.pushNotification(msg, tokens)
         }
+
         if (ids){
-			utils.ajax('post','https://android.googleapis.com/gcm/send',{registration_ids:ids},{
-				"Authorization": "key=AIzaSyCq_Er3AbH98OW2SPPG9cc5I1PSok6nnj4",
-				"Content-Type": "application/json"
-			},(err)=>{
-				if (err) return console.error(err)
-				console.log(arguments)
-			})
+			var gcm=this.gcm
+			utils.ajax('post',gcm.url,JSON.stringify({registration_ids:ids}),gcm.header,webpushCB)
+        }
+
+        if (keys){
+			var moz=this.moz
+			mozSend(moz.url,moz.header,keys,0,[],webpushCB)
         }
 	}
 }
@@ -79,22 +112,14 @@ module.exports= {
                 key:'YOUR_API_KEY_HERE'
             },
 			moz:{
-			},
-            // https://github.com/argon/node-apn/blob/master/doc/notification.markdown
-            // https://github.com/ToothlessGear/node-gcm/blob/master/lib/message-options.js
-            options:{
-                sound:'default',
-                icon:'ic_launcher',
-                ttl:0,
-                priority: 10,
-                retryLimit:-1,
-                contentAvailable:1,
-                truncateAtWordEnd:1,
-                packageName: 'com.domain.project.env'
-            }
+				endpoint:'https://updates.push.services.mozilla.com/wpush/v1'
+            },
+			options:{
+				ttl:0
+			}
         }
 
-        args.print('Notifier Options',picoObj.extend(config,libConfig))
+        args.print('Webpush Options',picoObj.extend(config,libConfig))
 
         var apn=config.apn
 
