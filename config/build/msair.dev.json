@@ -17,6 +17,18 @@
             "sep":["&"],
             "uploadWL":[],
             "port":"/tmp/msair.sock"
-        }
+        },
+		"webPush":{
+            "mod":"webpush",
+			"apn":{
+				"key":"config/apn/safari_msair.key",
+				"cert":"config/apn/safari_msair.cert"
+			},
+			"gcm":{
+				"key":"AIzaSyCq_Er3AbH98OW2SPPG9cc5I1PSok6nnj4"
+			},
+			"moz":{
+			}
+		}
     }
 }
