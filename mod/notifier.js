@@ -63,9 +63,9 @@ Notifier.prototype={
             msg.setAlertText(content)
             msg.setLaunchImage(options.icon)
             msg.truncateAtWordEnd=options.truncateAtWordEnd
-            msg.expiry = options.ttl ? (Date.now()/1000) + options.ttl : 0,
-            msg.priority = options.priority,
-            msg.retryLimit = options.retryLimit,
+            msg.expiry = options.ttl ? (Date.now()/1000) + options.ttl : 0
+            msg.priority = options.priority
+            msg.retryLimit = options.retryLimit
             msg.sound = options.sound
             msg.contentAvailable = options.contentAvailable
             msg.trim()
