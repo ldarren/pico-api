@@ -34,10 +34,9 @@ render=function(sess, ack, query, res, req, input, cb){
     sess.commit((err)=>{
         if (err) return error(err, sess, res, query, cb)
         var output=sess.getOutput()
-		if (!output) return cb()
         if (query.api){
             res.write(bodyparser.render(query, output))
-        }else{
+        }else if (output){
 			if (output.charAt) res.write(output)
 			else res.write(JSON.stringify(output))
         }
