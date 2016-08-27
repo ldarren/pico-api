@@ -18,7 +18,7 @@ apnFeedback=function(feedback,sigslot){
 },
 webpushCB=function(err, code, data){
 	if (err) return console.error(err)
-	console.log(data)
+	if (data) console.log(data)
 },
 resolvePath=function(home, apnPath){
     return (path.isAbsolute(apnPath) ? apnPath : path.resolve(home, apnPath))
@@ -56,7 +56,7 @@ WebPush=function(config,sigslot){
 	}
 },
 mozSend=function(url,header,keys,i,res,cb){
-	if (keys.length >=i) return cb()
+	if (keys.length <=i) return cb()
 	utils.ajax('post',url+keys[i],null,header,(err,code,data)=>{
 		if (err) return cb(err)
 		res.push(data)
@@ -65,7 +65,7 @@ mozSend=function(url,header,keys,i,res,cb){
 }
 
 WebPush.prototype={
-	broadcast: function(tokens, ids, keys, title, content, urlargs, cb){
+	broadcast: function(tokens, ids, keys, title, content, urlargs){
         var
 		options=this.options,
 		cli=this.apnCli
@@ -104,7 +104,7 @@ module.exports= {
             apn:{
                 key:'apn_key.pem',
                 cert:'apn_cert.pem',
-				production:true,
+				production:1,
                 interval:3600
             },
             gcm:{
@@ -112,7 +112,7 @@ module.exports= {
                 key:'YOUR_API_KEY_HERE'
             },
 			moz:{
-				endpoint:'https://updates.push.services.mozilla.com/wpush/v1'
+				endpoint:'https://updates.push.services.mozilla.com/wpush/v1/'
             },
 			options:{
 				ttl:0
