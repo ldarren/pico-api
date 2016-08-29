@@ -7,15 +7,19 @@ http=require('http'),
 fs=require('fs'),
 path=require('path'),
 args=require('pico-args'),
-workers={},
+WorkerGrp=require('../lib/WorkerGrp'),
+workerGrps={},
 ext,appjs,watchPath,
 install=function(fname){
     if (!fname) return false
     var base=path.basename(fname,ext)
     if (base===fname || -1!==base.indexOf('.')) return true
+	var [appName,count]=base.split('-')
     uninstall(fname)
-    cluster.setupMaster({exec:appjs, args:['-c',path.resolve(watchPath,fname)]})
-    workers[base]=cluster.fork()
+	var grp=workerGrp[appName]=workerGrp[appName]=new WorkerGrp(appName,appjs)
+	for(var i=0,l=parseInt(count)||1; i<l; i++){
+		grp.add(path.resolve(watchPath,fname))
+	}
     console.log('installed',fname)
     return true
 },
@@ -24,10 +28,10 @@ uninstall=function(fname){
     if (!fname) return false
     var base=path.basename(fname,ext)
     if (base===fname || -1!==base.indexOf('.')) return true
-    var worker=workers[base]
-    if (!worker) return true
-    worker.kill()
-    delete workers[base]
+	var [appName,count]=base.split('-')
+    var grp=workerGrp[appName]
+    if (!grp) return true
+	grp.removeAll()
     console.log('uninstalled',fname)
     return true
 },
@@ -42,9 +46,12 @@ appMgr={
         var appName=this.params.appName
         if (!appName) return next(`appMgr, invalid path:${this.api}`)
 		console.info('redirecting to',appName)
+		var
+		grp=this.workerGrp[appName],
+		id=grp.select()
 
 		var proxy=http.request({
-            socketPath:`/tmp/${appName}.sock`,
+            socketPath:`/tmp/${appName}-${id}.sock`,
             method:req.method,
             path:req.url,
             headers:req.headers
@@ -59,7 +66,30 @@ appMgr={
         req.pipe(proxy)
 
 		next()
-    }
+    },
+	install:function(input, next){
+		var
+		appName=input.appName,
+		config=input.config,
+		count=input.count||1
+		if (!fname || !config) return next('missing appMgr.install params')
+		var grp=workerGrp[appName]=workerGrp[appName]=new WorkerGrp(appName,appjs)
+		for(var i=0,l=count||1; i<l; i++){
+			grp.add(null,config)
+		}
+		console.log('installed',fname)
+		next()
+	},
+	uninstall:function(input, next){
+		var appName=input.appName
+		console.log('uninstalling',appName)
+		if (!appName) return next('missing appMgr.uninstall params')
+		var grp=workerGrp[appName]
+		if (!grp) return next() 
+		grp.remove(grp.select())
+		console.log('uninstalled',appName)
+		next()
+	}
 }
 
 module.exports= {
@@ -68,22 +98,27 @@ module.exports= {
 
         var
         config={
-            path:'config/build',
-            persistent:false
+            path:'',			// config file location, appMgr can operate with config send over through http
+            persistent:false	// watcher doens't keep program running
         },
         appPath= appConfig.path
 
         args.print('AppMgr Options',Object.assign(config,libConfig))
 
-        ext=`.${appConfig.env}.json`
         appjs=path.resolve(appPath,'lib/app.js')
-        watchPath=path.resolve(appPath,config.path)
 
-        fs.readdir(watchPath,(err, fnames)=>{
-            if (err) return next(err)
-            for(var i=0; install(fnames[i]); i++);
-            fs.watch(watchPath, {persistent:config.persistent}, watch)
-            next(null, appMgr)
-        })
+		if (config.path){
+			ext=`.${appConfig.env}.json`
+			watchPath=path.resolve(appPath,config.path)
+
+			fs.readdir(watchPath,(err, fnames)=>{
+				if (err) return next(err)
+				for(var i=0; install(fnames[i]); i++);
+				fs.watch(watchPath, {persistent:config.persistent}, watch)
+				next(null, appMgr)
+			})
+		}else{
+			next(null, appMgr)
+		}
     }
 }
