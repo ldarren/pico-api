@@ -143,9 +143,15 @@ web={
         })
     }
 },
-resetPort=function(port, cb){
-    if ('string' === typeof port) return fs.unlink(port, cb)
-    cb()
+resetPort=function(port, appConfig, cb){
+	if (port) return cb(null, port)
+
+    if (!appConfig.name || !appConfig.id) return cb('no port assigned')
+	var unix=`${appConfig.name}.${appConfig.id}`
+	fs.unlink(unix, (err)=>{
+		if (err) return cb(err)
+		cb(null, unix)
+	})
 },
 disconnect= function(){
     sigslot.signal('web.dc', Session.TYPE.WEB, null,null,this,null,null,renderAll)
@@ -160,7 +166,7 @@ module.exports= {
     create: function(appConfig, libConfig, next){
         config={
             pfxPath:null,
-            port:'80',
+            port:0,
             allowOrigin:'localhost',
             sep:['&'],
             secretKey:null,
@@ -187,8 +193,9 @@ module.exports= {
         multipart.setup(config.uploadWL)
         bodyparser.setup(config.cullAge, config.secretKey, config.sep)
 
-        resetPort(config.port, ()=>{
-            server.listen(config.port, ()=>{
+        resetPort(config.port, appConfig, (err, port)=>{
+			if (err) return next(err)
+            server.listen(port, ()=>{
 
 				// WS TEST START
 				// BUG: ws.send not working and unable forward ws connection to workers
