@@ -12,14 +12,11 @@ WorkerGrp=require('../lib/WorkerGrp'),
 workerGrps={},
 appEnv,appjs,watchPath,
 install=function(fpath){
-console.log(fpath)
     if (!fpath) return false
-console.log(fpath,cfg.parsePath(fpath))
     var [appName,count,env,ext]=cfg.parsePath(fpath)
-console.log(appName,count,env,ext)
     if (appEnv !== env) return true
     uninstall(fpath)
-	var grp=workerGrp[appName]=workerGrp[appName]=new WorkerGrp(appjs, appEnv)
+	var grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
 	for(var i=0; i<count; i++){
 		grp.add(path.resolve(watchPath,fpath))
 	}
@@ -31,7 +28,7 @@ uninstall=function(fpath){
     if (!fpath) return false
     var [appName,count,env,ext]=cfg.parsePath(fpath)
     if (appEnv !== env) return true
-    var grp=workerGrp[appName]
+    var grp=workerGrps[appName]
     if (!grp) return true
 	grp.removeAll()
     console.log('uninstalled',fpath)
@@ -47,13 +44,15 @@ appMgr={
     redirect:function(req, res, next){
         var appName=this.params.appName
         if (!appName) return next(`appMgr, invalid path:${this.api}`)
-		console.info('redirecting to',appName)
+
 		var
-		grp=this.workerGrp[appName],
+		grp=workerGrps[appName],
 		id=grp.select()
 
+		console.info('redirecting to',appName,id)
+
 		var proxy=http.request({
-            socketPath:`/tmp/${appName}-${id}.sock`,
+            socketPath:`/tmp/${appName}.${id}`,
             method:req.method,
             path:req.url,
             headers:req.headers
@@ -75,7 +74,7 @@ appMgr={
 		config=input.config,
 		count=input.count||1
 		if (!appName || !config) return next('missing appMgr.install params')
-		var grp=workerGrp[appName]=workerGrp[appName]=new WorkerGrp(appjs, appEnv)
+		var grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
 		for(var i=0,l=count||1; i<l; i++){
 			grp.add(input)
 		}
@@ -86,7 +85,7 @@ appMgr={
 		var appName=input.appName
 		console.log('uninstalling',appName)
 		if (!appName) return next('missing appMgr.uninstall params')
-		var grp=workerGrp[appName]
+		var grp=workerGrps[appName]
 		if (!grp) return next() 
 		grp.remove(grp.select())
 		console.log('uninstalled',appName)

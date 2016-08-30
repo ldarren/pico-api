@@ -147,9 +147,8 @@ resetPort=function(port, appConfig, cb){
 	if (port) return cb(null, port)
 
     if (!appConfig.name || !appConfig.id) return cb('no port assigned')
-	var unix=`${appConfig.name}.${appConfig.id}`
-	fs.unlink(unix, (err)=>{
-		if (err) return cb(err)
+	var unix=`/tmp/${appConfig.name}.${appConfig.id}`
+	fs.unlink(unix, ()=>{
 		cb(null, unix)
 	})
 },
@@ -194,7 +193,6 @@ module.exports= {
         bodyparser.setup(config.cullAge, config.secretKey, config.sep)
 
         resetPort(config.port, appConfig, (err, port)=>{
-			if (err) return next(err)
             server.listen(port, ()=>{
 
 				// WS TEST START
