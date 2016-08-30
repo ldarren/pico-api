@@ -1,7 +1,4 @@
 {
-    "app":{
-        "env": "pro"
-    },
     "deps":[
         "sirocco.dev.json"
     ]

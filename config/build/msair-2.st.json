@@ -1,8 +1,5 @@
 {
     "app":{
-        "name": "Mindsair",
-        "ajax": null,
-        "env": "dev",
         "paths":{
             "*":"http://localhost/mindsair/node/",
             "api": "http://localhost/mindsair/node/api/",
@@ -15,8 +12,7 @@
             "mod":"web",
             "allowOrigin":"*",
             "sep":["&"],
-            "uploadWL":[],
-            "port":"/tmp/msair.sock"
+            "uploadWL":[]
         },
 		"webPush":{
             "mod":"webpush",

@@ -1,7 +1,5 @@
 {
     "app":{
-        "name": "pico",
-        "env": "dev",
         "actions": [
             "apps/pico/index.json"
         ]

@@ -1,9 +1,6 @@
 {
-    "app":{
-        "env": "pro"
-    },
     "deps":[
-        "lead.dev.json"
+        "lead-1.dev.json"
     ],
     "mods":{
         "mainDB":{

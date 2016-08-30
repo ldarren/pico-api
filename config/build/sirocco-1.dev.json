@@ -1,8 +1,5 @@
 {
     "app":{
-        "name": "Sirocco",
-        "ajax": null,
-        "env": "dev",
         "paths":{
             "*":"http://localhost/sirocco/node/",
             "api": "http://localhost/sirocco/node/api/",

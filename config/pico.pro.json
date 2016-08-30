@@ -1,7 +1,4 @@
 {
-    "app":{
-        "env": "pro"
-    },
     "deps":[
         "pico.dev.json"
     ],
