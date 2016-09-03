@@ -1,7 +1,5 @@
 {
     "app":{
-        "name": "Sirocco",
-        "ajax":null,
         "paths":{
             "*":"http://localhost/sirocco/node/",
             "api": "http://localhost/sirocco/node/api/",

@@ -1,7 +1,5 @@
 {
     "app":{
-        "name": "Mindsair",
-        "ajax":null,
         "paths":{
             "*":"http://localhost/mindsair/node/",
             "api": "http://localhost/mindsair/node/api/",

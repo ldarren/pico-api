@@ -1,7 +1,5 @@
 {
     "app":{
-        "name": "Lead",
-        "ajax":null,
         "paths":{
             "*":"http://localhost/lead/node/",
             "api": "http://localhost/lead/node/api/",

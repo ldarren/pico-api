@@ -63,8 +63,7 @@
             "mod":"web",
             "allowOrigin":"*",
             "sep":["&"],
-            "uploadWL":[],
-            "port":"/tmp/lead.sock"
+            "uploadWL":[]
         }
     }
 }
