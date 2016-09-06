@@ -1,4 +1,6 @@
-config/apn
+config/cred
+config/src
+config/build
 
 # Logs
 logs

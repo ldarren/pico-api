@@ -1,0 +1,10 @@
+{
+    "deps":[
+        "pico.dev.json"
+    ],
+    "mods":{
+        "cmd":{
+            "mod":0
+        }
+    }
+}
