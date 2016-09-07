@@ -1,57 +1,45 @@
 var
 AWS= require('aws-sdk'),
 args= require('pico-args'),
+dummyCB=()=>{},
 addServices=function(aws,config){
 	if (config.ses) aws.ses=new SES(config.ses)
 }
 
 function SES(config){
 	this.ses=new AWS.SES(config)
+	this.config=config
 }
 
 SES.prototype={
-	sendMail:function(recipients,subject,text,html,cb){
-		var params = {
+	send(to,subject,text,opt={},cb=dummyCB){
+		if (!to || !to.length) return cb('no recipient')
+		if (!subject || !text) return cb('no content')
+		var
+		cfg=this.config
+		params={
 			Destination: { /* required */
-				BccAddresses: [
-					'STRING_VALUE',
-					/* more items */
-				],
-				CcAddresses: [
-					'STRING_VALUE',
-					/* more items */
-				],
-				ToAddresses: [
-					'STRING_VALUE',
-					/* more items */
-				]
+				ToAddresses: to,
+				CcAddresses: opt.cc,
+				BccAddresses: opt.bcc
 			},
 			Message: { /* required */
 				Body: { /* required */
-					Html: {
-						Data: 'STRING_VALUE', /* required */
-						Charset: 'STRING_VALUE'
-					},
-					Text: {
-						Data: 'STRING_VALUE', /* required */
-						Charset: 'STRING_VALUE'
-					}
+					Text:{Data:text,Charset:'utf-8'}
 				},
 				Subject: { /* required */
 					Data: subject, /* required */
-					Charset: 'STRING_VALUE'
+					Charset: 'utf-8'
 				}
 			},
-			Source: 'STRING_VALUE', /* required */
-			ReplyToAddresses: [
-				'STRING_VALUE',
-				/* more items */
-			],
-			ReturnPath: 'STRING_VALUE',
-			ReturnPathArn: 'STRING_VALUE',
-			SourceArn: 'STRING_VALUE'
+			Source: cfg.sender, /* required */
+			ReplyToAddresses: opt.reply,
+			ReturnPath: cfg.bounce,
+			ReturnPathArn: cfg.retARN || cfg.srcARN,
+			SourceArn: cfg.srcARN
 		}
-		this.ses.sendMail(params,cb)
+		if (opt.html) params.Message.Body.Html={Data:opt.html,Charset:'utf-8'}
+		this.ses.sendEmail(params,cb)
 	}
 }
 
@@ -61,8 +49,6 @@ module.exports={
 			credPath:'',
 			apiVersions:{
 				ses:'2010-12-01'
-			},
-			ses:{
 			}
         }
 
