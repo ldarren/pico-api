@@ -85,7 +85,7 @@ web={
     parse:function(req,res,next){
 		var ct=req.headers['content-type']
 		if (!ct) return next()
-        if (-1 === ct.toLowerCase().indexOf('multipart/form-data')){
+        if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{
                 if (err) return next(err)
                 var q
