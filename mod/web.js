@@ -30,7 +30,7 @@ error=function(err, sess, res, query, cb){
     sess.set('error',undefined)
     cb()
 },
-render=function(sess, ack, query, res, req, input, cb){
+render=function(sess, ack, query, res, req, cred,input, cb){
     sess.commit((err)=>{
         if (err) return error(err, sess, res, query, cb)
         var output=sess.getOutput()
@@ -43,29 +43,29 @@ render=function(sess, ack, query, res, req, input, cb){
         cb()
     })
 },
-renderStart=function(ack, query, res, req, input, next){
+renderStart=function(ack, query, res, req, cred, input, next){
     if (this.has('error')) return error(null, this, res, query, next)
     res.writeHead(200, HEAD_JSON)
-    render(this, ack, query, res, req, input, next)
+    render(this, ...arguments)
 },
-renderStream=function(ack, query, res, req, input, next){
+renderStream=function(ack, query, res, req, cred, input, next){
     if (this.has('error')) return error(null, this, res, query, next)
-    render(this, ack, query, res, req, input, next)
+    render(this, ...arguments)
 },
-renderStop=function(ack, query, res, req, input, next){
+renderStop=function(ack, query, res, req, cred, input, next){
     var cb=()=>{res.end(); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
-    render(this, ack, query, res, req, input, cb)
+    render(this, ack, query, res, req, cred, input, cb)
 },
 // TODO: better way to delay error message
-renderAll=function(ack, query, res, req, input, next){
+renderAll=function(ack, query, res, req, cred, input, next){
     var cb=()=>{res.end(); next()}
     if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
     res.writeHead(200, HEAD_JSON)
-    render(this, ack, query, res, req, input, cb)
+    render(this, ack, query, res, req, cred, input, cb)
 },
 web={
-	getBody:function(req,body,next){
+	getBody(req,body,next){
 		function cb(err, query){
 			if (err) return next(err)
 			Object.assign(body,query)
@@ -76,13 +76,7 @@ web={
 		case 'multipart/form-data': return multipart.parse(req, cb)
 		}
 	},
-	getMultipart:function(req,body,next){
-		bodyparser.parsePOST(req, (err, queries)=>{
-			if (err) return next(err)
-            sigslot.signal(this.api, Session.TYPE.WEB,queries,req,res,null,null,renderAll)
-		})
-	},
-    parse:function(req,res,next){
+    parse(req,res,next){
 		var ct=req.headers['content-type']
 		if (!ct) return next()
         if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
@@ -93,17 +87,17 @@ web={
                 case 0: break
                 case 1:
                     q=queries[0]
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q,null,renderAll)
+                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderAll)
                     break
                 default:
                     q=queries[0]
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q,null,renderStart)
+                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStart)
                     for(var i=1,l=queries.length-1; i<l; i++){
                         q=queries[i]
-                        sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q,null,renderStream)
+                        sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStream)
                     }
                     q=queries[queries.length-1]
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,req,res,q,null,renderStop)
+                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStop)
                     break
                 }
 
@@ -112,12 +106,12 @@ web={
         }else{
             multipart.parse(req, (err, query)=>{
                 if (err || !query.api) return next(err || 'empty multipart api')
-                sigslot.signal(query.api, Session.TYPE.WEB,query.data,req,res,query,null,renderAll)
+                sigslot.signal(query.api, Session.TYPE.WEB, query.data,query.cred, req,res, query,null, renderAll)
                 next()
             })
         }
     },
-    SSEStart:function(req, res, next){
+    SSEStart(req, res, next){
         res.addListener('close',disconnect)
         res.addListener('error',disconnect)
 
@@ -127,16 +121,16 @@ web={
         res.writeHead(200, HEAD_SSE)
         next()
     },
-    SSE:function(res, msg, evt, retry){
+    SSE(res, msg, evt, retry){
         res.write("retry: "+(retry||1000)+"\n");
         if (evt) res.write("event: "+evt+"\n");
         res.write("data: " + PJSON.stringify(msg).join(config.sep) + "\n\n");
     },
-    SSEStop:function(res, next){
+    SSEStop(res, next){
         res.end()
         next()
     },
-    SSEAbort:function(err, res, next){
+    SSEAbort(err, res, next){
         setTimeout(error, config.errorDelay, err, this, res, null, ()=>{
             res.end()
             next()
@@ -153,16 +147,16 @@ resetPort=function(port, appConfig, cb){
 	})
 },
 disconnect= function(){
-    sigslot.signal('web.dc', Session.TYPE.WEB, null,null,this,null,null,renderAll)
+    sigslot.signal('web.dc', Session.TYPE.WEB, null,null, null,this, null,null, renderAll)
 },
 request= function(req, res){
 	console.log(req.method,req.url)
     var o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,req,res,null,null,renderAll)
+    sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,null, req,res, null,null, renderAll)
 }
 
 module.exports= {
-    create: function(appConfig, libConfig, next){
+    create(appConfig, libConfig, next){
         config={
             pfxPath:null,
             port:0,

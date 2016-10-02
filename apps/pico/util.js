@@ -4,7 +4,7 @@ module.exports={
         //sigslot.signalAt('* * * * * *', 'sayHello')
         cb()
     },
-    sep:function(next){console.log('###'); return next()},
+    sep:function(msg,next){console.log(msg); return next()},
     route:function(req, next){
         switch(req.method){
         case 'POST': return next()
