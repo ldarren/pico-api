@@ -23,7 +23,7 @@ Characteristic=function(name, options){
     descs=options.descriptors,
     descriptors=[]
 
-    for(var i=0,d; d=descs[i]; i++){ descriptors.push(new bleno.Descriptor(d)) }
+    for(let i=0,d; d=descs[i]; i++){ descriptors.push(new bleno.Descriptor(d)) }
 
     bleno.Characteristic.call(this, {
         uuid: options.uuid,
@@ -83,7 +83,7 @@ ble={
     // standard: name, services, cb
     // ibeacon: uuid, major, minor, rssi, cb
     // EIR: advertisementData(31bytes), scanData(31bytes), cb
-    start:function(id){
+    start(id){
         var err=0
         block:{
             if (!poweredOn) {err=ERR_OFF; break block}
@@ -108,47 +108,47 @@ ble={
         console.error(err+': start advertising',...arguments)
         cb(err)
     },
-    stop:function(){
+    stop(){
         bleno.stopAdvertising()
     },
-    disconnect:function(){
+    disconnect(){
         bleno.disconnect()
     },
-    updateRSSI:function(cb){
+    updateRSSI(cb){
         bleno.updateRSSI(cb)
     }
 }
 
 Characteristic.prototype={
     // read request handler, function(offset, callback) { ... }
-    onReadRequest:function(offset, cb){
+    onReadRequest(offset, cb){
         console.log(this.name+'.read: ' + offset)
         sigslot.signal(this.name+'.read', Session.TYPE.BLE, null, offset, this, cb, render)
     },
     // write request handler, function(data, offset, withoutResponse, callback) { ...}
-    onWriteRequest:function(data, offset, withoutResponse, cb){
+    onWriteRequest(data, offset, withoutResponse, cb){
         console.log(this.name+'.write: ' + data.toString('hex') + ' ' + offset + ' ' + withoutResponse)
         sigslot.signal(this.name+'.write', Session.TYPE.BLE, data, offset, this, cb, render)
     },
     // notify/indicate subscribe handler, function(maxValueSize, updateValueCallback) { ...}
-    onSubscribe:function(maxValueSize, updateValueCB){
+    onSubscribe(maxValueSize, updateValueCB){
         console.log(this.name+'.subscribe: ' + maxValueSize)
         bleno.Characteristic.prototype.onSubscribe.call(this, maxValueSize, updateValueCB)
         sigslot.signal(this.name+'.subscribe', Session.TYPE.BLE, null, 0, this, null, render)
     },
     // notify/indicate unsubscribe handler, function() { ...}
-    onUnsubscribe:function(){
+    onUnsubscribe(){
         console.log(this.name+'.unsubscribe: ' + arguments)
         bleno.Characteristic.prototype.onUnsubscribe.call(this)
         sigslot.signal(this.name+'.unsubscribe', Session.TYPE.BLE, null, 0, this, null, render)
     },
     // notify sent handler, function() { ...}
-    onNotify:function(){
+    onNotify(){
         console.log(this.name+'.notify: ' + arguments)
         sigslot.signal(this.name+'.notify', Session.TYPE.BLE, null, 0, this, null, render)
     },
     // indicate confirmation received handler, function() { ...}
-    onIndicate:function(){
+    onIndicate(){
         console.log(this.name+'.indicate: ' + arguments)
         sigslot.signal(this.name+'.indicate', Session.TYPE.BLE, null, 0, this, null, render)
     }
@@ -157,7 +157,7 @@ Characteristic.prototype={
 util.inherits(Characteristic, bleno.Characteristic)
 
 module.exports= {
-    create: function(appConfig, libConfig, next){
+    create(appConfig, libConfig, next){
         config={
             name:'pico',
             services:[],

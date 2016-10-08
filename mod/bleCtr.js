@@ -12,7 +12,7 @@ characteristicMap={},
 characteristicList=[],
 dummyCB=()=>{},
 getChar=function(sUUID, cUUID, index, cb){
-    for(var i=index,c; c=characteristicList[i]; i++){
+    for(let i=index,c; c=characteristicList[i]; i++){
         if (c._serviceUuid===sUUID && c.uuid===cUUID) break
     }
     cb(null, c, ()=>{
@@ -38,20 +38,20 @@ start=function(services, characteristics, allowDuplicates, cb){
     var
     keys=Object.keys(serviceMap),
     uuids=[]
-    for(var i=0,id; id=services[keys[i]]; i++){
+    for(let i=0,id; id=services[keys[i]]; i++){
         uuids.push(id)
     }
 
     noble.startScanning(uuids, allowDuplicates, cb)
 },
 bleCtr={
-    start:function(){
+    start(){
         start(...arguments)
     },
-    stop:function(){
+    stop(){
         noble.stopScanning()
     },
-    read:function(service, characteristic, cb){
+    read(service, characteristic, cb){
         var results=[]
         getChar(service, characteristic, (err, c, next)=>{
             if (!c) return cb(err, results)
@@ -62,7 +62,7 @@ bleCtr={
             })
         })
     },
-    write:function(service, characteristic, data, withoutResponse, notify, cb){
+    write(service, characteristic, data, withoutResponse, notify, cb){
         var results=[]
         getChar(service, characteristic, (err, c, next)=>{
             if (!c) return cb(err, results)
@@ -85,7 +85,7 @@ bleCtr={
 }
 
 module.exports= {
-    create: function(appConfig, libConfig, next){
+    create(appConfig, libConfig, next){
         config={
             services:{},
             characteristics:{}

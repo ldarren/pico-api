@@ -82,7 +82,7 @@ web={
         if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{
                 if (err) return next(err)
-                var q
+                let q
                 switch(queries.length){
                 case 0: break
                 case 1:
@@ -92,7 +92,7 @@ web={
                 default:
                     q=queries[0]
                     sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStart)
-                    for(var i=1,l=queries.length-1; i<l; i++){
+                    for(let i=1,l=queries.length-1; i<l; i++){
                         q=queries[i]
                         sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStream)
                     }

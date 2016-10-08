@@ -37,7 +37,7 @@ Notifier=function(config,sigslot){
     }
 
     if (config.apn){
-        var apnCli=this.apnCli = new apn.Connection(config.apn)
+        let apnCli=this.apnCli = new apn.Connection(config.apn)
         apnCli.on('connected', apnConnected)
         apnCli.on('disconnected', apnDisconnected)
         apnCli.on('timeout', apnTimeout)
@@ -51,13 +51,13 @@ Notifier=function(config,sigslot){
 }
 
 Notifier.prototype={
-    broadcast: function(tokens, ids, title, content, options={}, payload){
+    broadcast(tokens, ids, title, content, options={}, payload){
         Object.assign(options,this.options)
         var
         type=getType(tokens),
         cli=this.apnCli
         if (type && cli){
-            var msg = new apn.Notification(payload)
+            let msg = new apn.Notification(payload)
 
             msg.setAlertTitle(title)
             msg.setAlertText(content)
@@ -73,7 +73,7 @@ Notifier.prototype={
             if (1===type){
                 cli.pushNotification(msg, tokens)
             }else{
-                for(var t in tokens){
+                for(let t in tokens){
                     msg.badge=tokens[t]
                     cli.pushNotification(msg, t)
                 }
@@ -82,7 +82,7 @@ Notifier.prototype={
         type=getType(ids)
         cli=this.gcmCli
         if (type && cli){
-            var msg = new gcm.Message({
+            let msg = new gcm.Message({
                 notification:{
                     title: title,
                     message: content,
@@ -99,11 +99,11 @@ Notifier.prototype={
                 restrictedPackageName:options.packageName
             })
 
-            var retry=-1===options.retryLimit ? 5 : options.retryLimit
+            let retry=-1===options.retryLimit ? 5 : options.retryLimit
             if (1===type){
                 cli.send(msg, ids, retry, gcmCB)
             }else{
-                for(var t in ids){
+                for(let t in ids){
                     msg.addData('msgcnt',ids[t])
                     cli.send(msg, t, retry, gcmCB)
                 }
@@ -113,7 +113,7 @@ Notifier.prototype={
 }
 
 module.exports= {
-    create: function(appConfig, libConfig, next){
+    create(appConfig, libConfig, next){
         var config={
             // https://github.com/argon/node-apn/blob/master/doc/connection.markdown
             // https://github.com/argon/node-apn/blob/master/doc/feedback.markdown

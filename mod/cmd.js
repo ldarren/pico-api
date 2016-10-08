@@ -11,7 +11,7 @@ Session= require('../lib/Session'),
 inspectOpts={showHidden:false, depth:4, colors:true, customInspect:false},
 sigslot,
 extendCtx=function(oldCtx, newCtx){
-    for(var i=0, k; k=PROHIBITED[i]; i++){
+    for(let i=0,k; k=PROHIBITED[i]; i++){
         delete oldCtx[k]
     }
     Object.assign(oldCtx, newCtx)
@@ -43,8 +43,9 @@ customWriter=function(out){
     return util.inspect(out, inspectOpts)
 }
 Cmd=function(config, input, output){
-    var ctx={}
-    var svr=repl.start({
+    var
+	ctx={},
+    svr=repl.start({
         input: input||process.stdin,
         output: output||process.stdout,
         prompt: config.prompt,
@@ -74,18 +75,18 @@ Cmd=function(config, input, output){
 }
 
 Cmd.prototype={
-    updateContext:function(key, value){
+    updateContext(key, value){
         this.context[key]=value
         this.server.context[key]=value
     },
     // e.g. key:hello cmd:{help:'say hello', action:function(params){this.write(params); this.displayPrompt}}
-    defineCommand:function(key,command){
+    defineCommand(key,command){
         this.server.defineCommand(key, command)
     }
 }
 
 module.exports={
-    create: function(appConfig, libConfig, next){
+    create(appConfig, libConfig, next){
         var config={
             socket:null,
             prompt: '> ',

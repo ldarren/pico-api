@@ -17,7 +17,7 @@ install=function(fpath){
     if (appEnv !== env) return true
     uninstall(fpath)
 	var grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
-	for(var i=0; i<count; i++){
+	for(let i=0; i<count; i++){
 		grp.add(path.resolve(watchPath,fpath))
 	}
     console.log('installed',fpath)
@@ -41,7 +41,7 @@ watch=function(evt, fpath){
     }
 },
 appMgr={
-    redirect:function(req, res, next){
+    redirect(req, res, next){
         var appName=this.params.appName
         if (!appName) return next(`appMgr, invalid path:${this.api}`)
 
@@ -68,20 +68,20 @@ appMgr={
 
 		next()
     },
-	install:function(input, next){
+	install(input, next){
 		var
 		appName=input.appName,
 		config=input.config,
 		count=input.count||1
 		if (!appName || !config) return next('missing appMgr.install params')
 		var grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
-		for(var i=0,l=count||1; i<l; i++){
+		for(let i=0,l=count||1; i<l; i++){
 			grp.add(input)
 		}
 		console.log('installed',appName)
 		next()
 	},
-	uninstall:function(input, next){
+	uninstall(input, next){
 		var appName=input.appName
 		console.log('uninstalling',appName)
 		if (!appName) return next('missing appMgr.uninstall params')
@@ -94,7 +94,7 @@ appMgr={
 }
 
 module.exports= {
-    create: function(appConfig, libConfig, next){
+    create(appConfig, libConfig, next){
         if (cluster.isWorker) return next('run on master only')
 
         var
@@ -114,7 +114,7 @@ module.exports= {
 
 			fs.readdir(watchPath,(err, fpaths)=>{
 				if (err) return next(err)
-				for(var i=0; install(fpaths[i]); i++);
+				for(let i=0; install(fpaths[i]); i++);
 				fs.watch(watchPath, {persistent:config.persistent}, watch)
 				next(null, appMgr)
 			})
