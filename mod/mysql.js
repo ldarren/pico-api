@@ -1,9 +1,9 @@
 //TODO: use pool or clusterPool to prevent connection error?
-var
+let
 mysql = require('mysql'),
 args= require('pico-args'),
 makeConn = function(client){
-    var
+    let
     config = client.config,
     conn = mysql.createConnection(config)
     conn.on('error', function(err){
@@ -36,7 +36,7 @@ Client.prototype={
         return mysql.format(...arguments)
     },
 	decode(obj,hash,ENUM){
-		var keys=Object.keys(obj)
+		let keys=Object.keys(obj)
 		for(let i=0,k; k=keys[i]; i++) {
 			if (-1===ENUM.indexOf(k)) continue
 			obj[k]=hash.key(obj[k])
@@ -50,7 +50,7 @@ Client.prototype={
 		return rows
 	},
 	encode(obj,by,hash,INDEX,ENUM){
-		var arr=[]
+		let arr=[]
         for(let i=0,k; k=INDEX[i]; i++){ 
 			if (-1===ENUM.indexOf(k)) arr.push(obj[k])
 			else arr.push(hash.val(obj[k]))
@@ -68,14 +68,13 @@ Client.prototype={
 		return output
 	},
     mapDecodes(rows=[], outputs=[], hash, ENUM){
-        for(let i=0,o,r; o=outputs[i]; i++){
-            r=rows[o.id]
-            this.mapDecode(r, o, hash, ENUM)
+        for(let i=0,o; o=outputs[i]; i++){
+            this.mapDecode(rows[o.id], o, hash, ENUM)
         }
         return outputs
     },
 	mapEncode(obj, by, hash, INDEX, ENUM){
-		var
+		let
 		id=obj.id,
 		arr=[]
 
@@ -93,8 +92,28 @@ Client.prototype={
 		}
 		return arr
 	},
+	map2Encode(obj1, obj2, map, by, hash, INDEX, ENUM){
+		let
+		id1=obj1.id,
+		id2=obj2.id,
+		arr=[]
+
+		for(let i=0,keys=Object.keys(map),key,k,v; key=keys[i]; i++){
+			if(INDEX.indexOf(key)>-1)continue
+			k=hash.val(key)
+			v=map[key]
+			if (!k || undefined===v) continue
+			if (-1===ENUM.indexOf(key)){
+				if(v.charAt) arr.push([id1,id2,k,v,null,by])
+				else arr.push([id1,id2,k,null,v,by])
+			}else{
+				arr.push([id1,id2,k,null,hash.val(v),by])
+			}
+		}
+		return arr
+	},
 	listDecode(rows,key,hash,ENUM){
-		var
+		let
 		k=hash.val(key),
 		notEnum=(-1===ENUM.indexOf(key))
 
@@ -108,7 +127,7 @@ Client.prototype={
 	},
 	listEncode(id, key, list, by, hash, INDEX, ENUM){
 		if (!key || !list || !list.length) return cb()
-		var
+		let
 		arr=[],
 		k=hash.val(key),
 		notEnum=(-1===ENUM.indexOf(key))
@@ -128,7 +147,7 @@ Client.prototype={
 
 module.exports={
     create(appConfig, libConfig, next){
-        var config={
+        let config={
             host:'localhost',
             port:3306,
             user:'null',

@@ -9,7 +9,7 @@ HEAD_SSE= {
     'Connection': 'keep-alive'
 }
 
-var
+let
 http= require('http'),
 https= require('https'),
 fs= require('fs'),
@@ -23,7 +23,7 @@ Session= require('../lib/Session'),
 config,
 sigslot,
 error=function(err, sess, res, query, cb){
-    var err=err||sess.get('error')
+    err=err||sess.get('error')
     if (!Array.isArray(err)) err=sess.error(404,err)
     if (!res.headersSent) res.writeHead(err[0], HEAD_JSON)
     res.write(bodyparser.error(query,err[1]))
@@ -33,7 +33,7 @@ error=function(err, sess, res, query, cb){
 render=function(sess, ack, query, res, req, cred,input, cb){
     sess.commit((err)=>{
         if (err) return error(err, sess, res, query, cb)
-        var output=sess.getOutput()
+        let output=sess.getOutput()
         if (query.api){
             res.write(bodyparser.render(query, output))
         }else if (output){
@@ -53,13 +53,13 @@ renderStream=function(ack, query, res, req, cred, input, next){
     render(this, ...arguments)
 },
 renderStop=function(ack, query, res, req, cred, input, next){
-    var cb=()=>{res.end(); next()}
+    let cb=()=>{res.end(); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
     render(this, ack, query, res, req, cred, input, cb)
 },
 // TODO: better way to delay error message
 renderAll=function(ack, query, res, req, cred, input, next){
-    var cb=()=>{res.end(); next()}
+    let cb=()=>{res.end(); next()}
     if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
     res.writeHead(200, HEAD_JSON)
     render(this, ack, query, res, req, cred, input, cb)
@@ -77,7 +77,7 @@ web={
 		}
 	},
     parse(req,res,next){
-		var ct=req.headers['content-type']
+		let ct=req.headers['content-type']
 		if (!ct) return next()
         if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{
@@ -141,7 +141,7 @@ resetPort=function(port, appConfig, cb){
 	if (port) return cb(null, port)
 
     if (!appConfig.name || !appConfig.id) return cb('no port assigned')
-	var unix=`/tmp/${appConfig.name}.${appConfig.id}`
+	let unix=`/tmp/${appConfig.name}.${appConfig.id}`
 	fs.unlink(unix, ()=>{
 		cb(null, unix)
 	})
@@ -151,7 +151,7 @@ disconnect= function(){
 },
 request= function(req, res){
 	console.log(req.method,req.url)
-    var o=url.parse(req.url,true)
+    let o=url.parse(req.url,true)
     sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,null, req,res, null,null, renderAll)
 }
 
@@ -167,7 +167,7 @@ module.exports= {
             uploadWL:[],
             errorDelay:3000
         }
-        var pfxPath, server
+        let pfxPath, server
 
         args.print('Web Options',Object.assign(config,libConfig))
         config.sep=config.sep.charAt?config.sep:JSON.stringify(config.sep)
@@ -191,7 +191,7 @@ module.exports= {
 
 				// WS TEST START
 				// BUG: ws.send not working and unable forward ws connection to workers
-				/*var
+				/*let
 				WebSocketServer= require('ws').Server,
 				wss=new WebSocketServer({server:server})
 				wss.on('connection', (ws)=>{
