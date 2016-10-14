@@ -14,35 +14,31 @@ A_R_OK=0o004,
 A_W_OK=0o002,
 A_X_OK=0o001
 
-var
+let
 fs = require('fs'),
 path = require('path'),
 args= require('pico-args'),
 dummyCB=()=>{},
 normalize=function(root, url){
-    var p=path.resolve(root,url)
+    let p=path.resolve(root,url)
     if (!p.startsWith(root)) return null
     return p
 },
 mkdirp=function(arr, i, mode, cb){
-console.log(mode)
     if (arr.length <= i) return cb()
-    var url=path.resolve(...(arr.slice(0,++i)))
+    let url=path.resolve(...(arr.slice(0,++i)))
     fs.mkdir(url, mode, (err)=>{
         if (err){
             // ignore EEXIST
             if (err.errno === -17) return mkdirp(arr, i, mode, cb)
             return cb(err)
         }
-        fs.writeFile(path.resolve(url, META), EMPTY, META_OPT, (err)=>{
-            if (err) return cb(err)
-            mkdirp(arr, i, mode, cb)
-        })
+		mkdirp(arr, i, mode, cb)
     })
 },
 rmrf=function(list, root, cb){
     if (!list.length) return cb()
-    var src=normalize(root,list.pop())
+    let src=normalize(root,list.pop())
     if (!src) return cb(`invalid source ${url}`)
 
     fs.lstat(src, (err, stat)=>{
@@ -67,7 +63,7 @@ rmrf=function(list, root, cb){
 copyr=function(list, root, dest, cb){
     if (!list.length) return cb()
 
-    var
+    let
     fname=list.pop(),
     src=normalize(root,fname)
 
@@ -92,7 +88,7 @@ copyr=function(list, root, dest, cb){
         if (stat.isDirectory()) return fs.readdir(src,(err,files)=>{
             if (err) return cb(err)
             fs.stat(dest, (err)=>{
-                var d=dest
+                let d=dest
                 if (!err){
                     d=path.resolve(dest, fname)
                 }
@@ -121,7 +117,7 @@ link=function(src, dst, cb){
 findLink=function(arr, root, link, links, cb){
     if (!arr.length) return cb(null, links) 
 
-    var src=normalize(root, arr.pop())
+    let src=normalize(root, arr.pop())
     if (!src) return cb('invalid url', links)
 
     fs.lstat(src, (err, stat)=>{
@@ -156,10 +152,11 @@ getFile=function(src, root, cb){
 
 function FileDB(config){
     this.root = config.root
-    this.domainRule = new RegExp(`[\\s\\S]{1,${config.nameLength}}`,'g')
+    this.pathRule = new RegExp(`[\\s\\S]{1,${config.nameLength}}`,'g')
 }
 
 FileDB.prototype = {
+	META:META,
     TYPE:{
         FILE:TYPE_FILE,
         DIR:TYPE_DIR,
@@ -173,13 +170,17 @@ FileDB.prototype = {
         A_W:A_W_OK,
         A_X:A_X_OK
     },
-    domain:function(name){
-        var arr= name.match(this.domainRule)
-        if (!arr) return arr
-        return path.resolve(this.root,...arr)
+    path(name){
+		let
+		ns=Array.isArray(name)?name:name.split(path.sep),
+		arr=[]
+		for(let i=0,n; n=ns[i]; i++){
+			arr.push(...n.match(this.pathRule))
+		}
+        return path.join(...arr)+path.sep
     },
     // node bug? a+w is never allow
-    create:function(url,data,type,mode,cb){
+    create(url,data,type,mode,cb){
         switch(arguments.length){
         case 5: break
         case 4:
@@ -194,19 +195,21 @@ FileDB.prototype = {
         mode=mode|MODE
         cb=cb||dummyCB
 
-        var dst=normalize(this.root, url)
+        let dst=normalize(this.root, url)
         if (!dst) return cb(`invalid dst ${url}`)
+
+		let arr,src
 
         switch(type){
         case TYPE_FILE:
-            var arr=path.dirname(dst.substr(this.root.length+1)).split('/')
+            arr=path.dirname(dst.substr(this.root.length+1)).split('/')
             arr.unshift(this.root)
             mkdirp(arr, 1, mode, (err)=>{
                 fs.writeFile(dst,data,{encoding:ENC,mode:mode},cb)
             })
             break
         case TYPE_DIR:
-            var arr=dst.substr(this.root.length+1).split('/')
+            arr=dst.substr(this.root.length+1).split('/')
             arr.unshift(this.root)
             mkdirp(arr, 1, mode, (err)=>{
                 if (err) cb(err)
@@ -214,7 +217,7 @@ FileDB.prototype = {
             })
             break
         case TYPE_LINK:
-            var src=normalize(this.root, data)
+            src=normalize(this.root, data)
             if (!src) return cb(`invalid source ${data}`)
 
             link(src, dst, cb)
@@ -222,13 +225,13 @@ FileDB.prototype = {
         default: return cb('unsupported file type')
         }
     },
-    remove:function(url,cb){
+    remove(url,cb){
         cb=cb||dummyCB
         rmrf([url],this.root, cb)
     },
-    rename:function(from,to,cb){
+    rename(from,to,cb){
         cb=cb||dummyCB
-        var
+        let
         fromP=normalize(this.root, from),
         toP=normalize(this.root, to)
 
@@ -236,10 +239,10 @@ FileDB.prototype = {
 
         fs.rename(fromP,toP,cb)
     },
-    chmod:function(url,mod,cb){
+    chmod(url,mod,cb){
         cb=cb||dummyCB
 
-        var p=normalize(this.root, url)
+        let p=normalize(this.root, url)
         if (!p) return cb(`invalid url: ${url}`)
 
         fs.stat(p,(err,stat)=>{
@@ -247,10 +250,10 @@ FileDB.prototype = {
             fs.chmod(p,MODE|mod,cb)
         })
     },
-    mode:function(url,cb){
+    mode(url,cb){
         if (!cb) return
 
-        var p=normalize(this.root, url)
+        let p=normalize(this.root, url)
         if (!p) return cb(`invalid url: ${url}`)
 
         fs.stat(p,(err,stat)=>{
@@ -258,10 +261,10 @@ FileDB.prototype = {
             cb(null, stat.mode)//parseInt(stat.mode.toString(8), 10))
         })
     },
-    read:function(url,cb){
+    read(url,cb){
         if (!cb) return
 
-        var p=normalize(this.root, url)
+        let p=normalize(this.root, url)
         if (!p) return cb(`invalid url: ${url}`)
 
         getFile(p, this.root, (err, file)=>{
@@ -269,10 +272,10 @@ FileDB.prototype = {
             fs.readFile(file, ENC, cb)
         })
     },
-    write:function(url,data,cb){
+    write(url,data,cb){
         cb=cb||dummyCB
 
-        var p=normalize(this.root, url)
+        let p=normalize(this.root, url)
         if (!p) return cb(`invalid url: ${url}`)
 
         getFile(p, this.root, (err, file)=>{
@@ -280,29 +283,29 @@ FileDB.prototype = {
             fs.writeFile(file, data, ENC, cb)
         })
     },
-    copy:function(from,to,cb){
+    copy(from,to,cb){
         cb=cb||dummyCB
 
-        var p=normalize(this.root, to)
+        let p=normalize(this.root, to)
         if (!p) return cb(`invalid dest: ${dest}`)
 
         copyr([from], this.root, p, cb)
     },
-    list:function(url,cb){
+    list(url,cb){
         if (!cb) return
-        var p=normalize(this.root, url)
+        let p=normalize(this.root, url)
         if (!p) return cb(`invalid url: ${url}`)
         fs.readdir(p, cb)
     },
-    links:function(url,link,cb){
+    links(url,link,cb){
         if (!cb) return
         findLink([url], this.root, link, [], cb)
     }
 }
 
 module.exports={
-    create: function(appConfig, libConfig, next){
-        var config={ root:__dirname, nameLength:2 }
+    create(appConfig, libConfig, next){
+        let config={ root:__dirname, nameLength:2 }
 
         args.print('FileDB Options',Object.assign(config,libConfig))
 
