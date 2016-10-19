@@ -7,32 +7,36 @@ META_OPT={encoding:ENC,mode:MODE},
 TYPE_FILE=1,
 TYPE_DIR=2,
 TYPE_LINK=3,
+// TODO: use fs.constant instead?
 G_R_OK=0o040,
 G_W_OK=0o020,
 G_X_OK=0o010,
 A_R_OK=0o004,
 A_W_OK=0o002,
-A_X_OK=0o001
+A_X_OK=0o001,
 
-let
 fs = require('fs'),
 path = require('path'),
+SEP=path.sep,
 args= require('pico-args'),
 dummyCB=()=>{},
-normalize=function(root, url){
-    let p=path.resolve(root,url)
+normalize=function(root){
+    let p=path.resolve(...arguments)
     if (!p.startsWith(root)) return null
     return p
+},
+mkdir=function(url, mode, cb){
+    fs.mkdir(url, mode, (err)=>{
+        // ignore EEXIST
+        if (err && err.errno !== -17) return cb(err)
+		cb()
+    })
 },
 mkdirp=function(arr, i, mode, cb){
     if (arr.length <= i) return cb()
     let url=path.resolve(...(arr.slice(0,++i)))
-    fs.mkdir(url, mode, (err)=>{
-        if (err){
-            // ignore EEXIST
-            if (err.errno === -17) return mkdirp(arr, i, mode, cb)
-            return cb(err)
-        }
+    mkdir(url, mode, (err)=>{
+        if (err) return cb(err)
 		mkdirp(arr, i, mode, cb)
     })
 },
@@ -42,6 +46,7 @@ rmrf=function(list, root, cb){
     if (!src) return cb(`invalid source ${url}`)
 
     fs.lstat(src, (err, stat)=>{
+		if (err && -2===err.errno) return rmrf(list, root, cb)
         if (err) return cb(err)
         if (stat.isFile() || stat.isSymbolicLink()) return fs.unlink(src, (err)=>{
             if (err) return cb(err)
@@ -109,9 +114,13 @@ link=function(src, dst, cb){
         if (err) return cb(err)
         if (stat.isSymbolicLink()) return fs.readlink(src, (err, realPath)=>{
             if (err) return cb(err)
-            link(path.resolve(src,realPath), dst, cb)
+            return link(path.resolve(src,realPath), dst, cb)
         })
-        fs.symlink(path.relative(dst,src), dst, cb)
+		let fname=path.basename(dst)
+		rmrf([fname],path.dirname(dst),(err)=>{
+			if (err) return cb(err)
+			fs.symlink(path.join(path.relative(dst,src),fname), dst, cb)
+		})
     })
 },
 findLink=function(arr, root, link, links, cb){
@@ -150,12 +159,12 @@ getFile=function(src, root, cb){
     })
 }
 
-function FileDB(config){
+function FSysDB(config){
     this.root = config.root
     this.pathRule = new RegExp(`[\\s\\S]{1,${config.nameLength}}`,'g')
 }
 
-FileDB.prototype = {
+FSysDB.prototype = {
 	META:META,
     TYPE:{
         FILE:TYPE_FILE,
@@ -170,17 +179,20 @@ FileDB.prototype = {
         A_W:A_W_OK,
         A_X:A_X_OK
     },
-    path(name){
-		let
-		ns=Array.isArray(name)?name:name.split(path.sep),
-		arr=[]
-		for(let i=0,n; n=ns[i]; i++){
+	join:path.join,
+    path(){
+		let ns=[], arr=[], i, n
+		for(i=0; n=arguments[i]; i++){
+			ns.push(...(n.split(SEP)))
+		}
+		for(i=0; n=ns[i]; i++){
 			arr.push(...n.match(this.pathRule))
 		}
-        return path.join(...arr)+path.sep
+        return path.join(...arr)+SEP
     },
     // node bug? a+w is never allow
-    create(url,data,type,mode,cb){
+	// mkdir -p
+    createp(url,data,type,mode,cb){
         switch(arguments.length){
         case 5: break
         case 4:
@@ -198,18 +210,18 @@ FileDB.prototype = {
         let dst=normalize(this.root, url)
         if (!dst) return cb(`invalid dst ${url}`)
 
-		let arr,src
+		let arr
 
         switch(type){
         case TYPE_FILE:
-            arr=path.dirname(dst.substr(this.root.length+1)).split('/')
+            arr=path.dirname(dst.substr(this.root.length+1)).split(SEP)
             arr.unshift(this.root)
             mkdirp(arr, 1, mode, (err)=>{
                 fs.writeFile(dst,data,{encoding:ENC,mode:mode},cb)
             })
             break
         case TYPE_DIR:
-            arr=dst.substr(this.root.length+1).split('/')
+            arr=dst.substr(this.root.length+1).split(SEP)
             arr.unshift(this.root)
             mkdirp(arr, 1, mode, (err)=>{
                 if (err) cb(err)
@@ -217,17 +229,58 @@ FileDB.prototype = {
             })
             break
         case TYPE_LINK:
-            src=normalize(this.root, data)
+            let src=normalize(this.root, data)
             if (!src) return cb(`invalid source ${data}`)
-
-            link(src, dst, cb)
+            arr=path.dirname(dst.substr(this.root.length+1)).split(SEP)
+            arr.unshift(this.root)
+            mkdirp(arr, 1, mode, (err)=>{
+				if (err) return cb(err)
+				link(src, dst, cb)
+			})
             break
         default: return cb('unsupported file type')
         }
     },
-    remove(url,cb){
+	create(root,name,data,type,mode,cb){
+        switch(arguments.length){
+        case 6: break
+        case 5:
+            if ('function' === typeof mode){
+                cb=mode
+                mode=MODE
+            }
+            break
+        case 4: mode=MODE; break
+        default: return console.error('not enough params')
+        }
+        mode=mode|MODE
         cb=cb||dummyCB
-        rmrf([url],this.root, cb)
+
+        let dst=normalize(this.root, root, name)
+        if (!dst) return cb(`invalid dst ${path.join(root,name)}`)
+
+		let arr,src
+
+        switch(type){
+        case TYPE_FILE:
+			fs.writeFile(dst,data,{encoding:ENC,mode:mode},cb)
+            break
+        case TYPE_DIR:
+			mkdir(dst, mode, (err)=>{
+                if (err) cb(err)
+                fs.writeFile(path.resolve(dst,META),data,META_OPT,cb)
+            })
+            break
+        case TYPE_LINK:
+            src=normalize(this.root, data)
+            if (!src) return cb(`invalid source ${data}`)
+            link(src, dst, cb)
+            break
+        default: return cb('unsupported file type')
+        }
+	},
+    remove(url,cb){
+        rmrf([url],this.root, cb||dummyCB)
     },
     rename(from,to,cb){
         cb=cb||dummyCB
@@ -307,8 +360,8 @@ module.exports={
     create(appConfig, libConfig, next){
         let config={ root:__dirname, nameLength:2 }
 
-        args.print('FileDB Options',Object.assign(config,libConfig))
+        args.print('FSysDB Options',Object.assign(config,libConfig))
 
-        return next(null, new FileDB(config))
+        return next(null, new FSysDB(config))
     }
 }
