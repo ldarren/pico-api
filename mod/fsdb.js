@@ -7,18 +7,22 @@ META_OPT={encoding:ENC,mode:MODE},
 TYPE_FILE=1,
 TYPE_DIR=2,
 TYPE_LINK=3,
-// TODO: use fs.constant instead?
-G_R_OK=0o040,
-G_W_OK=0o020,
-G_X_OK=0o010,
-A_R_OK=0o004,
-A_W_OK=0o002,
-A_X_OK=0o001,
+// G:user in group, A:all, X:browse group, R:read user, W:create subgroup
+G_R=0o040,
+G_W=0o020,
+G_X=0o010,
+G_RX=0o050,
+G_WRX=0o070,
+A_R=0o044,
+A_W=0o022,
+A_X=0o011,
+A_RX=0o055,
+A_WRX=0o077,
 
 fs = require('fs'),
 path = require('path'),
-SEP=path.sep,
 args= require('pico-args'),
+SEP=path.sep,
 dummyCB=()=>{},
 normalize=function(root){
     let p=path.resolve(...arguments)
@@ -46,8 +50,9 @@ rmrf=function(list, root, cb){
     if (!src) return cb(`invalid source ${url}`)
 
     fs.lstat(src, (err, stat)=>{
-		if (err && -2===err.errno) return rmrf(list, root, cb)
-        if (err) return cb(err)
+		if (err)
+			if(-2===err.errno) return rmrf(list, root, cb)
+			else return cb(err)
         if (stat.isFile() || stat.isSymbolicLink()) return fs.unlink(src, (err)=>{
             if (err) return cb(err)
             rmrf(list, root, cb)
@@ -116,35 +121,61 @@ link=function(src, dst, cb){
             if (err) return cb(err)
             return link(path.resolve(src,realPath), dst, cb)
         })
-		let fname=path.basename(dst)
-		rmrf([fname],path.dirname(dst),(err)=>{
+		rmrf([path.basename(dst)],path.dirname(dst),(err)=>{
 			if (err) return cb(err)
-			fs.symlink(path.join(path.relative(dst,src),fname), dst, cb)
+			fs.symlink(src, dst, cb)
 		})
     })
 },
-findLink=function(arr, root, link, links, cb){
+findLink=function(arr, root, link, cb){
+    if (!arr.length) return cb() 
+
+    let src=normalize(root, arr.pop())
+    if (!src) return cb('invalid url')
+
+    fs.lstat(src, (err, stat)=>{
+		if (err)
+			if(-2===err.errno) return findLink(arr, root, link, cb)
+			else return cb(err)
+        if (stat.isSymbolicLink()) return fs.readlink(src, (err, realPath)=>{
+            if (err) return cb(err)
+            if (!path.relative(realPath,link)) return cb(null, 1)
+            findLink(arr,root,link,cb)
+        })
+        if (stat.isDirectory()) return fs.readdir(src, (err, files)=>{
+            if (err) return cb(err)
+            findLink(files, src, link, (err, found)=>{
+                if (err || found) return cb(err, found)
+                findLink(arr, root, link, cb)
+            })
+        })
+        findLink(arr, root, link, cb)
+    })
+},
+findLinks=function(arr, root, link, links, cb){
     if (!arr.length) return cb(null, links) 
 
     let src=normalize(root, arr.pop())
     if (!src) return cb('invalid url', links)
 
     fs.lstat(src, (err, stat)=>{
-        if (err) return cb(err)
+		if (err)
+			if(-2===err.errno) return findLinks(arr, root, link, links, cb)
+			else return cb(err)
         if (stat.isSymbolicLink()) return fs.readlink(src, (err, realPath)=>{
             if (err) return cb(err)
             if (path.resolve(src,realPath) === link) links.push(src)
-            findLink(arr,root,link,links,cb)
+            findLinks(arr,root,link,links,cb)
         })
         if (stat.isDirectory()) return fs.readdir(src, (err, files)=>{
             if (err) return cb(err)
-            findLink(files, src, link, links, (err)=>{
+            findLinks(files, src, link, links, (err)=>{
                 if (err) return cb(err)
-                findLink(arr, root, link, links, cb)
+                findLinks(arr, root, link, links, cb)
             })
         })
         
-        findLink(arr, root, link, links, cb)
+        findLinks(arr, root, link, links, cb)
     })
 },
 getFile=function(src, root, cb){
@@ -172,14 +203,23 @@ FSysDB.prototype = {
         LINK:TYPE_LINK
     },
     MODE:{
-        G_R:G_R_OK,
-        G_W:G_W_OK,
-        G_X:G_X_OK,
-        A_R:A_R_OK,
-        A_W:A_W_OK,
-        A_X:A_X_OK
+		NONE:0,
+		G_R,
+		G_W,
+		G_X,
+		G_RX,
+		G_WRX,
+		A_R,
+		A_W,
+		A_X,
+		A_RX,
+		A_WRX
     },
 	join:path.join,
+	split(url){
+		if (!url||!url.split) return []
+		return url.split(SEP)
+	},
     path(){
 		let ns=[], arr=[], i, n
 		for(i=0; n=arguments[i]; i++){
@@ -350,9 +390,13 @@ FSysDB.prototype = {
         if (!p) return cb(`invalid url: ${url}`)
         fs.readdir(p, cb)
     },
-    links(url,link,cb){
+    findLink(link,root,urls,cb){
         if (!cb) return
-        findLink([url], this.root, link, [], cb)
+        findLink(Array.isArray(urls)?urls:[urls], path.join(this.root,root), path.join(this.root,link), cb)
+    },
+    findLinks(urls,link,cb){
+        if (!cb) return
+        findLinks(Array.isArray(urls)?urls:[urls], this.root, link, [], cb)
     }
 }
 
