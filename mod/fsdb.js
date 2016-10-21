@@ -4,9 +4,11 @@ ENC='utf8',
 EMPTY='',
 MODE=0o700,
 META_OPT={encoding:ENC,mode:MODE},
+
 TYPE_FILE=1,
 TYPE_DIR=2,
 TYPE_LINK=3,
+
 // G:user in group, A:all, X:browse group, R:read user, W:create subgroup
 G_R=0o040,
 G_W=0o020,
@@ -139,7 +141,7 @@ findLink=function(arr, root, link, cb){
 			else return cb(err)
         if (stat.isSymbolicLink()) return fs.readlink(src, (err, realPath)=>{
             if (err) return cb(err)
-            if (!path.relative(realPath,link)) return cb(null, 1)
+            if (!path.relative(realPath,link)) return cb(null, src)
             findLink(arr,root,link,cb)
         })
         if (stat.isDirectory()) return fs.readdir(src, (err, files)=>{
@@ -178,14 +180,14 @@ findLinks=function(arr, root, link, links, cb){
         findLinks(arr, root, link, links, cb)
     })
 },
-getFile=function(src, root, cb){
+getFilename=function(src, cb, type){
     fs.lstat(src, (err, stat)=>{
         if (err) return cb(err)
-        if (stat.isFile()) return cb(null, src)
-        if (stat.isDirectory()) return cb(null, path.resolve(src, META))
+        if (stat.isFile()) return cb(null, src, type||TYPE_FILE)
+        if (stat.isDirectory()) return cb(null, path.resolve(src, META), type||TYPE_DIR)
         if (stat.isSymbolicLink()) return fs.readlink(src, (err, realPath)=>{
             if (err) return cb(err)
-            getFile(path.resolve(src,realPath), root, cb)
+            getFilename(path.resolve(src,realPath), cb, TYPE_LINK)
         })
     })
 }
@@ -360,9 +362,11 @@ FSysDB.prototype = {
         let p=normalize(this.root, url)
         if (!p) return cb(`invalid url: ${url}`)
 
-        getFile(p, this.root, (err, file)=>{
+        getFilename(p, (err, fname, type)=>{
             if (err) return cb(err)
-            fs.readFile(file, ENC, cb)
+            fs.readFile(fname, ENC, (err, data)=>{
+				cb(err, data, type)
+			})
         })
     },
     write(url,data,cb){
@@ -371,9 +375,9 @@ FSysDB.prototype = {
         let p=normalize(this.root, url)
         if (!p) return cb(`invalid url: ${url}`)
 
-        getFile(p, this.root, (err, file)=>{
+        getFilename(p, (err, fname)=>{
             if (err) return cb(err)
-            fs.writeFile(file, data, ENC, cb)
+            fs.writeFile(fname, data, ENC, cb)
         })
     },
     copy(from,to,cb){
@@ -394,6 +398,7 @@ FSysDB.prototype = {
         if (!cb) return
         findLink(Array.isArray(urls)?urls:[urls], path.join(this.root,root), path.join(this.root,link), cb)
     },
+	//TODO: make findLinks works like findLink
     findLinks(urls,link,cb){
         if (!cb) return
         findLinks(Array.isArray(urls)?urls:[urls], this.root, link, [], cb)
