@@ -225,7 +225,8 @@ FSysDB.prototype = {
     path(){
 		let ns=[], arr=[], i, n
 		for(i=0; n=arguments[i]; i++){
-			ns.push(...(n.split(SEP)))
+			if (n.split) ns.push(...(n.split(SEP)))
+			else ns.push(n.toString())
 		}
 		for(i=0; n=ns[i]; i++){
 			arr.push(...n.match(this.pathRule))
