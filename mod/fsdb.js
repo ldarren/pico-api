@@ -219,19 +219,22 @@ FSysDB.prototype = {
     },
 	join:path.join,
 	split(url){
-		if (!url||!url.split) return []
+		if (!url||!url.charAt) return []
 		return url.split(SEP)
 	},
     path(){
-		let ns=[], arr=[], i, n
-		for(i=0; n=arguments[i]; i++){
-			if (n.split) ns.push(...(n.split(SEP)))
-			else ns.push(n.toString())
+		let ns=[], arr=[], i, l, n
+		for(i=0,l=arguments.length; i<l; i++){
+			n=arguments[i]
+			if (n.charAt) ns.push(...(n.split(SEP)))
+			else ns.push(n)
 		}
-		for(i=0; n=ns[i]; i++){
-			arr.push(...n.match(this.pathRule))
+		for(i=0,l=ns.length; i<l; i++){
+			n=ns[i]
+			if (isFinite(n)) arr.push(...n.toString().match(this.pathRule))
+			else arr.push(n)
 		}
-        return path.join(...arr)+SEP
+        return path.join(...arr,SEP)
     },
     // node bug? a+w is never allow
 	// mkdir -p
