@@ -1,9 +1,9 @@
 //TODO: use pool or clusterPool to prevent connection error?
-let
+const
 mysql = require('mysql'),
 args= require('pico-args'),
 makeConn = function(client){
-    let
+    const
     config = client.config,
     conn = mysql.createConnection(config)
     conn.on('error', function(err){
@@ -36,7 +36,7 @@ Client.prototype={
         return mysql.format(...arguments)
     },
 	decode(obj,hash,ENUM){
-		let keys=Object.keys(obj)
+		const keys=Object.keys(obj)
 		for(let i=0,k; k=keys[i]; i++) {
 			if (-1===ENUM.indexOf(k)) continue
 			obj[k]=hash.key(obj[k])
@@ -50,7 +50,7 @@ Client.prototype={
 		return rows
 	},
 	encode(obj,by,hash,INDEX,ENUM){
-		let arr=[]
+		const arr=[]
         for(let i=0,k; k=INDEX[i]; i++){ 
 			if (-1===ENUM.indexOf(k)) arr.push(obj[k])
 			else arr.push(hash.val(obj[k]))
@@ -75,7 +75,7 @@ Client.prototype={
         return outputs
     },
 	mapEncode(obj, by, hash, INDEX, ENUM){
-		let
+		const
 		id=obj.id,
 		arr=[]
 
@@ -94,7 +94,7 @@ Client.prototype={
 		return arr
 	},
 	map2Encode(obj1, obj2, map, by, hash, INDEX, ENUM){
-		let
+		const
 		id1=obj1.id,
 		id2=obj2.id,
 		arr=[]
@@ -114,7 +114,7 @@ Client.prototype={
 		return arr
 	},
 	listDecode(rows,key,hash,ENUM){
-		let
+		const
 		k=hash.val(key),
 		notEnum=(-1===ENUM.indexOf(key))
 
@@ -128,7 +128,7 @@ Client.prototype={
 	},
 	listEncode(id, key, list, by, hash, INDEX, ENUM){
 		if (!key || !list || !list.length) return cb()
-		let
+		const
 		arr=[],
 		k=hash.val(key),
 		notEnum=(-1===ENUM.indexOf(key))
@@ -148,7 +148,7 @@ Client.prototype={
 
 module.exports={
     create(appConfig, libConfig, next){
-        let config={
+        const config={
             host:'localhost',
             port:3306,
             user:'null',
