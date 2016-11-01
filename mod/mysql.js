@@ -58,9 +58,9 @@ Client.prototype={
         arr.push(by)
 		return arr
 	},
-	mapDecode(rows=[], output={}, hash, ENUM, key){
+	mapDecode(rows=[], output={}, hash, ENUM, key='id'){
 		for(let i=0,r,k; r=rows[i]; i++) {
-			if (key && r[key] !== output.id) continue
+			if (r[key] !== output.id) continue
 			k=hash.key(r.k)
 			if (-1===ENUM.indexOf(k)) output[k]=r.v1 || r.v2
 			else output[k]=hash.key(r.v2)
@@ -68,7 +68,7 @@ Client.prototype={
 		}
 		return output
 	},
-    mapDecodes(rows=[], outputs=[], key, hash, ENUM){
+    mapDecodes(rows=[], outputs=[], hash, ENUM, key='id'){
         for(let i=0,o; o=outputs[i]; i++){
             this.mapDecode(rows, o, hash, ENUM, key)
         }
