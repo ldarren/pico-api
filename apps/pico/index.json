@@ -6,10 +6,10 @@
     },
     "routes":{
         "ERR|#msg":[
-            [0]
+            []
         ],
         "END|#msg":[
-            [0]
+            []
         ],
         "/pico":[
             ["util","route","req"],
