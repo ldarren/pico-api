@@ -152,7 +152,7 @@ disconnect= function(){
 request= function(req, res){
 	console.log(req.method,req.url)
     let o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, Session.TYPE.WEB, o.query,null, req,res, null,null, renderAll)
+    sigslot.signal(o.pathname, Session.TYPE.WEB, null,o.query, req,res, null,null, renderAll)
 }
 
 module.exports= {
