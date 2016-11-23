@@ -1,4 +1,4 @@
-var
+const
 mods= require('./lib/mods'),
 cfg= require('./lib/cfg')
 
