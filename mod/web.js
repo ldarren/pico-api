@@ -7,9 +7,8 @@ HEAD_SSE= {
     'Access-Control-Allow-Credentials': 'true',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
-}
+},
 
-let
 http= require('http'),
 https= require('https'),
 fs= require('fs'),
@@ -20,14 +19,12 @@ args= require('pico-args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
-config,
-sigslot,
 error=function(err, sess, res, query, cb){
-    err=err||sess.get('error')
-    if (!Array.isArray(err)) err=sess.error(404,err)
-    if (!res.headersSent) res.writeHead(err[0], HEAD_JSON)
-    res.write(bodyparser.error(query,err[1]))
-    sess.set('error',undefined)
+	err=err||sess.get('error')
+	if (!Array.isArray(err)) err=sess.error(404,err)
+	if (!res.headersSent) res.writeHead(err[0], HEAD_JSON)
+	res.write(bodyparser.error(query,err[1]))
+    sess.set('error') //empty error
     cb()
 },
 render=function(sess, ack, query, res, req, cred,input, cb){
@@ -44,21 +41,25 @@ render=function(sess, ack, query, res, req, cred,input, cb){
     })
 },
 renderStart=function(ack, query, res, req, cred, input, next){
+	if (res.finished) return next()
     if (this.has('error')) return error(null, this, res, query, next)
     res.writeHead(200, HEAD_JSON)
     render(this, ...arguments)
 },
 renderStream=function(ack, query, res, req, cred, input, next){
+	if (res.finished) return next()
     if (this.has('error')) return error(null, this, res, query, next)
     render(this, ...arguments)
 },
 renderStop=function(ack, query, res, req, cred, input, next){
+	if (res.finished) return next()
     let cb=()=>{res.end(); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
     render(this, ack, query, res, req, cred, input, cb)
 },
 // TODO: better way to delay error message
 renderAll=function(ack, query, res, req, cred, input, next){
+	if (res.finished) return next()
     let cb=()=>{res.end(); next()}
     if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
     res.writeHead(200, HEAD_JSON)
@@ -122,9 +123,9 @@ web={
         next()
     },
     SSE(res, msg, evt, retry){
-        res.write("retry: "+(retry||1000)+"\n");
-        if (evt) res.write("event: "+evt+"\n");
-        res.write("data: " + PJSON.stringify(msg).join(config.sep) + "\n\n");
+        res.write(`retry: ${retry||1000}\n`)
+        if (evt) res.write(`event: ${evt}\n`)
+        res.write(`data: ${PJSON.stringify(msg).join(config.sep)}\n\n`)
     },
     SSEStop(res, next){
         res.end()
@@ -147,6 +148,7 @@ resetPort=function(port, appConfig, cb){
 	})
 },
 disconnect= function(){
+console.log('disconnect',arguments)
     sigslot.signal('web.dc', Session.TYPE.WEB, null,null, null,this, null,null, renderAll)
 },
 request= function(req, res){
@@ -154,6 +156,10 @@ request= function(req, res){
     let o=url.parse(req.url,true)
     sigslot.signal(o.pathname, Session.TYPE.WEB, null,o.query, req,res, null,null, renderAll)
 }
+
+let
+config,
+sigslot
 
 module.exports= {
     create(appConfig, libConfig, next){
