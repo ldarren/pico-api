@@ -1,4 +1,4 @@
-var
+const
 path=require('path'),
 apn=require('apn'),
 args= require('pico-args'),
@@ -26,7 +26,7 @@ resolvePath=function(home, apnPath){
 WebPush=function(config,sigslot){
 	this.options=config.options
     if (config.apn){
-        var apnCli=this.apnCli = new apn.Connection(config.apn)
+        const apnCli=this.apnCli = new apn.Connection(config.apn)
         apnCli.on('connected', apnConnected)
         apnCli.on('disconnected', apnDisconnected)
         apnCli.on('timeout', apnTimeout)
@@ -65,13 +65,13 @@ mozSend=function(url,header,keys,i,res,cb){
 }
 
 WebPush.prototype={
-	broadcast: function(tokens, ids, keys, title, content, urlargs){
-        var
+	broadcast(tokens, ids, keys, title, content, urlargs){
+        const
 		options=this.options,
 		cli=this.apnCli
 
         if (cli && tokens){
-            var msg = new apn.Notification()
+            const msg = new apn.Notification()
 
             msg.setAlertTitle(title)
             msg.setAlertText(content)
@@ -85,20 +85,20 @@ WebPush.prototype={
         }
 
         if (ids){
-			var gcm=this.gcm
+			const gcm=this.gcm
 			utils.ajax('post',gcm.url,JSON.stringify({registration_ids:ids}),gcm.header,webpushCB)
         }
 
         if (keys){
-			var moz=this.moz
+			const moz=this.moz
 			mozSend(moz.url,moz.header,keys,0,[],webpushCB)
         }
 	}
 }
 
 module.exports= {
-    create: function(appConfig, libConfig, next){
-        var config={
+    create(appConfig, libConfig, next){
+        const config={
             // https://github.com/argon/node-apn/blob/master/doc/connection.markdown
             // https://github.com/argon/node-apn/blob/master/doc/feedback.markdown
             apn:{
@@ -121,7 +121,7 @@ module.exports= {
 
         args.print('Webpush Options',picoObj.extend(config,libConfig))
 
-        var apn=config.apn
+        const apn=config.apn
 
         apn.key=resolvePath(appConfig.path,apn.key)
         apn.cert=resolvePath(appConfig.path,apn.cert)
