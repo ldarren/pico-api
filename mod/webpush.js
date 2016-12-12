@@ -40,7 +40,7 @@ WebPush=function(config,sigslot){
 	if (config.gcm){
 		this.gcm={
 			url:config.gcm.endpoint,
-			header:{
+			headers:{
 				"Authorization": `key=${config.gcm.key}`,
 				"Content-Type": "application/json"
 			}
@@ -49,15 +49,15 @@ WebPush=function(config,sigslot){
 	if (config.moz){
 		this.moz={
 			url:config.moz.endpoint,
-			header:{
+			headers:{
 				"TTL": `${config.options.ttl}`,
 			}
 		}
 	}
 },
-mozSend=function(url,header,keys,i,res,cb){
+mozSend=function(url,opt,keys,i,res,cb){
 	if (keys.length <=i) return cb()
-	utils.ajax('post',url+keys[i],null,header,(err,code,data)=>{
+	utils.ajax('post',url+keys[i],null,opt,(err,code,data)=>{
 		if (err) return cb(err)
 		res.push(data)
 		mozSend(url,header,keys,++i,res,cb)
@@ -86,12 +86,12 @@ WebPush.prototype={
 
         if (ids){
 			const gcm=this.gcm
-			utils.ajax('post',gcm.url,JSON.stringify({registration_ids:ids}),gcm.header,webpushCB)
+			utils.ajax('post',gcm.url,JSON.stringify({registration_ids:ids}),gcm,webpushCB)
         }
 
         if (keys){
 			const moz=this.moz
-			mozSend(moz.url,moz.header,keys,0,[],webpushCB)
+			mozSend(moz.url,moz,keys,0,[],webpushCB)
         }
 	}
 }
