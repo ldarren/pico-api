@@ -15,7 +15,7 @@ module.exports={
     help:function(next){
         next(`api ${this.api} is not supported by pico yet`)
     },
-    sayHello:function(next){
+    sayNow:function(next){
         console.log(Date.now())
         next()
     }
