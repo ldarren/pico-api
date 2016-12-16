@@ -30,7 +30,7 @@ error=function(err, sess, res, query, cb){
 render=function(sess, ack, query, res, req, cred,input, cb){
     sess.commit((err)=>{
         if (err) return error(err, sess, res, query, cb)
-        let output=sess.getOutput()
+        const output=sess.getOutput()
         if (query.api){
             res.write(bodyparser.render(query, output))
         }else if (output){
@@ -40,27 +40,37 @@ render=function(sess, ack, query, res, req, cred,input, cb){
         cb()
     })
 },
+renderNext=function(req,res,qs){
+	const q=qs.shift()
+
+	sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,qs.length?renderStream:renderStop,qs)
+},
 renderStart=function(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
-    if (this.has('error')) return error(null, this, res, query, next)
+
+    const cb=()=>{renderNext(req,res,this.args[0]); next()}
+    if (this.has('error')) return error(null, this, res, query, cb)
     res.writeHead(200, HEAD_JSON)
-    render(this, ...arguments)
+    render(this, ack, query, res, req, cred, input, cb)
 },
 renderStream=function(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
-    if (this.has('error')) return error(null, this, res, query, next)
-    render(this, ...arguments)
+
+    const cb=()=>{renderNext(req,res,this.args[0]); next()}
+    if (this.has('error')) return error(null, this, res, query, cb)
+    render(this, ack, query, res, req, cred, input, cb)
 },
 renderStop=function(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
-    let cb=()=>{res.end(); next()}
+
+    const cb=()=>{res.end(); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
     render(this, ack, query, res, req, cred, input, cb)
 },
 // TODO: better way to delay error message
 renderAll=function(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
-    let cb=()=>{res.end(); next()}
+    const cb=()=>{res.end(); next()}
     if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
     res.writeHead(200, HEAD_JSON)
     render(this, ack, query, res, req, cred, input, cb)
@@ -78,7 +88,7 @@ web={
 		}
 	},
     parse(req,res,next){
-		let ct=req.headers['content-type']
+		const ct=req.headers['content-type']
 		if (!ct) return next()
         if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{
@@ -91,14 +101,8 @@ web={
                     sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderAll)
                     break
                 default:
-                    q=queries[0]
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStart)
-                    for(let i=1,l=queries.length-1; i<l; i++){
-                        q=queries[i]
-                        sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStream)
-                    }
-                    q=queries[queries.length-1]
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStop)
+                    q=queries.shift()
+                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStart,queries)
                     break
                 }
 
