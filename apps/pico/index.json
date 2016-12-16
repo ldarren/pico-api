@@ -18,8 +18,8 @@
         "pico/add/app":[
             ["util","help"]
         ],
-        "sayHello":[
-            ["util","sayHello"]
+        "sayNow":[
+            ["util","sayNow"]
         ],
 		"/:appName|#appPath":[
 			["appMgr","redirect","req","res"]
