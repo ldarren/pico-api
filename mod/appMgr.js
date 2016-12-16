@@ -1,7 +1,7 @@
 // TODO
 // 1) app health check
 // 2) simple load balancing if more than one instance running
-var
+const
 cluster=require('cluster'),
 http=require('http'),
 fs=require('fs'),
@@ -10,13 +10,12 @@ args=require('pico-args'),
 cfg=require('../lib/cfg'),
 WorkerGrp=require('../lib/WorkerGrp'),
 workerGrps={},
-appEnv,appjs,watchPath,
 install=function(fpath){
     if (!fpath) return false
-    var [appName,count,env,ext]=cfg.parsePath(fpath)
+    const [appName,count,env,ext]=cfg.parsePath(fpath)
     if (appEnv !== env) return true
     uninstall(fpath)
-	var grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
+	const grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
 	for(let i=0; i<count; i++){
 		grp.add(path.resolve(watchPath,fpath))
 	}
@@ -26,9 +25,9 @@ install=function(fpath){
 uninstall=function(fpath){
     console.log('uninstalling',fpath)
     if (!fpath) return false
-    var [appName,count,env,ext]=cfg.parsePath(fpath)
+    const [appName,count,env,ext]=cfg.parsePath(fpath)
     if (appEnv !== env) return true
-    var grp=workerGrps[appName]
+    const grp=workerGrps[appName]
     if (!grp) return true
 	grp.removeAll()
     console.log('uninstalled',fpath)
@@ -42,16 +41,16 @@ watch=function(evt, fpath){
 },
 appMgr={
     redirect(req, res, next){
-        var appName=this.params.appName
+        const appName=this.params.appName
         if (!appName) return next(`appMgr, invalid path:${this.api}`)
 
-		var
-		grp=workerGrps[appName],
-		id=grp.select()
+		const grp=workerGrps[appName]
+        if (!grp) return next(`appMgr, invalid path:${this.api}`)
+		const id=grp.select()
 
 		console.info('redirecting to',appName,id)
 
-		var proxy=http.request({
+		const proxy=http.request({
             socketPath:`/tmp/${appName}.${id}`,
             method:req.method,
             path:req.url,
@@ -69,12 +68,12 @@ appMgr={
 		next()
     },
 	install(input, next){
-		var
+		const
 		appName=input.appName,
 		config=input.config,
 		count=input.count||1
 		if (!appName || !config) return next('missing appMgr.install params')
-		var grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
+		const grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
 		for(let i=0,l=count||1; i<l; i++){
 			grp.add(input)
 		}
@@ -82,10 +81,10 @@ appMgr={
 		next()
 	},
 	uninstall(input, next){
-		var appName=input.appName
+		const appName=input.appName
 		console.log('uninstalling',appName)
 		if (!appName) return next('missing appMgr.uninstall params')
-		var grp=workerGrps[appName]
+		const grp=workerGrps[appName]
 		if (!grp) return next() 
 		grp.remove(grp.select())
 		console.log('uninstalled',appName)
@@ -93,11 +92,13 @@ appMgr={
 	}
 }
 
+let appEnv,appjs,watchPath
+
 module.exports= {
     create(appConfig, libConfig, next){
         if (cluster.isWorker) return next('run on master only')
 
-        var
+        const
         config={
             path:'',			// config file location, appMgr can operate with config send over through http
             persistent:false	// watcher doens't keep program running
