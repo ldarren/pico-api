@@ -23,7 +23,7 @@ error=function(err, sess, res, query, cb){
 	err=err||sess.get('error')
 	if (!Array.isArray(err)) err=sess.error(404,err)
 	if (!res.headersSent) res.writeHead(err[0], HEAD_JSON)
-	res.write(bodyparser.error(query,err[1]))
+	res.write(bodyparser.error(query,err))
     sess.set('error') //empty error
     cb()
 },
