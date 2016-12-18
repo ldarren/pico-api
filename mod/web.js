@@ -58,6 +58,7 @@ renderStream=function(ack, query, res, req, cred, input, next){
 
     const cb=()=>{renderNext(req,res,this.args[0]); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
+console.log(req.method,req.url,query.api)
     render(this, ack, query, res, req, cred, input, cb)
 },
 renderStop=function(ack, query, res, req, cred, input, next){
@@ -65,6 +66,7 @@ renderStop=function(ack, query, res, req, cred, input, next){
 
     const cb=()=>{res.end(); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
+console.log(req.method,req.url,query.api)
     render(this, ack, query, res, req, cred, input, cb)
 },
 // TODO: better way to delay error message
@@ -93,17 +95,13 @@ web={
         if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
             bodyparser.parse(req, (err, queries)=>{
                 if (err) return next(err)
-                let q
-                switch(queries.length){
-                case 0: break
-                case 1:
-                    q=queries[0]
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderAll)
-                    break
-                default:
-                    q=queries.shift()
+				if (!queries.length) return next()
+                const q=queries.shift()
+console.log(req.method,req.url,q.api)
+                if(queries.length){
                     sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStart,queries)
-                    break
+				}else{
+                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderAll)
                 }
 
                 next()
@@ -156,7 +154,7 @@ console.log('disconnect',arguments)
     sigslot.signal('web.dc', Session.TYPE.WEB, null,null, null,this, null,null, renderAll)
 },
 request= function(req, res){
-	console.log(req.method,req.url)
+console.log(req.method,req.url)
     let o=url.parse(req.url,true)
     sigslot.signal(o.pathname, Session.TYPE.WEB, null,o.query, req,res, null,null, renderAll)
 }
