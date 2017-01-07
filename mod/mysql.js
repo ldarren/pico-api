@@ -64,7 +64,7 @@ Client.prototype={
 			k=hash.key(r.k)
 			if (-1===ENUM.indexOf(k)) output[k]=r.v1 || r.v2
 			else output[k]=hash.key(r.v2)
-			r.v1=r.v2=undefined
+			r.k=r.v1=r.v2=undefined
 		}
 		return output
 	},
@@ -122,7 +122,7 @@ Client.prototype={
 			if (r.k!==k)continue
 			if (notEnum) r[key]=(r.v1 || r.v2)
 			else r[key]=hash.key(r.v2)
-			r.v1=r.v2=undefined
+			r.k=r.v1=r.v2=undefined
 		}
 		return rows
 	},
