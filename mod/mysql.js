@@ -15,7 +15,7 @@ makeConn = function(client){
     conn.connect(function(err){
         if (err) {
             setImmediate(function(){ makeConn(client) })
-            return console.error('mysql conn[%s] error[%s]',JSON.stringify(config),err)
+			return console.error('mysql conn[%s:%d.%s] error[%s]',config.host,config.port,config.database,err)
         }
         console.log('mysql conn[%s:%d.%s] connected',config.host,config.port,config.database)
         //conn.query('SET NAMES utf8');
