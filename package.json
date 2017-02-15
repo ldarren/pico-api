@@ -1,8 +1,11 @@
 {
   "name": "picos",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "pico operating system",
   "main": "index.js",
+  "bin": {
+	  "picos":"./index.js"
+  },
   "dependencies": {
     "apn": "^1.7.5",
     "aws-sdk": "^2.5.5",

@@ -1,21 +1,20 @@
 module.exports={
-    setup: function(context, cb){
-        var sigslot=context.sigslot
-        //sigslot.signalAt('* * * * * *', 'sayHello')
+    setup(context, cb){
+        //context.sigslot.signalAt('* * * * * *', 'sayHello')
         cb()
     },
-    sep:function(msg,next){console.log(msg); return next()},
-    route:function(req, next){
+    sep(msg,next){console.log(msg); return next()},
+    route(req, next){
         switch(req.method){
         case 'POST': return next()
         case 'GET': this.setOutput(this.time)
         default: return next(null, this.sigslot.abort())
         }
     },
-    help:function(next){
+    help(next){
         next(`api ${this.api} is not supported by pico yet`)
     },
-    sayNow:function(next){
+    sayNow(next){
         console.log(Date.now())
         next()
     }

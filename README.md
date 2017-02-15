@@ -1,6 +1,55 @@
 # pico-api
 A lean API server
 
+##Setup
+* installation
+```
+npm i picos -g
+```
+* create app.json config file at your working folder
+```json
+{
+    "app":{
+        "actions": [
+            "action.json"
+        ]
+    },
+    "mods":{
+        "webServer":{
+            "mod":"web",
+            "port":8000
+        }
+    }
+}
+```
+* create action.json action config file at your working folder
+```json
+{
+    "deps":{
+        "app":"./app",
+    },
+    "routes":{
+        "/":[
+            ["app","hello","res"],
+            []
+		]
+    }
+}
+```
+* create app.js action file at your working folder
+```javascript
+module.exports={
+    setup(context, cb){
+        cb()
+    },
+    hello(res, next){
+		res.setHeader('connection','close')
+        this.setOutput('Hello World!')
+		next()
+    }
+}
+```
+
 ##Features
 * Web is not the only first class citizen in this platform, all other modules has similar status
 * Routing for web, fs events, redis pubsub, sse and node cluster messagging
