@@ -98,20 +98,18 @@ module.exports= {
     create(appConfig, libConfig, next){
         if (cluster.isWorker) return next('run on master only')
 
-        const
-        config={
+        const config={
             path:'',			// config file location, appMgr can operate with config send over through http
             persistent:false	// watcher doens't keep program running
-        },
-        appPath= appConfig.path
+        }
 
         args.print('AppMgr Options',Object.assign(config,libConfig))
 
-        appjs=path.resolve(appPath,'lib/app.js')
+        appjs=path.resolve(appConfig.path,'lib/app.js')
 
 		if (config.path){
 			appEnv=appConfig.env
-			watchPath=path.resolve(appPath,config.path)
+			watchPath=path.resolve(appConfig.configPath,config.path)
 
 			fs.readdir(watchPath,(err, fpaths)=>{
 				if (err) return next(err)

@@ -14,7 +14,7 @@
         },
         "appMgr":{
             "mod":"appMgr",
-            "path":"config/build"
+            "path":"build"
         }
     }
 }
