@@ -14,3 +14,4 @@ A lean API server
 * compile config/src db section to models
 * handling config/src db section update and changes
 * add domain protection to master and slaves
+* move mod and theirs dependencies out of picos

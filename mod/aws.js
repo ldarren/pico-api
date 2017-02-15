@@ -1,5 +1,6 @@
 var
 AWS= require('aws-sdk'),
+path= require('path'),
 args= require('pico-args'),
 dummyCB=()=>{},
 addServices=function(aws,config){
@@ -54,7 +55,7 @@ module.exports={
 
         args.print('SES Options',Object.assign(config,libConfig))
 
-		AWS.config.loadFromPath(config.credPath)
+		AWS.config.loadFromPath(path.resolve(appConfig.path,config.credPath))
 		AWS.config.apiVersions=config.apiVersions
 
 		var aws={}

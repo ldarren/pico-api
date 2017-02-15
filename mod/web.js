@@ -154,7 +154,6 @@ console.log('disconnect',arguments)
     sigslot.signal('web.dc', Session.TYPE.WEB, null,null, null,this, null,null, renderAll)
 },
 request= function(req, res){
-console.log(req.method,req.url)
     let o=url.parse(req.url,true)
     sigslot.signal(o.pathname, Session.TYPE.WEB, null,o.query, req,res, null,null, renderAll)
 }
