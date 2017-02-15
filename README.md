@@ -26,7 +26,7 @@ npm i picos -g
 ```json
 {
     "deps":{
-        "app":"./app",
+        "app":"./app"
     },
     "routes":{
         "/":[
