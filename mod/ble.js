@@ -4,19 +4,15 @@
 // Read and write descriptors for a particular characteristic. One of the most common descriptors used is the Client Characteristic Configuration Descriptor. This allows the client to set the notifications to indicate or notify for a particular characteristic.
 //
 const
+SESSION_TYPE='ble',
 ERR_INVALID='invalid ble action',
 ERR_OFF='ble power not on',
-ERR_NO_SERVICE='no ble service'
+ERR_NO_SERVICE='no ble service',
 
-var
 util=require('util'),
 bleno=require('bleno'),
 args= require('pico-args'),
 Session= require('../lib/Session'),
-poweredOn=false,
-sigslot,
-config,
-device={},
 dummyCB=()=>{},
 Characteristic=function(name, options){
     var
@@ -123,37 +119,44 @@ Characteristic.prototype={
     // read request handler, function(offset, callback) { ... }
     onReadRequest(offset, cb){
         console.log(this.name+'.read: ' + offset)
-        sigslot.signal(this.name+'.read', Session.TYPE.BLE, null, offset, this, cb, render)
+        sigslot.signal(this.name+'.read', SESSION_TYPE, null, offset, this, cb, render)
     },
     // write request handler, function(data, offset, withoutResponse, callback) { ...}
     onWriteRequest(data, offset, withoutResponse, cb){
         console.log(this.name+'.write: ' + data.toString('hex') + ' ' + offset + ' ' + withoutResponse)
-        sigslot.signal(this.name+'.write', Session.TYPE.BLE, data, offset, this, cb, render)
+        sigslot.signal(this.name+'.write', SESSION_TYPE, data, offset, this, cb, render)
     },
     // notify/indicate subscribe handler, function(maxValueSize, updateValueCallback) { ...}
     onSubscribe(maxValueSize, updateValueCB){
         console.log(this.name+'.subscribe: ' + maxValueSize)
         bleno.Characteristic.prototype.onSubscribe.call(this, maxValueSize, updateValueCB)
-        sigslot.signal(this.name+'.subscribe', Session.TYPE.BLE, null, 0, this, null, render)
+        sigslot.signal(this.name+'.subscribe', SESSION_TYPE, null, 0, this, null, render)
     },
     // notify/indicate unsubscribe handler, function() { ...}
     onUnsubscribe(){
         console.log(this.name+'.unsubscribe: ' + arguments)
         bleno.Characteristic.prototype.onUnsubscribe.call(this)
-        sigslot.signal(this.name+'.unsubscribe', Session.TYPE.BLE, null, 0, this, null, render)
+        sigslot.signal(this.name+'.unsubscribe', SESSION_TYPE, null, 0, this, null, render)
     },
     // notify sent handler, function() { ...}
     onNotify(){
         console.log(this.name+'.notify: ' + arguments)
-        sigslot.signal(this.name+'.notify', Session.TYPE.BLE, null, 0, this, null, render)
+        sigslot.signal(this.name+'.notify', SESSION_TYPE, null, 0, this, null, render)
     },
     // indicate confirmation received handler, function() { ...}
     onIndicate(){
         console.log(this.name+'.indicate: ' + arguments)
-        sigslot.signal(this.name+'.indicate', Session.TYPE.BLE, null, 0, this, null, render)
+        sigslot.signal(this.name+'.indicate', SESSION_TYPE, null, 0, this, null, render)
     }
 }
 
+let
+poweredOn=false,
+sigslot,
+config,
+device={}
+
+Session.addType(SESSION_TYPE, ['input','offset','characteristic','callback','render'])
 util.inherits(Characteristic, bleno.Characteristic)
 
 module.exports= {
@@ -188,29 +191,29 @@ module.exports= {
             }
         })
         bleno.on('advertisingStart', (err)=>{
-            if (!err) sigslot.signal('ble.start', Session.TYPE.BLE, null, null, null, render)
+            if (!err) sigslot.signal('ble.start', SESSION_TYPE, null, null, null, render)
         })
         bleno.on('advertisingStartError', (err)=>{
-            sigslot.signal('ERR/ble/start', Session.TYPE.BLE, err, null, null, null, render)
+            sigslot.signal('ERR/ble/start', SESSION_TYPE, err, null, null, null, render)
         })
         bleno.on('advertisingStop', ()=>{
-            sigslot.signal('ble.stop', Session.TYPE.BLE, null, null, null, null, render)
+            sigslot.signal('ble.stop', SESSION_TYPE, null, null, null, null, render)
         })
         bleno.on('servicesSet', (err)=>{
-            if (!err) sigslot.signal('ble.service.set', Session.TYPE.BLE, null, null, null, null, render)
+            if (!err) sigslot.signal('ble.service.set', SESSION_TYPE, null, null, null, null, render)
         })
         bleno.on('servicesSetError', (err)=>{
-            sigslot.signal('ERR/ble/service/set', Session.TYPE.BLE, err, null, null, null, render)
+            sigslot.signal('ERR/ble/service/set', SESSION_TYPE, err, null, null, null, render)
         })
         // following are linux only
         bleno.on('accept', (address)=>{
-            sigslot.signal('ble.connect', Session.TYPE.BLE, address, null, null, null, render)
+            sigslot.signal('ble.connect', SESSION_TYPE, address, null, null, null, render)
         })
         bleno.on('disconnect', (address)=>{
-            sigslot.signal('ble.disconnect', Session.TYPE.BLE, address, null, null, null, render)
+            sigslot.signal('ble.disconnect', SESSION_TYPE, address, null, null, null, render)
         })
         bleno.on('rssiUpdate', (rssi)=>{
-            sigslot.signal('ble.rssi.update', Session.TYPE.BLE, rssi, null, null, null, render)
+            sigslot.signal('ble.rssi.update', SESSION_TYPE, rssi, null, null, null, render)
         })
     }
 }

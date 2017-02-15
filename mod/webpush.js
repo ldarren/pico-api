@@ -1,8 +1,9 @@
 const
+SESSION_TYPE='webpush',
 path=require('path'),
 apn=require('apn'),
 args= require('pico-args'),
-picoObj=require('pico-common').export('pico/obj'),
+pObj=require('pico-common').export('pico/obj'),
 utils= require('../lib/utils'),
 Session= require('../lib/Session'),
 apnConnected = function(){ console.log('apn connected') },
@@ -12,7 +13,7 @@ apnTransmitted = function(notification, device){ console.log('apn send ok', devi
 apnTransmissionError = function(errCode, notification, device){ console.log('apn send ko', errCode, device.toString('hex')) },
 apnFeedback=function(feedback,sigslot){
     feedback.on('feedback', (items)=>{ // items = [{device, time}]
-        sigslot.signal('webpush.feedback', Session.TYPE.WEBPUSH, items, 'apn')
+        sigslot.signal('webpush.feedback', SESSION_TYPE, items, 'apn')
     })
     feedback.on('feedbackError', console.error)
 },
@@ -96,6 +97,8 @@ WebPush.prototype={
 	}
 }
 
+Session.addType(SESSION_TYPE, ['input','type'])
+
 module.exports= {
     create(appConfig, libConfig, next){
         const config={
@@ -119,7 +122,7 @@ module.exports= {
 			}
         }
 
-        args.print('Webpush Options',picoObj.extend(config,libConfig))
+        args.print('Webpush Options',pObj.extend(config,libConfig))
 
         const apn=config.apn
 

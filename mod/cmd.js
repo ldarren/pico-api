@@ -1,7 +1,7 @@
 const
-PROHIBITED=['process','Cmd','GLOBAL','global','root','require','module']
+SESSION_TYPE='cmd',
+PROHIBITED=['process','Cmd','GLOBAL','global','root','require','module'],
 
-var
 net = require('net'),
 repl = require('repl'),
 util = require('util'),
@@ -9,7 +9,6 @@ pico= require('pico-common'),
 args= require('pico-args'),
 Session= require('../lib/Session'),
 inspectOpts={showHidden:false, depth:4, colors:true, customInspect:false},
-sigslot,
 extendCtx=function(oldCtx, newCtx){
     for(let i=0,k; k=PROHIBITED[i]; i++){
         delete oldCtx[k]
@@ -67,10 +66,10 @@ Cmd=function(config, input, output){
     this.context=ctx
     svr.on('reset', (context)=>{
         extendCtx(context, ctx)
-        sigslot.signal('cmd.reset', Session.TYPE.CMD, context, render)
+        sigslot.signal('cmd.reset', SESSION_TYPE, context, render)
     })
     svr.on('exit', ()=>{
-        sigslot.signal('cmd.exit', Session.TYPE.CMD, 'sample data', render)
+        sigslot.signal('cmd.exit', SESSION_TYPE, 'sample data', render)
     })
 }
 
@@ -84,6 +83,10 @@ Cmd.prototype={
         this.server.defineCommand(key, command)
     }
 }
+
+Session.addType(SESSION_TYPE, ['input','render'])
+
+let sigslot
 
 module.exports={
     create(appConfig, libConfig, next){

@@ -1,5 +1,6 @@
 // TODO: must contained pubsub communication channel, reuse pipeline feature?
-var
+const
+SESSION_TYPE='redis',
 redis = require('redis'),
 args= require('pico-args'),
 Session= require('../lib/Session'),
@@ -7,13 +8,15 @@ send=(sigslot,pattern,channel,msg)=>{
 	var input
 	try{input=JSON.parse(msg)}
 	catch(exp){input,msg}
-    sigslot.signal(pattern, Session.TYPE.REDIS,input,channel)
+    sigslot.signal(pattern, SESSION_TYPE,input,channel)
 },
 listenTo=(evt,client,channels,cb)=>{
 	if (!channels || !channels.length) return
 	client.on(evt,cb)
 	client.subscribe.apply(client, channels)
 }
+
+Session.addType(SESSION_TYPE, ['input','channel'])
 
 module.exports={
     create:function(appConfig, libConfig, next){

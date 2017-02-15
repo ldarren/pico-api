@@ -1,4 +1,5 @@
 const
+SESSION_TYPE='web',
 CORS='Access-Control-Allow-Origin',
 HEAD_JSON= { 'Content-Type': 'application/octet-stream' },
 HEAD_HTML= { 'Content-Type': 'text/html; charset=utf-8' }
@@ -43,7 +44,7 @@ render=function(sess, ack, query, res, req, cred,input, cb){
 renderNext=function(req,res,qs){
 	const q=qs.shift()
 
-	sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,qs.length?renderStream:renderStop,qs)
+	sigslot.signal(q.api, SESSION_TYPE,q.data,q.cred,req,res,q,null,qs.length?renderStream:renderStop,qs)
 },
 renderStart=function(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
@@ -99,9 +100,9 @@ web={
                 const q=queries.shift()
 console.log(req.method,req.url,q.api)
                 if(queries.length){
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderStart,queries)
+                    sigslot.signal(q.api, SESSION_TYPE,q.data,q.cred,req,res,q,null,renderStart,queries)
 				}else{
-                    sigslot.signal(q.api, Session.TYPE.WEB,q.data,q.cred,req,res,q,null,renderAll)
+                    sigslot.signal(q.api, SESSION_TYPE,q.data,q.cred,req,res,q,null,renderAll)
                 }
 
                 next()
@@ -109,7 +110,7 @@ console.log(req.method,req.url,q.api)
         }else{
             multipart.parse(req, (err, query)=>{
                 if (err || !query.api) return next(err || 'empty multipart api')
-                sigslot.signal(query.api, Session.TYPE.WEB, query.data,query.cred, req,res, query,null, renderAll)
+                sigslot.signal(query.api, SESSION_TYPE, query.data,query.cred, req,res, query,null, renderAll)
                 next()
             })
         }
@@ -151,12 +152,14 @@ resetPort=function(port, appConfig, cb){
 },
 disconnect= function(){
 console.log('disconnect',arguments)
-    sigslot.signal('web.dc', Session.TYPE.WEB, null,null, null,this, null,null, renderAll)
+    sigslot.signal('web.dc', SESSION_TYPE, null,null, null,this, null,null, renderAll)
 },
 request= function(req, res){
     let o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, Session.TYPE.WEB, null,o.query, req,res, null,null, renderAll)
+    sigslot.signal(o.pathname, SESSION_TYPE, null,o.query, req,res, null,null, renderAll)
 }
+
+Session.addType(SESSION_TYPE, ['input','cred','req','res','query','ack','render'])
 
 let
 config,

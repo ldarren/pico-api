@@ -1,4 +1,5 @@
-var
+const
+SESSION_TYPE='notifier',
 path=require('path'),
 apn=require('apn'),
 gcm=require('node-gcm'),
@@ -12,7 +13,7 @@ apnTransmitted = function(notification, device){ console.log('apn send ok', devi
 apnTransmissionError = function(errCode, notification, device){ console.log('apn send ko', errCode, device.toString('hex')) },
 apnFeedback=function(feedback,sigslot){
     feedback.on('feedback', (items)=>{ // items = [{device, time}]
-        sigslot.signal('notifier.feedback', Session.TYPE.NOTIFIER, items, 'apn')
+        sigslot.signal('notifier.feedback', SESSION_TYPE, items, 'apn')
     })
     feedback.on('feedbackError', console.error)
 },
@@ -111,6 +112,8 @@ Notifier.prototype={
         }
     }
 }
+
+Session.addType(SESSION_TYPE, ['input','type'])
 
 module.exports= {
     create(appConfig, libConfig, next){
