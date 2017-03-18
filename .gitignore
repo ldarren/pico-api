@@ -1,6 +1,4 @@
-config/cred
-config/src
-config/build
+config/
 
 # Logs
 logs

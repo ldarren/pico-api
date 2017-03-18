@@ -2,7 +2,7 @@ const
 SESSION_TYPE='web',
 CORS='Access-Control-Allow-Origin',
 HEAD_JSON= { 'Content-Type': 'application/octet-stream' },
-HEAD_HTML= { 'Content-Type': 'text/html; charset=utf-8' }
+HEAD_TEXT= { 'Content-Type': 'text/plain; charset=utf-8' }
 HEAD_SSE= {
     'Content-Type': 'text/event-stream',
     'Access-Control-Allow-Credentials': 'true',
@@ -20,11 +20,21 @@ args= require('pico-args'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 Session= require('../lib/Session'),
+writeHead=function(res,query,code){
+	if (res.headersSent) return
+	res.writeHead(code, query.api ? HEAD_JSON : HEAD_TEXT)
+},
+writeBody=function(res,output){
+	if (output){
+		if (output.charAt) res.write(output)
+		else res.write(JSON.stringify(output))
+	}
+},
 error=function(err, sess, res, query, cb){
 	err=err||sess.get('error')
 	if (!Array.isArray(err)) err=sess.error(404,err)
-	if (!res.headersSent) res.writeHead(err[0], HEAD_JSON)
-	res.write(bodyparser.error(query,err))
+	writeHead(res,query,err[0])
+	writeBody(res, query.api ? bodyparser.error(query, err) : err)
     sess.set('error') //empty error
     cb()
 },
@@ -32,12 +42,7 @@ render=function(sess, ack, query, res, req, cred,input, cb){
     sess.commit((err)=>{
         if (err) return error(err, sess, res, query, cb)
         const output=sess.getOutput()
-        if (query.api){
-            res.write(bodyparser.render(query, output))
-        }else if (output){
-			if (output.charAt) res.write(output)
-			else res.write(JSON.stringify(output))
-        }
+		writeBody(res, query.api ? bodyparser.render(query, output) : output)
         cb()
     })
 },
@@ -51,7 +56,7 @@ renderStart=function(ack, query, res, req, cred, input, next){
 
     const cb=()=>{renderNext(req,res,this.args[0]); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
-    res.writeHead(200, HEAD_JSON)
+	writeHead(res,query,200)
     render(this, ack, query, res, req, cred, input, cb)
 },
 renderStream=function(ack, query, res, req, cred, input, next){
@@ -75,7 +80,7 @@ renderAll=function(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
     const cb=()=>{res.end(); next()}
     if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
-    res.writeHead(200, HEAD_JSON)
+	writeHead(res,query,200)
     render(this, ack, query, res, req, cred, input, cb)
 },
 web={
@@ -156,7 +161,7 @@ console.log('disconnect',arguments)
 },
 request= function(req, res){
     let o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, SESSION_TYPE, null,o.query, req,res, null,null, renderAll)
+    sigslot.signal(o.pathname, SESSION_TYPE, null,o.query, req,res, o.query,null, renderAll)
 }
 
 Session.addType(SESSION_TYPE, ['input','cred','req','res','query','ack','render'])
@@ -191,7 +196,7 @@ module.exports= {
             server= http.createServer(request)
         }
 
-        if (config.allowOrigin) HEAD_HTML[CORS]=HEAD_JSON[CORS]=HEAD_SSE[CORS]=config.allowOrigin
+        if (config.allowOrigin) HEAD_TEXT[CORS]=HEAD_JSON[CORS]=HEAD_SSE[CORS]=config.allowOrigin
 
         multipart.setup(config.uploadWL)
         bodyparser.setup(config.cullAge, config.secretKey, config.sep)
