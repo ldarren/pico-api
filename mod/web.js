@@ -17,9 +17,9 @@ path= require('path'),
 url= require('url'),
 PJSON= require('pico-common').export('pico/json'),
 args= require('pico-args'),
+Session= require('picos-session'),
 bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
-Session= require('../lib/Session'),
 writeHead=function(res,query,code){
 	if (res.headersSent) return
 	res.writeHead(code, query.api ? HEAD_JSON : HEAD_TEXT)
