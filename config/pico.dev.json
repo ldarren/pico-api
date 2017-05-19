@@ -8,7 +8,7 @@
         "webServer":{
             "mod":"web",
             "allowOrigin":"*",
-            "delimiter":["&"],
+            "sep":["&"],
             "uploadWL":[],
             "port":4888
         },
