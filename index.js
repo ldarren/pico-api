@@ -2,8 +2,11 @@
 
 const
 mods= require('./lib/mods'),
-cfg= require('./lib/cfg')
+cfg= require('./lib/cfg'),
+options=cfg.parse(__dirname)
 
-mods.load(cfg.parse(__dirname), (err, context)=>{
+if (options && !options.master) return require('./lib/app')
+
+mods.load(options, (err, context)=>{
     if (err) return console.error(err)
 })
