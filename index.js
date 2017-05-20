@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// in code picos was install globally
+process.env.NODE_PATH=process.cwd()+'/node_modules'
 
 const
 mods= require('./lib/mods'),
