@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "pico operating system",
   "main": "index.js",
   "bin": {
