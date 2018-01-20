@@ -1,12 +1,12 @@
 # pico-api
 A lean API server
 
-##Setup
+## Setup
 * installation
-```
-npm i picos -g
-```
-* create app.json config file at your working folder
+` npm i picos -g `
+
+and create following files in your working folder
+* create `app.json` config file
 ```json
 {
     "app":{
@@ -22,21 +22,21 @@ npm i picos -g
     }
 }
 ```
-* create action.json action config file at your working folder
+* create `action.json` action config file
 ```json
 {
     "deps":{
-        "app":"./app"
+        "act":"./action"
     },
     "routes":{
         "/":[
-            ["app","hello","res"],
+            ["act","hello","res"],
             []
 		]
     }
 }
 ```
-* create app.js action file at your working folder
+* create `action.js` action file
 ```javascript
 module.exports={
     setup(context, cb){
@@ -49,18 +49,33 @@ module.exports={
     }
 }
 ```
+* create an empty api index config file, `api/index.json`
+```javascript
+{
+	"deps":{},
+	"routes":{}
+}
+```
+* create an empty model index file, `model/index.js`
+```javascript
+return {
+}
+```
 
-##Features
+## Run
+`npx picos -p app.json`
+
+## Features
 * Web is not the only first class citizen in this platform, all other modules has similar status
 * Routing for web, fs events, redis pubsub, sse and node cluster messagging
 * Distributed source files and lazily download files from file server
 * use JSON as relational database design tool
 * reloading an app without reloading all other apps
 
-##TODO
-* translate from config/src to config/build
-* compile config/src db section to database
-* compile config/src db section to models
-* handling config/src db section update and changes
-* add domain protection to master and slaves
-* move mod and theirs dependencies out of picos
+## TODO
+-[] translate from config/src to config/build
+-[] compile config/src db section to database
+-[] compile config/src db section to models
+-[] handling config/src db section update and changes
+-[] add domain protection to master and slaves
+-[X] move mod and theirs dependencies out of picos

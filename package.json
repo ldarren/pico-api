@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "pico operating system",
   "main": "index.js",
   "bin": {
@@ -22,8 +22,7 @@
   },
   "keywords": [
     "pico",
-    "api server",
-    "http server"
+    "api server"
   ],
   "author": "Darren Liew",
   "license": "MIT",
