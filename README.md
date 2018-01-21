@@ -49,21 +49,9 @@ module.exports={
     }
 }
 ```
-* create an empty api index config file, `api/index.json`
-```javascript
-{
-	"deps":{},
-	"routes":{}
-}
-```
-* create an empty model index file, `model/index.js`
-```javascript
-return {
-}
-```
 
 ## Run
-`npx picos -p app.json`
+`npx picos -mp app.json`
 
 ## Features
 * Web is not the only first class citizen in this platform, all other modules has similar status
@@ -73,9 +61,9 @@ return {
 * reloading an app without reloading all other apps
 
 ## TODO
--[] translate from config/src to config/build
--[] compile config/src db section to database
--[] compile config/src db section to models
--[] handling config/src db section update and changes
--[] add domain protection to master and slaves
--[X] move mod and theirs dependencies out of picos
+- [ ] translate from config/src to config/build
+- [ ] compile config/src db section to database
+- [ ] compile config/src db section to models
+- [ ] handling config/src db section update and changes
+- [ ] add domain protection to master and slaves
+- [x] move mod and theirs dependencies out of picos

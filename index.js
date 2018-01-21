@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 // in case picos was installed globally
 process.env.NODE_PATH = process.cwd()+'/node_modules'
 
