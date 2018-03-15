@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "pico operating system",
   "main": "index.js",
   "bin": {
@@ -9,8 +9,8 @@
   "dependencies": {
     "pico-args": "*",
     "pico-common": "*",
-    "picos-session": "^0.1.0",
-    "picos-util": "^0.1.0",
+    "picos-session": "*",
+    "picos-util": "*",
     "ws": "^1.0.1"
   },
   "scripts": {

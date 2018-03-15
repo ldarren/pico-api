@@ -1,10 +1,11 @@
 const
 SESSION_TYPE='web',
 CORS='Access-Control-Allow-Origin',
-HEAD_JSON= { 'Content-Type': 'application/octet-stream' },
-HEAD_TEXT= { 'Content-Type': 'text/plain; charset=utf-8' }
+CT='Content-Type',
+HEAD_PICO= { [CT]: 'application/octet-stream' },
+HEAD_STD= {}, //{ [CT]: 'text/plain; charset=utf-8' },
 HEAD_SSE= {
-    'Content-Type': 'text/event-stream',
+    [CT]: 'text/event-stream',
     'Access-Control-Allow-Credentials': 'true',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
@@ -22,7 +23,7 @@ bodyparser= require('../lib/bodyparser'),
 multipart= require('../lib/multipart'),
 writeHead=function(res,query,code){
 	if (res.headersSent) return
-	res.writeHead(code, query.api ? HEAD_JSON : HEAD_TEXT)
+	res.writeHead(code, query.api ? HEAD_PICO : HEAD_STD)
 },
 writeBody=function(res,output){
 	if (output){
@@ -176,6 +177,7 @@ module.exports= {
             pfxPath:null,
             port:0,
             allowOrigin:'localhost',
+			contentType: '',
             sep:['&'],
             secretKey:null,
             cullAge:0,
@@ -196,7 +198,8 @@ module.exports= {
             server= http.createServer(request)
         }
 
-        if (config.allowOrigin) HEAD_TEXT[CORS]=HEAD_JSON[CORS]=HEAD_SSE[CORS]=config.allowOrigin
+        if (config.allowOrigin) HEAD_STD[CORS]=HEAD_PICO[CORS]=HEAD_SSE[CORS]=config.allowOrigin
+        if (config.contentType) HEAD_STD[CT]=HEAD_PICO[CT]=HEAD_SSE[CT]=config.contentType
 
         multipart.setup(config.uploadWL)
         bodyparser.setup(config.cullAge, config.secretKey, config.sep)
