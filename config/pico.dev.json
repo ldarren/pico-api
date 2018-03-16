@@ -1,5 +1,6 @@
 {
     "app":{
+		"signalTTL": 60000,
         "actions": [
             "apps/pico/index.json"
         ]
