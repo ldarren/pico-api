@@ -15,9 +15,6 @@
         "appMgr":{
             "mod":"appMgr",
             "path":"build"
-        },
-        "cmd":{
-            "mod":"cmd"
         }
     }
 }

@@ -65,7 +65,6 @@ renderStream=function(ack, query, res, req, cred, input, next){
 
     const cb=()=>{renderNext(req,res,this.args[0]); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
-console.log(req.method,req.url,query.api)
     render(this, ack, query, res, req, cred, input, cb)
 },
 renderStop=function(ack, query, res, req, cred, input, next){
@@ -73,7 +72,6 @@ renderStop=function(ack, query, res, req, cred, input, next){
 
     const cb=()=>{res.end(); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
-console.log(req.method,req.url,query.api)
     render(this, ack, query, res, req, cred, input, cb)
 },
 // TODO: better way to delay error message

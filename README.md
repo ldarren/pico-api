@@ -53,6 +53,13 @@ module.exports={
 ## Run
 `npx picos -mp app.json`
 
+or
+
+`npm start app.json`
+
+## Test
+`npm test`
+
 ## Features
 * Web is not the only first class citizen in this platform, all other modules has similar status
 * Routing for web, fs events, redis pubsub, sse and node cluster messagging

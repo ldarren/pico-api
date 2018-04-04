@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "description": "pico operating system",
   "main": "index.js",
   "bin": {
@@ -8,12 +8,13 @@
   },
   "dependencies": {
     "pico-args": "*",
-    "pico-common": "*",
-    "picos-session": "*",
-    "picos-util": "*",
+    "pico-common": "^0.9.0",
+    "picos-session": "^0.1.1",
+    "picos-util": "^0.1.2",
     "ws": "^1.0.1"
   },
   "scripts": {
+    "start": "node index.js -mp",
     "test": "node tests.js"
   },
   "repository": {
