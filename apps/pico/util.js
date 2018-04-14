@@ -12,7 +12,7 @@ module.exports={
         }
     },
     help(next){
-        next(`api ${this.api} is not supported by pico yet`)
+        next(this.error(404, `api ${this.api} is not supported yet`))
     },
     sayNow(next){
         console.log(Date.now())
