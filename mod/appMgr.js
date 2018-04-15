@@ -2,7 +2,6 @@
 // 1) app health check
 // 2) simple load balancing if more than one instance running
 const
-cluster=require('cluster'),
 http=require('http'),
 fs=require('fs'),
 path=require('path'),
@@ -96,8 +95,6 @@ let appEnv,appjs,watchPath,config
 
 module.exports= {
     create(appConfig, libConfig, next){
-        if (cluster.isWorker) return next('run on master only')
-
         config={
             path:'',			// config file location, appMgr can operate with config send over through http
 			stripUri:true,		// It may be desirable to specify a URI prefix to match an API, but not include it in the upstream request

@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
@@ -11,7 +11,7 @@
     "pico-common": "*",
     "picos-session": "*",
     "picos-util": "*",
-    "ws": "*"
+    "ws": "^5.1.1"
   },
   "scripts": {
     "start": "node index.js -mp",
@@ -24,7 +24,7 @@
   "keywords": [
     "pico",
     "api",
-	"service"
+    "service"
   ],
   "author": "Darren Liew",
   "license": "MIT",

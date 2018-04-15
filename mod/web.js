@@ -212,7 +212,7 @@ module.exports= {
 				wss=new WebSocketServer({server:server})
 				wss.on('connection', (ws)=>{
 					ws.on('message', (message)=>{
-						console.log('ws received: %s %d', message, require('cluster').isWorker)
+						console.log('ws received: %s %d', message)
 						ws.send(`${message} too!`, (err)=>{if (err) return console.error(err)})
 					})
 				})*/
