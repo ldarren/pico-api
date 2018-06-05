@@ -204,20 +204,6 @@ module.exports= {
 
         resetPort(config.port, appConfig, (err, port)=>{
             server.listen(port, ()=>{
-
-				// WS TEST START
-				// BUG: ws.send not working and unable forward ws connection to workers
-				/*let
-				WebSocketServer= require('ws').Server,
-				wss=new WebSocketServer({server:server})
-				wss.on('connection', (ws)=>{
-					ws.on('message', (message)=>{
-						console.log('ws received: %s %d', message)
-						ws.send(`${message} too!`, (err)=>{if (err) return console.error(err)})
-					})
-				})*/
-				// WS TEST END
-
                 next(null, web)
             })
         })

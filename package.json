@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
@@ -10,8 +10,7 @@
     "pico-args": "*",
     "pico-common": "*",
     "picos-session": "*",
-    "picos-util": "*",
-    "ws": "^5.1.1"
+    "picos-util": "*"
   },
   "scripts": {
     "start": "node index.js -mp",
