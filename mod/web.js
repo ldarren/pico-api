@@ -35,7 +35,7 @@ error=function(err, sess, res, query, cb){
 	err=err||sess.get('error')
 	if (!Array.isArray(err)) err=sess.error(404,err)
 	writeHead(res,query,err[0])
-	writeBody(res, query.api ? bodyparser.error(query, err) : err)
+	writeBody(res, query.api ? bodyparser.error(query, err) : err[1])
     sess.set('error') //empty error
     cb()
 },
