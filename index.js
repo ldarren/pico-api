@@ -2,14 +2,22 @@
 
 // in case picos was installed globally
 process.env.NODE_PATH = process.cwd()+'/node_modules'
-
 const cfg = require('./lib/cfg')
-const options = cfg.parse(__dirname)
 
-if (options && !options.app.master) return require('./lib/app')
+function run(args, cb){
+	const options = cfg.parse(__dirname, args)
+	if (options && !options.app.master) {
+		const app = require('./lib/app')
+		return app(options, cb)
+	}
 
-const mods = require('./lib/mods')
+	const mods = require('./lib/mods')
 
-mods.load(options, (err, context) => {
-    if (err) return console.error(err)
+	mods.load(options, cb)
+}
+
+require.main === module && run(null, (err, ctx) => {
+	if (err) return console.error(err)
 })
+
+module.exports = run

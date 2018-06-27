@@ -51,11 +51,31 @@ module.exports={
 ```
 
 ## Run
-`npx picos -mp app.json`
+There are three ways to run picos server
 
-or
+* Run without sandbox or run as master
+`npx picos -mp app.dev.json`
 
-`npm start app.json`
+* Run with sandbox or run as app
+`npx picos -p app.dev.json`
+
+* Run in another nodejs app (good for test framework)
+```javascript
+const picos = require('picos')
+picos({path: ['app.test.json'], master:[1]}, (err, ctx) => {
+})
+```
+
+to reduce typing, consider add it to package.json
+```json
+{
+	"script": {
+		"start": "npx picos -mp"
+	}
+}
+```
+then run server with command
+`npm start app.dev.json`
 
 ## Test
 `npm test`
