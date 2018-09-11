@@ -6,6 +6,7 @@ http=require('http'),
 fs=require('fs'),
 path=require('path'),
 args=require('pico-args'),
+util=require('picos-util'),
 cfg=require('../lib/cfg'),
 WorkerGrp=require('../lib/WorkerGrp'),
 workerGrps={},
@@ -18,18 +19,18 @@ install=function(fpath){
 	for(let i=0; i<count; i++){
 		grp.add(path.resolve(watchPath,fpath))
 	}
-    console.log('installed',fpath)
+    console.info('installed',fpath)
     return true
 },
 uninstall=function(fpath){
-    console.log('uninstalling',fpath)
+    console.info('uninstalling',fpath)
     if (!fpath) return false
     const [appName,count,env,ext]=cfg.parsePath(fpath)
     if (appEnv !== env) return true
     const grp=workerGrps[appName]
     if (!grp) return true
 	grp.removeAll()
-    console.log('uninstalled',fpath)
+    console.info('uninstalled',fpath)
     return true
 },
 watch=function(evt, fpath){
@@ -53,7 +54,7 @@ appMgr={
             method:req.method,
             path: config.stripUri ? '/' + this.params.appPath : req.url,
             headers:req.headers
-        }, (cres)=>{
+        }, cres => {
             res.addListener('close', () => cres.destroy() )
             res.writeHeader(cres.statusCode, cres.headers)
             cres.pipe(res)
@@ -65,28 +66,35 @@ appMgr={
 
 		next()
     },
+    ajax(appName, method, href, params, opt, output, cb){
+		const grp=workerGrps[appName]
+        if (!appName || !grp) return next(this.error(400, `appMgr, invalid path:${this.api}`))
+
+        opt.socketPath=`/tmp/${appName}.${grp.select()}`,
+		util.ajax(method, href, params, opt, cb)
+    },
 	install(input, next){
 		const
 		appName=input.appName,
 		config1=input.config,
 		count=input.count||1
-		console.log('install', input)
+		console.info('install', input)
 		if (!appName || !config1) return next('missing appMgr.install params')
 		const grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
 		for(let i=0,l=count||1; i<l; i++){
 			grp.add(input)
 		}
-		console.log('installed',appName)
+		console.info('installed',appName)
 		next()
 	},
 	uninstall(input, next){
 		const appName=input.appName
-		console.log('uninstalling',appName)
+		console.info('uninstalling',appName)
 		if (!appName) return next('missing appMgr.uninstall params')
 		const grp=workerGrps[appName]
 		if (!grp) return next() 
 		grp.remove(grp.select())
-		console.log('uninstalled',appName)
+		console.info('uninstalled',appName)
 		next()
 	}
 }
