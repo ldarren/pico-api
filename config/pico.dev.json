@@ -2,7 +2,7 @@
     "app":{
 		"signalTTL": 60000,
 		"master": true,
-        "actions": [
+        "apis": [
             "apps/pico/index.json"
         ]
     },

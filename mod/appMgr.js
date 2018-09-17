@@ -66,10 +66,11 @@ appMgr={
 
 		next()
     },
-    ajax(appName, method, href, params, opt, output, cb){
+    ajax(appName, method, href, params, opt, cb){
 		const grp=workerGrps[appName]
-        if (!appName || !grp) return next(this.error(400, `appMgr, invalid path:${this.api}`))
+        if (!appName || !grp) return cb(this.error(400, `appMgr: invalid path:${this.api}`))
 
+		opt = opt || {}
         opt.socketPath=`/tmp/${appName}.${grp.select()}`,
 		util.ajax(method, href, params, opt, cb)
     },
