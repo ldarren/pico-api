@@ -1,88 +1,113 @@
-const
-SESSION_TYPE='web',
-CORS='Access-Control-Allow-Origin',
-CT='Content-Type',
-HEAD_PICO= { [CT]: 'application/octet-stream' },
-HEAD_STD= {}, //{ [CT]: 'text/plain; charset=utf-8' },
-HEAD_SSE= {
+const SESSION_TYPE='web'
+const CORS='Access-Control-Allow-Origin'
+const CT='Content-Type'
+const HEAD_PICO= { [CT]: 'application/octet-stream' }
+const HEAD_STD= {} //{ [CT]: 'text/plain; charset=utf-8' }
+const HEAD_SSE= {
     [CT]: 'text/event-stream',
     'Access-Control-Allow-Credentials': 'true',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
-},
+}
 
-http= require('http'),
-https= require('https'),
-fs= require('fs'),
-path= require('path'),
-url= require('url'),
-PJSON= require('pico-common').export('pico/json'),
-args= require('pico-args'),
-Session= require('picos-session'),
-bodyparser= require('../lib/bodyparser'),
-multipart= require('../lib/multipart'),
-writeHead=function(res,query,code){
+const http= require('http')
+const https= require('https')
+const fs= require('fs')
+const path= require('path')
+const url= require('url')
+const PJSON= require('pico-common').export('pico/json')
+const args= require('pico-args')
+const Session= require('picos-session')
+const bodyparser= require('../lib/bodyparser')
+const multipart= require('../lib/multipart')
+
+let config
+let sigslot
+let server
+
+function writeHead(res,query,code){
 	if (res.headersSent) return
 	res.writeHead(code, query.api ? HEAD_PICO : HEAD_STD)
-},
-writeBody=function(res,output){
+}
+function writeBody(res,output){
 	if (output){
 		if (output.charAt) res.write(output)
 		else res.write(JSON.stringify(output))
 	}
-},
-error=function(err, sess, res, query, cb){
+}
+function error(err, sess, res, query, cb){
 	err=err||sess.get('error')
 	if (!Array.isArray(err)) err=sess.error(404,err)
 	writeHead(res,query,err[0])
 	writeBody(res, query.api ? bodyparser.error(query, err) : err[1])
     sess.set('error') //empty error
     cb()
-},
-render=function(sess, ack, query, res, req, cred,input, cb){
+}
+function render(sess, ack, query, res, req, cred,input, cb){
     sess.commit((err)=>{
         if (err) return error(err, sess, res, query, cb)
         const output=sess.getOutput()
 		writeBody(res, query.api ? bodyparser.render(query, output) : output)
         cb()
     })
-},
-renderNext=function(req,res,qs){
+}
+function renderNext(req,res,qs){
 	const q=qs.shift()
 
 	sigslot.signal(q.api, SESSION_TYPE,q.data,q.cred,req,res,q,null,qs.length?renderStream:renderStop,qs)
-},
-renderStart=function(ack, query, res, req, cred, input, next){
+}
+function renderStart(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
 
     const cb=()=>{renderNext(req,res,this.args[0]); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
 	writeHead(res,query,200)
     render(this, ack, query, res, req, cred, input, cb)
-},
-renderStream=function(ack, query, res, req, cred, input, next){
+}
+function renderStream(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
 
     const cb=()=>{renderNext(req,res,this.args[0]); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
     render(this, ack, query, res, req, cred, input, cb)
-},
-renderStop=function(ack, query, res, req, cred, input, next){
+}
+function renderStop(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
 
     const cb=()=>{res.end(); next()}
     if (this.has('error')) return error(null, this, res, query, cb)
     render(this, ack, query, res, req, cred, input, cb)
-},
+}
 // TODO: better way to delay error message
-renderAll=function(ack, query, res, req, cred, input, next){
+function renderAll(ack, query, res, req, cred, input, next){
 	if (res.finished) return next()
     const cb=()=>{res.end(); next()}
     if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
 	writeHead(res,query,200)
     render(this, ack, query, res, req, cred, input, cb)
-},
-web={
+}
+function resetPort(port, appConfig, cb){
+	if (port) return cb(null, port)
+
+    if (!appConfig.name || !appConfig.id) return cb('no port assigned')
+	cb(null, `/tmp/${appConfig.name}.${appConfig.id}`)
+}
+function disconnect(){
+console.log('disconnect',arguments)
+    sigslot.signal('web.dc', SESSION_TYPE, null,null, null,this, null,null, renderAll)
+}
+function request(req, res){
+    let o=url.parse(req.url,true)
+    sigslot.signal(o.pathname, SESSION_TYPE, null,o.query, req,res, o.query,null, renderAll)
+}
+
+Session.addType(SESSION_TYPE, ['input','cred','req','res','query','ack','render'])
+
+const web = {
+	onexit(){
+		console.log('close server', config.port)
+		server.close()
+	},
 	getBody(req,body,next){
 		function cb(err, query){
 			if (err) return next(err)
@@ -144,30 +169,7 @@ console.log(req.method,req.url,q.api)
             next()
         })
     }
-},
-resetPort=function(port, appConfig, cb){
-	if (port) return cb(null, port)
-
-    if (!appConfig.name || !appConfig.id) return cb('no port assigned')
-	let unix=`/tmp/${appConfig.name}.${appConfig.id}`
-	fs.unlink(unix, ()=>{
-		cb(null, unix)
-	})
-},
-disconnect= function(){
-console.log('disconnect',arguments)
-    sigslot.signal('web.dc', SESSION_TYPE, null,null, null,this, null,null, renderAll)
-},
-request= function(req, res){
-    let o=url.parse(req.url,true)
-    sigslot.signal(o.pathname, SESSION_TYPE, null,o.query, req,res, o.query,null, renderAll)
 }
-
-Session.addType(SESSION_TYPE, ['input','cred','req','res','query','ack','render'])
-
-let
-config,
-sigslot
 
 module.exports= {
     create(appConfig, libConfig, next){
@@ -182,7 +184,7 @@ module.exports= {
             uploadWL:[],
             errorDelay:3000
         }
-        let pfxPath, server
+        let pfxPath
 
         args.print('Web Options',Object.assign(config,libConfig))
         config.sep=config.sep.charAt?config.sep:JSON.stringify(config.sep)

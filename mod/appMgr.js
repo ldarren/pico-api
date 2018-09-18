@@ -1,16 +1,18 @@
 // TODO
 // 1) app health check
 // 2) simple load balancing if more than one instance running
-const
-http=require('http'),
-fs=require('fs'),
-path=require('path'),
-args=require('pico-args'),
-util=require('picos-util'),
-cfg=require('../lib/cfg'),
-WorkerGrp=require('../lib/WorkerGrp'),
-workerGrps={},
-install=function(fpath){
+const http=require('http')
+const fs=require('fs')
+const path=require('path')
+const args=require('pico-args')
+const util=require('picos-util')
+const cfg=require('../lib/cfg')
+const WorkerGrp=require('../lib/WorkerGrp')
+const workerGrps={}
+
+let appEnv, appjs, watchPath, config
+
+function install(fpath){
     if (!fpath) return false
     const [appName,count,env,ext]=cfg.parsePath(fpath)
     if (appEnv !== env) return true
@@ -21,8 +23,8 @@ install=function(fpath){
 	}
     console.info('installed',fpath)
     return true
-},
-uninstall=function(fpath){
+}
+function uninstall(fpath){
     console.info('uninstalling',fpath)
     if (!fpath) return false
     const [appName,count,env,ext]=cfg.parsePath(fpath)
@@ -32,14 +34,23 @@ uninstall=function(fpath){
 	grp.removeAll()
     console.info('uninstalled',fpath)
     return true
-},
-watch=function(evt, fpath){
+}
+function watch(evt, fpath){
     switch(evt){
     case 'rename': uninstall(fpath); break
     case 'change': install(fpath); break
     }
-},
-appMgr={
+}
+function removeAll(){
+	for (let name in workerGrps){
+		workerGrps[name].removeAll()
+	}
+	// process.exit is done in lib/mods
+}
+
+process.on('exit', removeAll)
+
+const appMgr = {
     redirect(req, res, next){
         const appName=this.params.appName
 		const grp=workerGrps[appName]
@@ -100,11 +111,9 @@ appMgr={
 	}
 }
 
-let appEnv,appjs,watchPath,config
-
-module.exports= {
+module.exports = {
     create(appConfig, libConfig, next){
-        config={
+        config = {
             path:'',			// config file location, appMgr can operate with config send over through http
 			stripUri:true,		// It may be desirable to specify a URI prefix to match an API, but not include it in the upstream request
             persistent:false	// watcher doens't keep program running

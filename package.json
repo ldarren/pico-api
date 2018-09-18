@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.5.11",
+  "version": "0.6.0",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
