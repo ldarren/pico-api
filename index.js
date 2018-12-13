@@ -16,7 +16,7 @@ function run(args, cb){
 	mods.load(options, cb)
 }
 
-require.main === module && run(null, (err, ctx) => {
+require.main === module && run(null, (err, ctx_) => {
 	if (err) return console.error(err)
 })
 

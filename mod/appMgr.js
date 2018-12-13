@@ -13,33 +13,33 @@ const workerGrps={}
 let appEnv, appjs, watchPath, config
 
 function install(fpath){
-    if (!fpath) return false
-    const [appName,count,env,ext]=cfg.parsePath(fpath)
-    if (appEnv !== env) return true
-    uninstall(fpath)
+	if (!fpath) return false
+	const [appName,count,env,ext_]=cfg.parsePath(fpath)
+	if (appEnv !== env) return true
+	uninstall(fpath)
 	const grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
 	for(let i=0; i<count; i++){
 		grp.add(path.resolve(watchPath,fpath))
 	}
-    console.info('installed',fpath)
-    return true
+	console.info('installed',fpath)
+	return true
 }
 function uninstall(fpath){
-    console.info('uninstalling',fpath)
-    if (!fpath) return false
-    const [appName,count,env,ext]=cfg.parsePath(fpath)
-    if (appEnv !== env) return true
-    const grp=workerGrps[appName]
-    if (!grp) return true
+	console.info('uninstalling',fpath)
+	if (!fpath) return false
+	const [appName,count_,env,ext_]=cfg.parsePath(fpath)
+	if (appEnv !== env) return true
+	const grp=workerGrps[appName]
+	if (!grp) return true
 	grp.removeAll()
-    console.info('uninstalled',fpath)
-    return true
+	console.info('uninstalled',fpath)
+	return true
 }
 function watch(evt, fpath){
-    switch(evt){
-    case 'rename': uninstall(fpath); break
-    case 'change': install(fpath); break
-    }
+	switch(evt){
+	case 'rename': uninstall(fpath); break
+	case 'change': install(fpath); break
+	}
 }
 function removeAll(){
 	for (let name in workerGrps){
@@ -51,45 +51,45 @@ function removeAll(){
 process.on('exit', removeAll)
 
 const appMgr = {
-    redirect(req, res, next){
-        const appName=this.params.appName
+	redirect(req, res, next){
+		const appName=this.params.appName
 		const grp=workerGrps[appName]
-        if (!appName || !grp) return next(this.error(400, `appMgr, invalid path:${this.api}`))
+		if (!appName || !grp) return next(this.error(400, `appMgr, invalid path:${this.api}`))
 
 		const id=grp.select()
 
 		console.info('redirecting to',appName,id)
 
 		const proxy=http.request({
-            socketPath:`/tmp/${appName}.${id}`,
-            method:req.method,
-            path: config.stripUri ? '/' + this.params.appPath : req.url,
-            headers:req.headers
-        }, cres => {
-            res.addListener('close', () => cres.destroy() )
-            res.writeHeader(cres.statusCode, cres.headers)
-            cres.pipe(res)
-        })
+			socketPath:`/tmp/${appName}.${id}`,
+			method:req.method,
+			path: config.stripUri ? '/' + this.params.appPath : req.url,
+			headers:req.headers
+		}, cres => {
+			res.addListener('close', () => cres.destroy() )
+			res.writeHeader(cres.statusCode, cres.headers)
+			cres.pipe(res)
+		})
 
 		proxy.addListener('error', err => next(this.error(404,err)) )
 
-        req.pipe(proxy)
+		req.pipe(proxy)
 
 		next()
-    },
-    ajax(appName, method, href, params, opt, cb){
+	},
+	ajax(appName, method, href, params, opt, cb){
 		const grp=workerGrps[appName]
-        if (!appName || !grp) return cb(this.error(400, `appMgr: invalid path:${this.api}`))
+		if (!appName || !grp) return cb(this.error(400, `appMgr: invalid path:${this.api}`))
 
 		opt = opt || {}
-        opt.socketPath=`/tmp/${appName}.${grp.select()}`,
+		opt.socketPath=`/tmp/${appName}.${grp.select()}`,
 		util.ajax(method, href, params, opt, cb)
-    },
+	},
 	install(input, next){
 		const
-		appName=input.appName,
-		config1=input.config,
-		count=input.count||1
+			appName=input.appName,
+			config1=input.config,
+			count=input.count||1
 		console.info('install', input)
 		if (!appName || !config1) return next('missing appMgr.install params')
 		const grp=workerGrps[appName]=workerGrps[appName]=new WorkerGrp(appjs, appEnv)
@@ -104,7 +104,7 @@ const appMgr = {
 		console.info('uninstalling',appName)
 		if (!appName) return next('missing appMgr.uninstall params')
 		const grp=workerGrps[appName]
-		if (!grp) return next() 
+		if (!grp) return next()
 		grp.remove(grp.select())
 		console.info('uninstalled',appName)
 		next()
@@ -112,16 +112,16 @@ const appMgr = {
 }
 
 module.exports = {
-    create(appConfig, libConfig, next){
-        config = {
-            path:'',			// config file location, appMgr can operate with config send over through http
+	create(appConfig, libConfig, next){
+		config = {
+			path:'',			// config file location, appMgr can operate with config send over through http
 			stripUri:true,		// It may be desirable to specify a URI prefix to match an API, but not include it in the upstream request
-            persistent:false	// watcher doens't keep program running
-        }
+			persistent:false	// watcher doens't keep program running
+		}
 
-        args.print('AppMgr Options',Object.assign(config,libConfig))
+		args.print('AppMgr Options',Object.assign(config,libConfig))
 
-        appjs=path.resolve(appConfig.path,'lib/app.js')
+		appjs=path.resolve(appConfig.path,'lib/app.js')
 
 		if (config.path){
 			appEnv=appConfig.env
@@ -136,5 +136,5 @@ module.exports = {
 		}else{
 			next(null, appMgr)
 		}
-    }
+	}
 }
