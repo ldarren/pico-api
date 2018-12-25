@@ -3,7 +3,7 @@ const { test } = pico.export('pico/test')
 const pUtil = require('picos-util')
 const picos = require('./index')
 
-picos({path: ['config/pico.test.json'], master: [false]}, (err, ctx) => {
+picos({path: ['config/pico.test.json'], dir: ['apps/pico'], master: [false]}, (err, ctx) => {
 	test('ensure server is setup correctly', cb => {
 		cb(err, ctx !== undefined)
 	})
