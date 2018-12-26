@@ -113,6 +113,7 @@ Session.addType(SESSION_TYPE, ['input','cred','req','res','query','ack','render'
 
 const web = {
 	onexit(){
+		if (!server) return
 		console.log('close server', config.port)
 		server.close()
 	},

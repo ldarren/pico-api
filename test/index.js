@@ -1,18 +1,30 @@
-const pico =require('pico-common/bin/pico-cli')
-const { test } = pico.export('pico/test')
+const pico = require('pico-common/bin/pico-cli')
+const { series } = pico.export('pico/test')
 const pUtil = require('picos-util')
 const picos = require('../index')
 
-picos({path: ['config/pico.test.json'], dir: ['test'], master: [false]}, (err, ctx) => {
-	test('ensure server is setup correctly', cb => {
-		cb(err, ctx !== undefined)
+series('client/sandbox only', function(){
+	this.begin(next => {
+		picos({path: ['config/pico.test.json'], dir: ['test'], master: [false]}, (err, ctx, cfg) => {
+			next(err, [ctx, cfg])
+		})
 	})
-	test('ensure server is running correctly', cb => {
+
+	this.end((ctx, cfg, next) => {
+		ctx.quit()
+		next()
+	})
+
+	this.test('ensure server is setup correctly', (ctx, cfg, next) => {
+		next(null, ctx != null)
+	})
+
+	this.test('ensure server is running correctly', (ctx, cfg, next) => {
 		pUtil.ajax('GET', 'http://localhost:4888/pico', null, null, (err, state, res) => {
 			if (4 !== state) return
-			if (err) return cb(err, ctx !== undefined)
+			if (err) return next(err)
 			const delta = Date.now() - parseInt(res)
-			cb(err, delta < 1000)
+			next(null, delta < 1000)
 		})
 	})
 })
