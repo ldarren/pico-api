@@ -6,7 +6,8 @@ const cfg = require('./lib/cfg')
 
 function run(args, cb){
 	const options = cfg.parse(__dirname, args)
-	if (options && !options.app.master) {
+	if (!options || !options.app) return process.exit(1)
+	if (!options.app.master) {
 		const app = require('./lib/app')
 		return app(options, cb)
 	}

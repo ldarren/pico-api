@@ -1,20 +1,20 @@
 {
   "name": "picos",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
     "picos": "./index.js"
   },
   "dependencies": {
-    "pico-args": "^1.0.11",
-    "pico-common": "^0.10.13",
+    "pico-args": "^1.0.12",
+    "pico-common": "^0.10.15",
     "picos-session": "^0.1.2",
     "picos-util": "^0.1.3"
   },
   "scripts": {
     "start": "node index.js -mp",
-    "test": "node tests.js",
+    "test": "node test/index.js",
 	"lint": "eslint .",
 	"lint:fix": "eslint . --fix"
   },

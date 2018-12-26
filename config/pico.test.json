@@ -1,7 +1,7 @@
 {
     "app":{
         "apis": [
-            "apps/pico/index.json"
+            "test/index.json"
         ]
     },
     "mods":{
@@ -11,10 +11,6 @@
             "delimiter":["&"],
             "uploadWL":[],
             "port":4888
-        },
-        "appMgr":{
-            "mod":"appMgr",
-            "path":"build"
         }
     }
 }
