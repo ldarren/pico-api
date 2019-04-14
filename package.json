@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "pico-args": "^1.0.12",
-    "pico-common": "^0.10.15",
+    "pico-common": "^0.10.17",
     "picos-session": "^0.1.2",
     "picos-util": "^0.1.3"
   },
