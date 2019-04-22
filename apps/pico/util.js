@@ -10,6 +10,7 @@ module.exports={
 		switch(req.method){
 		case 'POST': return next()
 		case 'GET': this.setOutput(this.time)
+		// fall through
 		default: return next(null, this.sigslot.abort())
 		}
 	},
