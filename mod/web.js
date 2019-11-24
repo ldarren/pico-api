@@ -9,6 +9,7 @@ const HEAD_SSE= {
 	'Cache-Control': 'no-cache',
 	'Connection': 'keep-alive'
 }
+const BOUNDARY='boundary='
 
 const http= require('http')
 const https= require('https')
@@ -118,12 +119,16 @@ const web = {
 		server.close()
 	},
 	getBody(req,body,next){
+		const str=req.headers['content-type']
+		if (!str) return next()
+		const arr = str.split(';')
+		const ct = arr.shift()
 		function cb(err, query){
 			if (err) return next(err)
 			Object.assign(body,query)
 			next()
 		}
-		switch(req.headers['content-type']){
+		switch(ct.toLowerCase()){
 		default: return bodyparser.parseBody(req, cb)
 		case 'multipart/form-data': return multipart.parse(req, cb)
 		}
@@ -132,7 +137,8 @@ const web = {
 		const ct=req.headers['content-type']
 		if (!ct) return next()
 		if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
-			bodyparser.parse(req, (err, queries)=>{
+			const boundary = ct.split(';').find(a => a.indexOf(BOUNDARY !== -1))
+			bodyparser.parse(req, boundary.slice(BOUNDARY.length), (err, queries)=>{
 				if (err) return next(err)
 				if (!queries.length) return next()
 				const q=queries.shift()
@@ -188,8 +194,6 @@ module.exports= {
 			allowOrigin:'localhost',
 			contentType: '',
 			sep:['&'],
-			secretKey:null,
-			cullAge:0,
 			uploadWL:[],
 			errorDelay:3000
 		}
@@ -211,7 +215,7 @@ module.exports= {
 		if (config.contentType) HEAD_STD[CT]=HEAD_PICO[CT]=HEAD_SSE[CT]=config.contentType
 
 		multipart.setup(config.uploadWL)
-		bodyparser.setup(config.cullAge, config.secretKey, config.sep)
+		bodyparser.setup(config.sep)
 
 		resetPort(config.port, appConfig, (err, port)=>{
 			server.listen(port, ()=>{
