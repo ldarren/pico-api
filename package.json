@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
@@ -15,6 +15,7 @@
   "scripts": {
     "start": "node index.js -mp",
     "test": "node test/index.js",
+	"test:cp": "jscpd --ignore 'node_modules,test' .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
