@@ -1,226 +1,94 @@
-const SESSION_TYPE='web'
-const CORS='Access-Control-Allow-Origin'
-const CT='Content-Type'
-const HEAD_PICO= { [CT]: 'application/octet-stream' }
-const HEAD_STD= {} //{ [CT]: 'text/plain; charset=utf-8' }
-const HEAD_SSE= {
-	[CT]: 'text/event-stream',
-	'Access-Control-Allow-Credentials': 'true',
-	'Cache-Control': 'no-cache',
-	'Connection': 'keep-alive'
-}
-const BOUNDARY='boundary='
+const http = require('http')
+const URL = require('url')
+const qs = require('querystring')
 
-const http= require('http')
-const https= require('https')
-const fs= require('fs')
-const path= require('path')
-const url= require('url')
-const PJSON= require('pico-common').export('pico/json')
-const args= require('pico-args')
-const Session= require('picos-session')
-const bodyparser= require('../lib/bodyparser')
-const multipart= require('../lib/multipart')
+const RAW = Symbol.for('raw')
+const HAS_DATA = obj => obj && (Array.isArray(obj) || Object.keys(obj).length)
+const CREATE_BODY = (body, meta) => JSON.stringify(Object.assign({}, meta, {body}))
 
-let config
-let sigslot
-let server
+module.exports = {
 
-function writeHead(res,query,code){
-	if (res.headersSent) return
-	res.writeHead(code, query.api ? HEAD_PICO : HEAD_STD)
-}
-function writeBody(res,output){
-	if (output){
-		if (output.charAt) res.write(output)
-		else res.write(JSON.stringify(output))
-	}
-}
-function error(err, sess, res, query, cb){
-	err=err||sess.get('error')
-	if (!Array.isArray(err)) err=sess.error(404,err)
-	writeHead(res,query,err[0])
-	writeBody(res, query.api ? bodyparser.error(query, err) : err[1])
-	sess.set('error') //empty error
-	cb()
-}
-function render(sess, ack, query, res, req, cred,input, cb){
-	sess.commit((err)=>{
-		if (err) return error(err, sess, res, query, cb)
-		const output=sess.getOutput()
-		writeBody(res, query.api ? bodyparser.render(query, output) : output)
-		cb()
-	})
-}
-function renderNext(req,res,qs){
-	const q=qs.shift()
-
-	sigslot.signal(q.api, SESSION_TYPE,q.data,q.cred,req,res,q,null,qs.length?renderStream:renderStop,qs)
-}
-function renderStart(ack, query, res, req, cred, input, next){
-	if (res.finished) return next()
-
-	const cb=()=>{
-		renderNext(req,res,this.args[0]); next()
-	}
-	if (this.has('error')) return error(null, this, res, query, cb)
-	writeHead(res,query,200)
-	render(this, ack, query, res, req, cred, input, cb)
-}
-function renderStream(ack, query, res, req, cred, input, next){
-	if (res.finished) return next()
-
-	const cb=()=>{
-		renderNext(req,res,this.args[0]); next()
-	}
-	if (this.has('error')) return error(null, this, res, query, cb)
-	render(this, ack, query, res, req, cred, input, cb)
-}
-function renderStop(ack, query, res, req, cred, input, next){
-	if (res.finished) return next()
-
-	const cb=()=>{
-		res.end(); next()
-	}
-	if (this.has('error')) return error(null, this, res, query, cb)
-	render(this, ack, query, res, req, cred, input, cb)
-}
-// TODO: better way to delay error message
-function renderAll(ack, query, res, req, cred, input, next){
-	if (res.finished) return next()
-	const cb=()=>{
-		res.end(); next()
-	}
-	if (this.has('error')) return setTimeout(error, config.errorDelay, null, this, res, query, cb) // only protocol error need delay
-	writeHead(res,query,200)
-	render(this, ack, query, res, req, cred, input, cb)
-}
-function resetPort(port, appConfig, cb){
-	if (port) return cb(null, port)
-
-	if (!appConfig.name || !appConfig.id) return cb('no port assigned')
-	cb(null, `/tmp/${appConfig.name}.${appConfig.id}`)
-}
-function disconnect(){
-	console.log('disconnect',arguments)
-	sigslot.signal('web.dc', SESSION_TYPE, null,null, null,this, null,null, renderAll)
-}
-function request(req, res){
-	let o=url.parse(req.url,true)
-	sigslot.signal(o.pathname, SESSION_TYPE, null,o.query, req,res, o.query,null, renderAll)
-}
-
-Session.addType(SESSION_TYPE, ['input','cred','req','res','query','ack','render'])
-
-const web = {
-	onexit(){
-		if (!server) return
-		console.log('close server', config.port)
-		server.close()
+	setup(host, cfg, rsc, paths){
+		http.createServer((req, res) => {
+			const url = URL.parse(req.url, 1)
+			host.go(url.pathname, {req, res, url})
+		}).listen(cfg.port, cfg.host, () => process.stdout.write(`listening to ${cfg.host}:${cfg.port}\n`))
 	},
-	getBody(req,body,next){
-		const str=req.headers['content-type']
-		if (!str) return next()
-		const arr = str.split(';')
-		const ct = arr.shift()
-		function cb(err, query){
-			if (err) return next(err)
-			Object.assign(body,query)
-			next()
-		}
-		switch(ct.toLowerCase()){
-		default: return bodyparser.parseBody(req, cb)
-		case 'multipart/form-data': return multipart.parse(req, cb)
-		}
+
+	queryParser(req, query){
+		Object.assign(query, URL.parse(req.url, true).query)
+		return this.next()
 	},
-	parse(req,res,next){
-		const ct=req.headers['content-type']
-		if (!ct) return next()
-		if (-1===ct.toLowerCase().indexOf('multipart/form-data')){
-			const boundary = ct.split(';').find(a => a.indexOf(BOUNDARY !== -1))
-			bodyparser.parse(req, boundary.slice(BOUNDARY.length), (err, queries)=>{
-				if (err) return next(err)
-				if (!queries.length) return next()
-				const q=queries.shift()
-				console.log(req.method,req.url,q.api)
-				if(queries.length){
-					sigslot.signal(q.api, SESSION_TYPE,q.data,q.cred,req,res,q,null,renderStart,queries)
-				}else{
-					sigslot.signal(q.api, SESSION_TYPE,q.data,q.cred,req,res,q,null,renderAll)
+
+	async bodyParser(req, body){
+		const err = await (new Promise((resolve, reject) => {
+			const arr = []
+
+			req.on('data', chuck => {
+				arr.push(chuck)
+
+				// Too much POST data, kill the connection!
+				if (arr.length > 128) req.connection.destroy()
+			})
+			req.on('error',err => {
+				reject(err)
+			})
+			req.on('end', () => {
+				const str = Buffer.concat(arr).toString()
+				const raw = {[RAW]: str}
+				try{
+					switch(req.headers['content-type']){
+					case 'application/x-www-form-urlencoded': Object.assign(body, qs.parse(str), raw); break
+					case 'text/plain': Object.assign(body, raw); break
+					case 'application/json': Object.assign(body, JSON.parse(str), raw); break
+					default: Object.assign(body, raw); break
+					}
+				}catch(exp){
+					Object.assign(body, raw)
 				}
-
-				next()
+				resolve()
 			})
-		}else{
-			multipart.parse(req, (err, query)=>{
-				if (err || !query.api) return next(err || 'empty multipart api')
-				sigslot.signal(query.api, SESSION_TYPE, query.data,query.cred, req,res, query,null, renderAll)
-				next()
-			})
-		}
+		}))
+		return this.next(err)
 	},
-	SSEStart(req, res, next){
-		res.addListener('close',disconnect)
-		res.addListener('error',disconnect)
 
-		req.socket.setKeepAlive(true)
-		req.socket.setTimeout(0)
-
-		res.writeHead(200, HEAD_SSE)
-		next()
-	},
-	SSE(res, msg, evt, retry){
-		res.write(`retry: ${retry||1000}\n`)
-		if (evt) res.write(`event: ${evt}\n`)
-		res.write(`data: ${PJSON.stringify(msg).join(config.sep)}\n\n`)
-	},
-	SSEStop(res, next){
-		res.end()
-		next()
-	},
-	SSEAbort(err, res, next){
-		setTimeout(error, config.errorDelay, err, this, res, null, ()=>{
-			res.end()
-			next()
-		})
-	}
-}
-
-module.exports= {
-	create(appConfig, libConfig, next){
-		config={
-			pfxPath:null,
-			port:0,
-			allowOrigin:'localhost',
-			contentType: '',
-			sep:['&'],
-			uploadWL:[],
-			errorDelay:3000
-		}
-		let pfxPath
-
-		args.print('Web Options',Object.assign(config,libConfig))
-		config.sep=config.sep.charAt?config.sep:JSON.stringify(config.sep)
-		pfxPath= config.pfxPath
-		sigslot= appConfig.sigslot
-
-		if (pfxPath){
-			pfxPath= path.isAbsolute(pfxPath) ? pfxPath : path.resolve(appConfig.path, pfxPath)
-			server= https.createServer({pfx:fs.readFileSync(pfxPath)}, request)
-		}else{
-			server= http.createServer(request)
+	output: (contentType = 'application/json', dataType = 'json') => {
+		let hasData = HAS_DATA
+		let createBody = CREATE_BODY
+		switch(dataType){
+		case 'text':
+			hasData = data => data && data.charAt && data.length
+			createBody = body => body.charAt ? body : JSON.stringify(body)
+			break
+		case 'xml':
+			// TODO obj to xml
+			createBody = body => '<xml></xml>'
+			break
+		case 'bin':
+			createBody = body => String.fromCharCode.apply(null, body[0])
+			break
 		}
 
-		if (config.allowOrigin) HEAD_STD[CORS]=HEAD_PICO[CORS]=HEAD_SSE[CORS]=config.allowOrigin
-		if (config.contentType) HEAD_STD[CT]=HEAD_PICO[CT]=HEAD_SSE[CT]=config.contentType
+		let headers = {}
+		Object.assign(headers, {'Content-Type': contentType})
 
-		multipart.setup(config.uploadWL)
-		bodyparser.setup(config.sep)
+		return async function(res, output, meta){
+			if (!res || !res.end) return this.next()
 
-		resetPort(config.port, appConfig, (err, port)=>{
-			server.listen(port, ()=>{
-				next(null, web)
-			})
-		})
-	}
+			try {
+				await this.next()
+				if (hasData(output) || hasData(meta)) {
+					res.writeHead(200, headers)
+					res.end(createBody(output, meta))
+				} else {
+					res.writeHead(204)
+					res.end()
+				}
+			} catch(exp) {
+				console.error(exp)
+				res.writeHead(500, exp.message || exp)
+				res.end(exp.message || exp)
+			}
+		}
+	},
 }
