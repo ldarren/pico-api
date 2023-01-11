@@ -2,23 +2,28 @@
 
 // in case picos was installed globally
 process.env.NODE_PATH = process.cwd()+'/node_modules'
-const cfg = require('./lib/cfg')
+const book = require('./src/book')
+const pipeline = require('./src/pipeline')
 
-function run(args, cb){
-	const options = cfg.parse(__dirname, args)
-	if (!options || !options.app) return process.exit(1)
-	if (!options.app.master) {
-		const app = require('./lib/app')
-		return app(options, cb)
-	}
-
-	const mods = require('./lib/mods')
-
-	mods.load(options, cb)
+function run(opt, cb){
+	book.open(opt.dir + opt.service, (err, service) => {
+		if (err) return cb(err)
+		pipeline.run(service)
+	})
 }
 
-require.main === module && run(null, (err, ctx_) => {
-	if (err) return console.error(err)
-})
+// is run from cmd?
+if (require.main === module) {
+	const args = require('pico-args')
+	const opt = args.parse({
+		dir: ['service/', 'service directory'],
+		d: '@dir',
+		service: ['sample/index', 'json script'],
+		s: '@service'
+	})
+	run(opt, err => {
+		if (err) return console.error(err)
+	})
+}
 
 module.exports = run
