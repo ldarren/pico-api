@@ -50,8 +50,10 @@ module.exports = {
 		return this.next()
 	},
 
-	// Example route "/1.0/snode/key/:id"
-	// [["util.router", "id", "/snode", "/key"], "_.req.method", "_.params"]
+	/*
+	 * Example route "/1.0/snode/key/:id"
+	 * [["util.router", "id", "/snode", "/key"], "_.req.method", "_.params"]
+	 */
 	router: (key, rsc, postfix) => async function (method, params){
 		const id = params[key] ? postfix : ''
 		const name = `${method}/${rsc}${id}`

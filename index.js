@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-// in case picos was installed globally
-process.env.NODE_PATH = process.cwd()+'/node_modules'
+// In case picos was installed globally
+process.env.NODE_PATH = process.cwd() + '/node_modules'
 const book = require('./src/book')
 const pipeline = require('./src/pipeline')
 
@@ -12,7 +12,7 @@ function run(opt, cb){
 	})
 }
 
-// is run from cmd?
+// Is run from cmd?
 if (require.main === module) {
 	const args = require('pico-args')
 	const opt = args.parse({

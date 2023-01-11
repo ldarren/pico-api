@@ -1,5 +1,5 @@
 const pico = require('pico-common/bin/pico-cli')
-const { series } = pico.export('pico/test')
+const {series} = pico.export('pico/test')
 const pUtil = require('picos-util')
 const picos = require('../index')
 
