@@ -1,3 +1,4 @@
+const path = require('path')
 const pStr = require('pico-common').export('pico/str')
 const pObj = require('pico-common').export('pico/obj')
 const OverTime = require('./overtime')
@@ -139,7 +140,7 @@ function _host(radix, libs, routes, threshold){
 }
 
 module.exports = {
-	run(service, threshold){
+	run(service, moddir, threshold){
 		const radix = new pStr.Radix
 		const mods = {}
 		const libs = {}
@@ -147,10 +148,19 @@ module.exports = {
 		const paths = Object.keys(service.routes)
 		const host = _host(radix, libs, routes, threshold)
 
+
 		service.mod.forEach(cfg => {
 			const id = cfg.id
 			if (!id || KEYWORDS.includes(id)) throw `invalid id [${id}]`
-			const mod = require(`../mod/${cfg.mod}`)
+			let mod
+			switch(cfg.mod.charAt(0)){
+			case '@':
+				mod = require(path.join('..', 'mod', cfg.mod.substring(1)))
+				break
+			default:
+				mod = require(path.resolve(moddir, cfg.mod))
+				break
+			}
 			Object.assign(libs, {[id]: mod.setup(host, cfg, service.rsc, paths)})
 			mods[id] = mod
 		})

@@ -6,9 +6,9 @@ const book = require('./src/book')
 const pipeline = require('./src/pipeline')
 
 function run(opt, cb){
-	book.open(opt.dir + opt.service, (err, service) => {
+	book.open(opt.service, (err, service) => {
 		if (err) return cb(err)
-		pipeline.run(service)
+		pipeline.run(service, opt.mod, opt.ratelimit)
 	})
 }
 
@@ -16,10 +16,12 @@ function run(opt, cb){
 if (require.main === module) {
 	const args = require('pico-args')
 	const opt = args.parse({
-		dir: ['service/', 'service directory'],
-		d: '@dir',
-		service: ['sample/index', 'json script'],
-		s: '@service'
+		service: ['service/index', 'path to service script'],
+		s: '@service',
+		mod: ['mod/', 'module path'],
+		m: '@service',
+		ratelimit: [64, 'ratelimit'],
+		r: '@ratelimit'
 	})
 	run(opt, err => {
 		if (err) return console.error(err)

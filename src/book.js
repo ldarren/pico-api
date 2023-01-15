@@ -92,5 +92,6 @@ module.exports = {
 				cb(null, pObj.extends({}, book, {flat: 1}))
 			})
 		})
-	}
+	},
+	getWD
 }
