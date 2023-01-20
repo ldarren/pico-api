@@ -6,9 +6,9 @@ const book = require('./src/book')
 const pipeline = require('./src/pipeline')
 
 function run(opt, cb){
-	book.open(opt.service, (err, service) => {
+	book.open(opt.service, async (err, service) => {
 		if (err) return cb(err)
-		pipeline.run(service, opt.mod, opt.ratelimit)
+		await pipeline.run(service, opt.mod, opt.ratelimit)
 	})
 }
 

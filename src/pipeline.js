@@ -140,7 +140,7 @@ function _host(radix, libs, routes, threshold){
 }
 
 module.exports = {
-	run(service, moddir, threshold){
+	async run(service, moddir, threshold){
 		const radix = new pStr.Radix
 		const mods = {}
 		const libs = {}
@@ -148,9 +148,9 @@ module.exports = {
 		const paths = Object.keys(service.routes)
 		const host = _host(radix, libs, routes, threshold)
 
-
-		service.mod.forEach(cfg => {
-			const id = cfg.id
+		for (let i = 0, sm = service.mod, ids = Object.keys(sm), l = ids.length, cfg, id; i < l; i++){
+			id = ids[i]
+			cfg = sm[id]
 			if (!id || KEYWORDS.includes(id)) throw `invalid id [${id}]`
 			let mod
 			switch(cfg.mod.charAt(0)){
@@ -161,9 +161,9 @@ module.exports = {
 				mod = require(path.resolve(moddir, cfg.mod))
 				break
 			}
-			Object.assign(libs, {[id]: mod.setup(host, cfg, service.rsc, paths)})
+			Object.assign(libs, {[id]: await mod.setup(host, cfg, service.rsc, paths)})
 			mods[id] = mod
-		})
+		}
 
 		paths.forEach(key => {
 			radix.add(key)
