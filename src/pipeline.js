@@ -53,7 +53,7 @@ function _host(radix, libs, routes, threshold){
 			let route = routes[key]
 			if (!route) {
 				route = key && routes[ERROR_ROUTE]
-				if (!route) return console.error(`route[${route}] not found`)
+				if (!route) return console.error(`route[${named}] not found`)
 			}
 			overtime.incr()
 			return next.call(Object.assign({}, libs, {params, next, route, data, ptr: 0}))

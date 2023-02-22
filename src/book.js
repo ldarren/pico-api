@@ -84,7 +84,7 @@ function readBook(wd, index, cb){
 module.exports = {
 	open(bname, cb){
 		getWD(cwd => {
-			const bpath = path.resolve(cwd, bname)
+			const bpath = getPath(cwd, bname)
 			const wd = path.dirname(bpath)
 			const name = path.basename(bpath)
 			readBook(wd, name, (err, book) => {
