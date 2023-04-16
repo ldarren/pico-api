@@ -147,8 +147,10 @@ module.exports = {
 		const routes = {}
 		const paths = Object.keys(service.routes)
 		const host = _host(radix, libs, routes, threshold)
+		const ids = Object.keys(service.mod)
+		const awaits = []
 
-		for (let i = 0, sm = service.mod, ids = Object.keys(sm), l = ids.length, cfg, id; i < l; i++){
+		for (let i = 0, sm = service.mod, l = ids.length, cfg, id; i < l; i++){
 			id = ids[i]
 			cfg = sm[id]
 			if (!id || KEYWORDS.includes(id)) throw `invalid id [${id}]`
@@ -161,9 +163,14 @@ module.exports = {
 				mod = require(path.resolve(moddir, cfg.mod))
 				break
 			}
-			Object.assign(libs, {[id]: await mod.setup(host, cfg, service.rsc, paths)})
 			mods[id] = mod
+			setups.push(await mod.setup(host, cfg, service.rsc, paths))
 		}
+		const setups = await Promise.all(awaits)
+		for (let i = 0, l = ids.length; i < l; i++){
+			Object.assign(libs, {[ids[i]]: setups[i]})
+		}
+		
 
 		paths.forEach(key => {
 			radix.add(key)
