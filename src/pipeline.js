@@ -164,13 +164,12 @@ module.exports = {
 				break
 			}
 			mods[id] = mod
-			setups.push(await mod.setup(host, cfg, service.rsc, paths))
+			awaits.push(mod.setup(host, cfg, service.rsc, paths))
 		}
 		const setups = await Promise.all(awaits)
 		for (let i = 0, l = ids.length; i < l; i++){
 			Object.assign(libs, {[ids[i]]: setups[i]})
 		}
-		
 
 		paths.forEach(key => {
 			radix.add(key)
