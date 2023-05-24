@@ -1,6 +1,5 @@
 module.exports = {
 	setup(){
-		//this.sigslot.signalAt('* * * * * *', 'sayHello')
 	},
 	sep(msg, out){
 		Object.assign(out, {msg})
@@ -8,7 +7,7 @@ module.exports = {
 	},
 	route(req, out){
 		switch(req.method){
-		case 'POST': return next()
+		case 'POST': return this.next()
 		case 'GET': Object.assign(out, {t: Date.now()})
 		// Falls through
 		default: return this.next()
@@ -18,7 +17,7 @@ module.exports = {
 		return this.next(this.error(404, `api ${this.api} is not supported yet`))
 	},
 	sayNow(out){
-		Object.assign(out, {now:Date.now()})
+		Object.assign(out, {now: Date.now()})
 		this.next()
 	}
 }

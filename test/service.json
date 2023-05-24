@@ -18,6 +18,9 @@
 		],
 		"#help": [
 			["util.help"]
+		],
+		"* * * * * *": [
+			["util.sayNow"]
 		]
 	},
 	"mod":{
