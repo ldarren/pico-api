@@ -14,12 +14,12 @@ function timeout(host, path, parsed){
 }
 
 module.exports = {
-	setup(host, cfg, rsc, paths){
+	setup(cfg, rsc, paths){
 		const now = Date.now()
 		return paths.forEach(p => {
 			const parsed = pTime.parse(p)
 			if (!parsed) return
-			setTimeout(timeout, pTime.nearest(...parsed, now) - now, host, p, parsed)
+			setTimeout(timeout, pTime.nearest(...parsed, now) - now, this, p, parsed)
 		})
 	}
 }

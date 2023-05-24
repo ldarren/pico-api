@@ -239,8 +239,8 @@ function sets(coll, is, inputs, metas, useri, outputs){
 }
 
 module.exports = {
-	setup(host, cfg, rsc, paths){
-		const db = new Database(host, cfg)
+	setup(cfg, rsc, paths){
+		const db = new Database(this, cfg)
 		return Object.keys(rsc).reduce((acc, name) => {
 			const rs = rsc[name]
 			if (!rs || db.name !== rs.db) return acc

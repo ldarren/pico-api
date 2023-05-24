@@ -164,7 +164,7 @@ module.exports = {
 				break
 			}
 			mods[id] = mod
-			awaits.push(mod.setup(host, cfg, service.rsc, paths))
+			awaits.push(mod.setup.call(host, cfg, service.rsc, paths))
 		}
 		const setups = await Promise.all(awaits)
 		for (let i = 0, l = ids.length; i < l; i++){
@@ -241,5 +241,6 @@ module.exports = {
 		})
 
 		host.go('')
+		return host
 	}
 }

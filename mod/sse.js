@@ -24,7 +24,7 @@ function connect(req, res, id){
 
 module.exports = {
 
-	setup(host, cfg, rsc, paths){
+	setup(cfg, rsc, paths){
 	},
 
 	connect(req, res, id){

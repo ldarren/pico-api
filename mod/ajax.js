@@ -43,7 +43,7 @@ function poll(method, href, params, opt, cb){
 }
 
 module.exports = {
-	setup(host, cfg, rsc, paths){
+	setup(cfg, rsc, paths){
 	},
 	poll: (method, href) => async function(params, opt, output){
 		process.stdout.write(`waiting ${href} response... `)

@@ -5,7 +5,7 @@ const BASE64 = 'base64'
 
 module.exports = {
 
-	setup(host, cfg, rsc, paths){
+	setup(cfg, rsc, paths){
 	},
 
 	verify(req, user){

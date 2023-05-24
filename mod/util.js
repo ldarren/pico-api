@@ -33,8 +33,8 @@ function groupQuery(input, grouping, output = []){
 }
 
 module.exports = {
-	setup(host, cfg, rsc, paths){
-		return this
+	setup(cfg, rsc, paths){
+		return module.exports
 	},
 
 	async wait(sec){

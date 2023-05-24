@@ -8,10 +8,10 @@ const CREATE_BODY = (body, meta) => JSON.stringify(Object.assign({}, meta, {body
 
 module.exports = {
 
-	setup(host, cfg, rsc, paths){
+	setup(cfg, rsc, paths){
 		http.createServer((req, res) => {
 			const url = URL.parse(req.url, 1)
-			host.go(url.pathname, {req, res, url})
+			this.go(url.pathname, {req, res, url})
 		}).listen(cfg.port, cfg.host, () => process.stdout.write(`listening to ${cfg.host}:${cfg.port}\n`))
 	},
 
@@ -57,7 +57,7 @@ module.exports = {
 		let createBody = CREATE_BODY
 		switch(dataType){
 		case 'text':
-			hasData = data => data && data.charAt && data.length
+			hasData = data => !!data
 			createBody = body => body.charAt ? body : JSON.stringify(body)
 			break
 		case 'xml':

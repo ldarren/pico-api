@@ -1,5 +1,5 @@
 module.exports = {
-	setup(host, cfg, rsc, paths){
+	setup(cfg, rsc, paths){
 	},
 	record(output){
 		Object.assign(output, process.resourceUsage())
