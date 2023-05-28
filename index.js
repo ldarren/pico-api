@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
 // In case picos was installed globally
-process.env.NODE_PATH = process.cwd() + '/node_modules'
+const NP = process.env.NODE_PATH || ''
+process.env.NODE_PATH = (NP ? NP + ':' : NP) + process.cwd() + '/node_modules'
+require('module').Module._initPaths()
+
 const book = require('./src/book')
 const pipeline = require('./src/pipeline')
 

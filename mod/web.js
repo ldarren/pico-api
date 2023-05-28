@@ -1,13 +1,14 @@
-const http = require('http')
-const URL = require('url')
-const qs = require('querystring')
+const http = require('node:http')
+const URL = require('node:url')
+const qs = require('node:querystring')
+const multipart = require('./multipart')
 
 const RAW = Symbol.for('raw')
 const HAS_DATA = obj => obj && (Array.isArray(obj) || Object.keys(obj).length)
 const CREATE_BODY = (body, meta) => JSON.stringify(Object.assign({}, meta, {body}))
+const GET_CONTENT_TYPE = (value = '') => value.split(';')[0].trim().toLowerCase()
 
 module.exports = {
-
 	setup(cfg, rsc, paths){
 		http.createServer((req, res) => {
 			const url = URL.parse(req.url, 1)
@@ -20,7 +21,7 @@ module.exports = {
 		return this.next()
 	},
 
-	async bodyParser(req, body){
+	async bodyParser(req, body, contentType){
 		const err = await (new Promise((resolve, reject) => {
 			const arr = []
 
@@ -37,7 +38,7 @@ module.exports = {
 				const str = Buffer.concat(arr).toString()
 				const raw = {[RAW]: str}
 				try{
-					switch(req.headers['content-type']){
+					switch(contentType ?? GET_CONTENT_TYPE(req.headers['content-type'])){
 					case 'application/x-www-form-urlencoded': Object.assign(body, qs.parse(str), raw); break
 					case 'text/plain': Object.assign(body, raw); break
 					case 'application/json': Object.assign(body, JSON.parse(str), raw); break
@@ -50,6 +51,25 @@ module.exports = {
 			})
 		}))
 		return this.next(err)
+	},
+
+	parse(req, body){
+		const ct = GET_CONTENT_TYPE(req.headers['content-type'])
+
+		switch(ct){
+		case '':
+			return this.queryParser(req, body)
+		case 'multipart/form-data':
+			return new Promise((resolve, reject) => {
+				multipart.parse(req, (err, data) => {
+					if (err) return reject(err)
+					Object.assign(body, data)
+					resolve()
+				})
+			})
+		default:
+			return this.bodyParser(req, body, ct)
+		}
 	},
 
 	output: (contentType = 'application/json', dataType = 'json') => {
