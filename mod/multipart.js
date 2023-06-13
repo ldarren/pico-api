@@ -84,7 +84,7 @@ const
 			makeOrder(order, obj[NAME], {
 				[FNAME]: obj[FNAME],
 				[SAVED]: obj[SAVED],
-				contentType: obj['Content-Type']
+				type: obj['Content-Type']
 			})
 			file.end()
 		}

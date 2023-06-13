@@ -53,23 +53,30 @@ module.exports = {
 		return this.next(err)
 	},
 
-	parse(req, body){
+	async parse(req, body){
 		const ct = GET_CONTENT_TYPE(req.headers['content-type'])
 
 		switch(ct){
 		case '':
-			return this.queryParser(req, body)
+			module.exports.queryParser(req, body)
+			break
 		case 'multipart/form-data':
-			return new Promise((resolve, reject) => {
-				multipart.parse(req, (err, data) => {
-					if (err) return reject(err)
-					Object.assign(body, data)
-					resolve()
+			{
+				const promise = new Promise((resolve, reject) => {
+					multipart.parse(req, (err, data) => {
+						if (err) return reject(err)
+						Object.assign(body, data)
+						resolve()
+					})
 				})
-			})
+				await promise
+			}
+			break
 		default:
-			return this.bodyParser(req, body, ct)
+			module.exports.bodyParser(req, body, ct)
+			break
 		}
+		return this.next()
 	},
 
 	output: (contentType = 'application/json', dataType = 'json') => {
@@ -105,7 +112,11 @@ module.exports = {
 					res.end()
 				}
 			} catch(exp) {
-				console.error(exp)
+				if (exp.isAxiosError){
+					console.error(exp.toJSON())
+				} else {
+					console.error(exp)
+				}
 				res.writeHead(500, exp.message || exp)
 				res.end(exp.message || exp)
 			}
