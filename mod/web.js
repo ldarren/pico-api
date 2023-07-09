@@ -99,16 +99,16 @@ module.exports = {
 		let headers = {}
 		Object.assign(headers, {'Content-Type': contentType})
 
-		return async function(res, output, meta){
+		return async function(res, output, meta, head = {headers: {}}){
 			if (!res || !res.end) return this.next()
 
 			try {
 				await this.next()
 				if (hasData(output) || hasData(meta)) {
-					res.writeHead(200, headers)
+					res.writeHead(head.status || 200, Object.assign(headers, head.headers))
 					res.end(createBody(output, meta))
 				} else {
-					res.writeHead(204)
+					res.writeHead(head.status || 200, head.headers)
 					res.end()
 				}
 			} catch(exp) {
@@ -117,8 +117,10 @@ module.exports = {
 				} else {
 					console.error(exp)
 				}
-				res.writeHead(500, exp.message || exp)
-				res.end(exp.message || exp)
+				// exp in head format? {status, headers, message}
+				const status = exp.status || 500
+				res.writeHead(status, exp.headers)
+				res.end(exp.message ? JSON.stringify(exp.message) : http.STATUS_CODES[status])
 			}
 		}
 	},

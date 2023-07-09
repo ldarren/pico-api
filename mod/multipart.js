@@ -1,6 +1,7 @@
 /**
- * req.on('end') event not firing intermittently. current work around is to trigger end when remaining
- * is emptied. which has a risk of false positive if network lag happened
+ * TODO
+ * - req.on('end') event not firing intermittently. current work around is to trigger end when remaining is emptied. which has a risk of false positive if network lag happened
+ * - not save to tmp file, return a stream object?
  */
 const
 	fs = require('node:fs'),
