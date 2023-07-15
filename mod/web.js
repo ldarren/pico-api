@@ -41,6 +41,8 @@ module.exports = {
 					switch(contentType ?? GET_CONTENT_TYPE(req.headers['content-type'])){
 					case 'application/x-www-form-urlencoded': Object.assign(body, qs.parse(str), raw); break
 					case 'text/plain': Object.assign(body, raw); break
+					// some client default to json without content type to prevent
+					case '':
 					case 'application/json': Object.assign(body, JSON.parse(str), raw); break
 					default: Object.assign(body, raw); break
 					}
