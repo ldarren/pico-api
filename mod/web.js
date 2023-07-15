@@ -4,13 +4,27 @@ const qs = require('node:querystring')
 const multipart = require('./multipart')
 
 const RAW = Symbol.for('raw')
+const OPTIONS = 'OPTIONS'
 const HAS_DATA = obj => obj && (Array.isArray(obj) || Object.keys(obj).length)
 const CREATE_BODY = (body, meta) => JSON.stringify(Object.assign({}, meta, {body}))
 const GET_CONTENT_TYPE = (value = '') => value.split(';')[0].trim().toLowerCase()
 
 module.exports = {
 	setup(cfg, rsc, paths){
+		const cors = cfg.cors
+		const headers = {
+			'Access-Control-Allow-Origin': cors,
+			'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT, DELETE, CONNECT, PATCH',
+			'Access-Control-Request-Headers': '*',
+			// 30 days
+			'Access-Control-Max-Age': 2592000,
+		}
 		http.createServer((req, res) => {
+			if (cors && OPTIONS === req.method){
+				res.writeHead(204, headers)
+				res.end()
+				return
+			}
 			const url = URL.parse(req.url, 1)
 			this.go(url.pathname, {req, res, url})
 		}).listen(cfg.port, cfg.host, () => process.stdout.write(`listening to ${cfg.host}:${cfg.port}\n`))
