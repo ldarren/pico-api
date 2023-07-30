@@ -12,15 +12,20 @@ const GET_CONTENT_TYPE = (value = '') => value.split(';')[0].trim().toLowerCase(
 module.exports = {
 	setup(cfg, rsc, paths){
 		const cors = cfg.cors
-		const headers = {
-			'Access-Control-Allow-Origin': cors,
-			'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT, DELETE, CONNECT, PATCH',
-			'Access-Control-Request-Headers': '*',
+		const headers = [
+			'Access-Control-Allow-Origin', cors,
+			'Access-Control-Allow-Methods', 'OPTIONS, POST, GET, PUT, DELETE, CONNECT, PATCH',
+			'Access-Control-Allow-Headers', '*',
 			// 30 days
-			'Access-Control-Max-Age': 2592000,
-		}
+			'Access-Control-Max-Age', 2592000
+		]
 		http.createServer((req, res) => {
-			if (cors && OPTIONS === req.method){
+			if (cors){
+				for (let i = 0, l = headers.length; i < l; i += 2){
+					res.setHeader(headers[i], headers[i + 1])
+				}
+			}
+			if (OPTIONS === req.method.toUpperCase()){
 				res.writeHead(204, headers)
 				res.end()
 				return
@@ -74,7 +79,7 @@ module.exports = {
 
 		switch(ct){
 		case '':
-			module.exports.queryParser(req, body)
+			await module.exports.queryParser.call(this, req, body)
 			break
 		case 'multipart/form-data':
 			{
@@ -87,12 +92,11 @@ module.exports = {
 				})
 				await promise
 			}
-			break
+			return this.next()
 		default:
-			module.exports.bodyParser(req, body, ct)
+			await module.exports.bodyParser.call(this, req, body, ct)
 			break
 		}
-		return this.next()
 	},
 
 	output: (contentType = 'application/json', dataType = 'json') => {
