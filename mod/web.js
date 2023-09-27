@@ -79,8 +79,7 @@ module.exports = {
 
 		switch(ct){
 		case '':
-			await module.exports.queryParser.call(this, req, body)
-			break
+			return module.exports.queryParser.call(this, req, body)
 		case 'multipart/form-data':
 			{
 				const promise = new Promise((resolve, reject) => {
@@ -94,8 +93,7 @@ module.exports = {
 			}
 			return this.next()
 		default:
-			await module.exports.bodyParser.call(this, req, body, ct)
-			break
+			return module.exports.bodyParser.call(this, req, body, ct)
 		}
 	},
 

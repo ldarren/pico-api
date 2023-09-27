@@ -81,7 +81,7 @@ function _host(radix, libs, routes, threshold){
 
 			const path = key.slice(1)
 			let arg = pObj.dot(src, path)
-			if (arg) return arg
+			if (void 0 !== arg) return arg
 			if (SRC_DATA !== key[0] || key.length !== 2) return void 0
 
 			switch(key[1].charAt(0)){
