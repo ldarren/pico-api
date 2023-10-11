@@ -1,24 +1,34 @@
 #!/usr/bin/env node
 
-// in case picos was installed globally
-process.env.NODE_PATH = process.cwd()+'/node_modules'
-const cfg = require('./lib/cfg')
+// In case picos was installed globally
+const NP = process.env.NODE_PATH || ''
+process.env.NODE_PATH = (NP ? NP + ':' : NP) + process.cwd() + '/node_modules'
+require('module').Module._initPaths()
 
-function run(args, cb){
-	const options = cfg.parse(__dirname, args)
-	if (!options || !options.app) return process.exit(1)
-	if (!options.app.master) {
-		const app = require('./lib/app')
-		return app(options, cb)
-	}
+const book = require('./src/book')
+const pipeline = require('./src/pipeline')
 
-	const mods = require('./lib/mods')
-
-	mods.load(options, cb)
+function run(opt, cb){
+	book.open(opt.service, async (err, service) => {
+		if (err) return cb(err)
+		cb(null, await pipeline.run(service, opt.mod, opt.ratelimit))
+	})
 }
 
-require.main === module && run(null, (err, ctx_) => {
-	if (err) return console.error(err)
-})
+// Is run from cmd?
+if (require.main === module) {
+	const args = require('pico-args')
+	const opt = args.parse({
+		service: ['service/index', 'path to service script'],
+		s: '@service',
+		mod: ['mod/', 'module path'],
+		m: '@service',
+		ratelimit: [64, 'ratelimit'],
+		r: '@ratelimit'
+	})
+	run(opt, err => {
+		if (err) return console.error(err)
+	})
+}
 
 module.exports = run

@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  stub:
+    container_name: stub
+    image: node:18-alpine
+    environment:
+      NODE_ENV: dev
+      NODE_APP: ses
+    volumes:
+      - .:/opt/stub
+    working_dir: /opt/stub
+    ports:
+      - "1337:1337"
+    restart: unless-stopped
+    command: ["npm", "run", "start"]
