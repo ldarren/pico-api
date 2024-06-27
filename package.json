@@ -1,23 +1,23 @@
 {
   "name": "picos",
-  "version": "0.9.0",
+  "version": "0.10.9",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
     "picos": "./index.js"
   },
   "dependencies": {
-    "pico-args": "^1.0.13",
-    "pico-common": "^0.11.5",
-    "picos-session": "^0.1.4",
-    "picos-util": "^0.1.4"
+    "pico-args": "^1.0.14",
+    "pico-common": "^0.15.1",
+    "picos-util": "^0.2.8",
+    "randexp": "^0.5.3"
   },
   "scripts": {
-    "start": "node index.js -mp",
+    "start": "node index.js -s okapi/index.js",
     "test": "node test/index.js",
-	"test:cp": "jscpd --ignore 'node_modules,test' .",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "test:cp": "jscpd --ignore 'node_modules,test' .",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix"
   },
   "repository": {
     "type": "git",

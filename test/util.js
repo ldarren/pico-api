@@ -1,23 +1,23 @@
-module.exports={
-	setup(context, cb){
-		//context.sigslot.signalAt('* * * * * *', 'sayHello')
-		cb()
+module.exports = {
+	setup(){
 	},
-	sep(msg,next){
-		console.log(msg); return next()
+	sep(msg, out){
+		Object.assign(out, {msg})
+		return this.next()
 	},
-	route(req, next){
+	route(req, out){
 		switch(req.method){
-		case 'POST': return next()
-		case 'GET': this.setOutput(this.time)
-		default: return next(null, this.sigslot.abort())
+		case 'POST': return this.next()
+		case 'GET': Object.assign(out, {t: Date.now()})
+		// Falls through
+		default: return this.next()
 		}
 	},
-	help(next){
-		next(this.error(404, `api ${this.api} is not supported yet`))
+	help(){
+		return this.next(this.error(404, `api ${this.api} is not supported yet`))
 	},
-	sayNow(next){
-		console.log(Date.now())
-		next()
+	sayNow(out){
+		Object.assign(out, {now: Date.now()})
+		this.next()
 	}
 }

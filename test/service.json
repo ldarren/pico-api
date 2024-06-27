@@ -1,0 +1,39 @@
+{
+	"routes":{
+		"ERR|#msg":[
+			["util.help"]
+		],
+		"END|#msg":[
+			["util.help"]
+		],
+		"/pico":[
+			["util.route","_.req", "_.output"],
+			[["webServer.output", "text/plain", "text"], "_.res", "_.output.t"]
+		],
+		"pico/add/app":[
+			["util.help"]
+		],
+		"sayNow":[
+			["util.sayNow"]
+		],
+		"#help": [
+			["util.help"]
+		],
+		"* * * * * *": [
+			["util.sayNow"]
+		]
+	},
+	"mod":{
+		"util": {
+			"mod": "util"
+		},
+		"webServer":{
+			"mod":"@web",
+			"allowOrigin":"*",
+			"delimiter":["&"],
+			"uploadWL":[],
+			"host": "0.0.0.0",
+			"port":4888
+		}
+	}
+}
