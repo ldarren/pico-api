@@ -22,7 +22,7 @@ if (require.main === module) {
 		service: ['service/index', 'path to service script'],
 		s: '@service',
 		mod: ['mod/', 'module path'],
-		m: '@service',
+		m: '@mod',
 		ratelimit: [64, 'ratelimit'],
 		r: '@ratelimit'
 	})

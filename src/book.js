@@ -9,21 +9,21 @@ pico.ajax = psUtil.ajax
 
 const fopt = {encoding: 'utf8'}
 
-let CWD
+let PD
 
 /**
- * Get current working directory
+ * Get picos directory. the PD is a abs, none symbolic link and contains the picos index.js
  *
  * @param {Function} cb - call back
  *
  * @returns {void} - undefined
  */
-function getWD(cb){
-	if (CWD) return cb(CWD)
-	fs.readlink(symPath, (err, realPath) => {
-		if (err) realPath = symPath
-		CWD = path.dirname(realPath)
-		cb(CWD)
+function getPD(cb){
+	if (PD) return cb(PD)
+	fs.readlink(symPath, (err, relPath) => {
+		if (err) PD = symPath
+		else PD = path.resolve(symPath, realPath)
+		cb(path.dirname(PD))
 	})
 }
 
@@ -83,15 +83,13 @@ function readBook(wd, index, cb){
 
 module.exports = {
 	open(bname, cb){
-		getWD(cwd => {
-			const bpath = getPath(cwd, bname)
-			const wd = path.dirname(bpath)
-			const name = path.basename(bpath)
-			readBook(wd, name, (err, book) => {
-				if (err) return cb(err)
-				cb(null, pObj.extends({}, book, {flat: 1}))
-			})
+		const bpath = getPath('.', bname)
+		const wd = path.dirname(bpath)
+		const name = path.basename(bpath)
+		readBook(wd, name, (err, book) => {
+			if (err) return cb(err)
+			cb(null, pObj.extends({}, book, {flat: 1}))
 		})
 	},
-	getWD
+	getPD
 }
