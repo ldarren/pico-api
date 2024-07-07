@@ -44,7 +44,7 @@ function _host(radix, libs, routes, threshold){
 	 */
 	async function next(err, named, data = this.data || {}){
 		if (err) {
-			overtime.decr(1)
+			overtime.decr()
 			throw err
 		}
 		if (null != named) {
@@ -53,7 +53,13 @@ function _host(radix, libs, routes, threshold){
 			let route = routes[key]
 			if (!route) {
 				route = named && routes[ERROR_ROUTE]
-				if (!route) return console.error(`route[${named}] not found`)
+				if (!route) {
+					// not exception if named is an empty string
+					if (named) {
+						console.error(`route[${named}] not found`)
+						throw named
+					}
+				}
 			}
 			overtime.incr()
 			return next.call(Object.assign({}, libs, {named, params, next, route, data, ptr: 0}))
@@ -61,7 +67,7 @@ function _host(radix, libs, routes, threshold){
 
 		const middleware = this.route[this.ptr++]
 		if (!middleware) {
-			return overtime.decr(3)
+			return overtime.decr()
 		}
 
 		const args = middleware.slice(1).map(key => {

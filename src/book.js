@@ -76,7 +76,7 @@ function readBook(wd, index, cb){
 	readPages(wd, [index], [], (err, res) => {
 		if (err) return cb(err)
 		if (!res.length) return cb(`not found: ${index}`)
-		if (!res[0].charAt) return cb(null, res)
+		if (!Array.isArray(res[0])) return cb(null, res)
 		readPages(wd, res[0], [], cb)
 	})
 }
