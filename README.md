@@ -14,3 +14,15 @@ main fields of the resource
 
 ### meta
 meta fields of the resource, such as created\_at, created\_by
+
+
+## TODO
+- fix eslint (migrate to latest)
+- explain it is middleware first architecture
+- explain how to create a middleware
+- explain module vs middleware
+- explain how to create a modules
+- explain create module to be use as middleware or in middleware
+- explain how to branch
+- explain how to detour (await next)
+- how to handle error. define midduleware to handle route "ERR" and throw error by this.next(this.web.Error(status, message, headers))

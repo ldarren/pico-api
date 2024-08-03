@@ -63,7 +63,7 @@ module.exports = {
 
 	routerByRSC: (rsc, prefix = '/i') => async function(method, params) {
 		const rs = rsc[params.rsc]
-		if (!rs) return this.next(`unsupprted resource: ${params.rsc}`)
+		if (!rs) return this.next(null, `ERR/RESOURCE-NOT-FOUND/${params.rsc}`)
 		const idx = params.i ? prefix : ''
 		const name = `${method}/${params.rsc}${idx}`
 		await this.next(null, name, Object.assign({
@@ -75,13 +75,13 @@ module.exports = {
 
 	input: spec => function(input, output, ext) {
 		const err = pObj.validate(spec, input, output, ext)
-		if (err) return this.next(`invalid params [${err}]`)
+		if (err) return this.next(null, `ERR/INVALID-INPUT/[${err}]`)
 		return this.next()
 	},
 
 	inputNoCurry(input, spec, output, ext) {
 		const err = pObj.validate(spec, input, output, ext)
-		if (err) return this.next(`invalid params [${err}]`)
+		if (err) return this.next(null, `ERR/INVALID-INPUT/[${err}]`)
 		return this.next()
 	},
 

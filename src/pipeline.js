@@ -54,11 +54,9 @@ function _host(radix, libs, routes, threshold){
 			if (!route) {
 				route = named && routes[ERROR_ROUTE]
 				if (!route) {
-					// not exception if named is an empty string
-					if (named) {
-						console.error(`route[${named}] not found`)
-						throw named
-					}
+					// no console.error if named is an empty string
+					named && console.error(`route[${named}] not found`)
+					return
 				}
 			}
 			overtime.incr()

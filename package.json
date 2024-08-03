@@ -16,8 +16,8 @@
     "start": "node index.js -s test/service.json",
     "test": "node test/index.js",
     "test:cp": "jscpd --ignore 'node_modules,test' .",
-    "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "repository": {
     "type": "git",
