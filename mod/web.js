@@ -9,6 +9,10 @@ const HAS_DATA = obj => obj && (Array.isArray(obj) || Object.keys(obj).length)
 const CREATE_BODY = (body, meta) => JSON.stringify(Object.assign({}, meta, {body}))
 const GET_CONTENT_TYPE = (value = '') => value.split(';')[0].trim().toLowerCase()
 
+function Error(status, message, headers){
+	return {status, message, headers}
+}
+
 module.exports = {
 	setup(cfg, rsc, paths){
 		const cors = cfg.cors
@@ -33,6 +37,8 @@ module.exports = {
 			const url = URL.parse(req.url, 1)
 			this.go(url.pathname, {req, res, url})
 		}).listen(cfg.port, cfg.host, () => process.stdout.write(`listening to ${cfg.host}:${cfg.port}\n`))
+
+		return {Error}
 	},
 
 	queryParser(req, query){
@@ -126,15 +132,11 @@ module.exports = {
 					res.writeHead(head.status || 200, Object.assign(headers, head.headers))
 					res.end(createBody(output, meta))
 				} else {
-					res.writeHead(head.status || 200, head.headers)
+					res.writeHead(head.status || 204, head.headers)
 					res.end()
 				}
 			} catch(exp) {
-				if (exp.isAxiosError){
-					console.error(exp.toJSON())
-				} else {
-					console.error(exp)
-				}
+				console.error('web error', exp.isAxiosError ? exp.toJSON() : exp)
 				// exp in head format? {status, headers, message}
 				const status = exp.status || 500
 				res.writeHead(status, exp.headers)

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-// In case picos was installed globally
+// In case picos was installed globally,
+// dynamically updates where Node.js looks for modules without changing any permanent configuration
 const NP = process.env.NODE_PATH || ''
 process.env.NODE_PATH = (NP ? NP + ':' : NP) + process.cwd() + '/node_modules'
 require('module').Module._initPaths()
@@ -18,14 +19,20 @@ function run(opt, cb){
 // Is run from cmd?
 if (require.main === module) {
 	const args = require('pico-args')
-	const opt = args.parse({
-		service: ['service/index', 'path to service script'],
+	const params =  {
+		service: ['', 'path to the service script, e.g: "service/index.json"'],
 		s: '@service',
-		mod: ['mod/', 'module path'],
-		m: '@service',
-		ratelimit: [64, 'ratelimit'],
-		r: '@ratelimit'
-	})
+		mod: ['mod/', 'path to the module folder'],
+		m: '@mod',
+		ratelimit: [64, 'ratelimit the concurrent requests'],
+		r: '@ratelimit',
+		help: [false, 'Usage'],
+		h: '@help',
+	}
+	const opt = args.parse(params)
+	if (!opt.service || opt.help){
+		return args.usage(params)
+	}
 	run(opt, err => {
 		if (err) return console.error(err)
 	})

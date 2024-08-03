@@ -18,6 +18,6 @@ module.exports = {
 	},
 	sayNow(out){
 		Object.assign(out, {now: Date.now()})
-		this.next()
+		return this.next()
 	}
 }

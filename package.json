@@ -1,6 +1,6 @@
 {
   "name": "picos",
-  "version": "0.10.9",
+  "version": "0.11.0",
   "description": "pico api service",
   "main": "index.js",
   "bin": {
@@ -13,11 +13,11 @@
     "randexp": "^0.5.3"
   },
   "scripts": {
-    "start": "node index.js -s okapi/index.js",
+    "start": "node index.js -s test/service.json",
     "test": "node test/index.js",
     "test:cp": "jscpd --ignore 'node_modules,test' .",
-    "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "repository": {
     "type": "git",
